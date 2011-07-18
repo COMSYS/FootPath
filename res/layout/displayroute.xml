@@ -1,0 +1,21 @@
+
+<RelativeLayout android:layout_width="fill_parent"
+	android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/baselayout" android:keepScreenOn="true">
+
+
+
+	<LinearLayout android:layout_below="@+id/svPath"
+		android:layout_alignLeft="@+id/svPath" android:layout_width="fill_parent" android:layout_height="fill_parent" android:id="@+id/ll01">
+		<SurfaceView android:layout_height="fill_parent" android:layout_width="fill_parent" android:id="@+id/svPath"></SurfaceView>
+</LinearLayout>
+	<ZoomControls android:layout_height="wrap_content"
+		android:id="@+id/zoomCtrl" android:layout_width="wrap_content" android:layout_alignBottom="@+id/ll01" android:layout_alignRight="@+id/ll01"></ZoomControls>
+	<Button android:layout_height="wrap_content"
+		android:layout_width="wrap_content" android:id="@+id/btnRecalc"
+		android:layout_alignBottom="@+id/ll01" android:layout_alignLeft="@+id/ll01" android:text="Recalc First Fit"></Button>
+	<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/btnSwitchFit" android:text="Switch to First Fit Algorithm" android:layout_above="@id/btnRecalc" android:layout_alignRight="@id/btnRecalc"></Button>
+
+
+
+</RelativeLayout>

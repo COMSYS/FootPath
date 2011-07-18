@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:id="@+id/LinearLayout01" android:layout_height="fill_parent" android:orientation="vertical"><TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Set peak value: (current)" android:id="@+id/tvPeak"></TextView><SeekBar android:layout_height="wrap_content" android:layout_width="fill_parent" android:max="100" android:progress="18" android:id="@+id/sbPeak"></SeekBar><TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Set filter value: (current)" android:id="@+id/tvFilter"></TextView><SeekBar android:layout_height="wrap_content" android:progress="60" android:layout_width="fill_parent" android:max="100" android:id="@+id/sbFilter"></SeekBar><TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Set step timout: (current)" android:id="@+id/tvTimeout"></TextView><SeekBar android:layout_height="wrap_content" android:layout_width="fill_parent" android:progress="500" android:max="1000" android:id="@+id/sbTimeout"></SeekBar><SurfaceView android:layout_width="fill_parent" android:layout_height="256px" android:id="@+id/svHistory"></SurfaceView>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</LinearLayout>

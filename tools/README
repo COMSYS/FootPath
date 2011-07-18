@@ -1,0 +1,4 @@
+Usage: java -jar URL2QR.jar <width in px> <height in px> <URL> <output file>
+OR
+Usage: java -jar URL2QR.jar <width in px> <height in px> <Base-URL> <Room From> <Room To> <output file>
+

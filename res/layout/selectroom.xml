@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/relSelect"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:keepScreenOn="true">
+	<TextView android:layout_height="wrap_content"
+		android:layout_width="wrap_content" android:layout_below="@+id/Spinner01"
+		android:id="@+id/TextView02" android:text="Please select a room as destination:"></TextView>
+	<Spinner android:layout_below="@+id/TextView02"
+		android:layout_height="wrap_content" android:id="@+id/Spinner02"
+		android:layout_width="fill_parent"></Spinner>
+	<EditText android:layout_width="wrap_content" android:id="@+id/EditText01"
+		android:layout_height="wrap_content" android:layout_below="@+id/Spinner02"
+		android:layout_alignRight="@+id/Spinner02" android:text="191"></EditText>
+	<TextView android:id="@+id/tvSteps" android:layout_height="wrap_content"
+		android:layout_toLeftOf="@+id/EditText01" android:layout_alignTop="@+id/EditText01"
+		android:layout_alignBottom="@+id/EditText01" android:layout_width="fill_parent"
+		android:text="How tall are you? [cm]"></TextView>
+	<TextView android:id="@+id/tvUse" android:text="Use:"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_below="@+id/tvSteps" android:layout_alignLeft="@+id/tvSteps"></TextView>
+	<CheckBox android:id="@+id/cbStairs" android:checked="true"
+		android:layout_width="wrap_content" android:text="Staircases"
+		android:layout_height="wrap_content" android:layout_toRightOf="@+id/tvUse"
+		android:layout_alignTop="@+id/tvUse"></CheckBox>
+	<CheckBox android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_toRightOf="@+id/cbStairs"
+		android:layout_alignTop="@+id/cbStairs" android:layout_alignBottom="@+id/cbStairs"
+		android:id="@+id/cbLog" android:text="Log Data" android:checked="true"></CheckBox>
+	<CheckBox android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_below="@+id/cbLog"
+		android:layout_alignLeft="@+id/cbLog" android:layout_alignRight="@+id/cbLog"
+		android:id="@+id/cbAudio" android:text="Include Audio"></CheckBox>
+	<CheckBox android:layout_width="wrap_content"
+		android:layout_below="@+id/cbStairs" android:layout_height="wrap_content"
+		android:layout_alignLeft="@+id/cbStairs" android:id="@+id/cbElevators"
+		android:text="Elevators" android:checked="false"></CheckBox>
+	<CheckBox android:layout_width="wrap_content"
+		android:layout_below="@+id/cbElevators" android:layout_height="wrap_content"
+		android:layout_alignLeft="@+id/cbElevators" android:id="@+id/cbOutside"
+		android:checked="true" android:text="Outside"></CheckBox>
+	<Button android:id="@+id/btnSave" android:text="Save Config"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_toRightOf="@+id/btnLoad" android:layout_alignTop="@+id/btnLoad"
+		android:layout_alignBottom="@+id/btnLoad"></Button>
+	<Button android:layout_width="wrap_content"
+		android:layout_above="@+id/btnSave" android:layout_height="wrap_content"
+		android:layout_alignLeft="@+id/btnSave" android:layout_alignRight="@+id/btnSave"
+		android:text="GPS" android:id="@+id/btnGPS"></Button>
+	<Button android:layout_height="wrap_content" android:layout_toRightOf="@+id/btnGPS" android:layout_alignTop="@+id/btnGPS" android:layout_alignBottom="@+id/btnGPS" android:id="@+id/btnQR" android:text="QR-Code" android:layout_width="wrap_content"></Button>
+	<Button android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_toRightOf="@+id/btnSave"
+		android:layout_alignTop="@+id/btnSave" android:layout_alignBottom="@+id/btnSave"
+		android:text="      Go!     " android:id="@+id/btnGo"></Button>
+	<TextView android:id="@+id/TextView01" android:text="Please select a room as location:"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_alignParentLeft="true"></TextView>
+	<Spinner android:id="@+id/Spinner01" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_below="@+id/TextView01"
+		android:layout_alignLeft="@+id/TextView01"></Spinner>
+	<Button android:id="@+id/btnLoad" android:text="Load Config"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"></Button>
+	<Button android:text="Calibrate" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_above="@+id/btnLoad"
+		android:layout_alignLeft="@+id/btnLoad" android:layout_alignRight="@+id/btnLoad"
+		android:id="@+id/btnCalibrate"></Button>
+</RelativeLayout>
