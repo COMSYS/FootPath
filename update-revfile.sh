@@ -12,7 +12,7 @@ function get_git_revision {
 #echo "branch:" `parse_git_branch`
 #echo "sha1:  " `get_git_revision`
 REVNO=$(get_git_revision)
-echo "package de.uvwxy.footpath; public class Rev{ public final static string rev = \"$REVNO\"; }" > gen/de/uvwxy/footpath/Rev.java
+echo "package de.uvwxy.footpath;public class Rev{public final static String rev = \"$REVNO\";}" > gen/de/uvwxy/footpath/Rev.java
 
 
 

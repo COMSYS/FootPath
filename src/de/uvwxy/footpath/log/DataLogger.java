@@ -14,6 +14,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
+import de.uvwxy.footpath.Rev;
 
 /**
  * Interface to log compass, accelerometer, GPS, WiFi and route
