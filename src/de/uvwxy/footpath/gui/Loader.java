@@ -17,14 +17,15 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemSelectedListener;
 import de.uvwxy.footpath.R;
+import de.uvwxy.footpath.Rev;
 import de.uvwxy.footpath.graph.Graph;
 import de.uvwxy.footpath.graph.GraphNode;
 import de.uvwxy.footpath.graph.LatLonPos;
@@ -227,7 +228,7 @@ public class Loader extends Activity {
 		cbOutside 	= (CheckBox) findViewById(R.id.cbOutside);
 		cbLog		= (CheckBox) findViewById(R.id.cbLog);
 		cbAudio		= (CheckBox) findViewById(R.id.cbAudio);
-		this.setTitle("Footpath r(" + " todo " + ")");
+		this.setTitle("Footpath r(" + Rev.rev.substring(0,8) + ")");
 		
 		// Drop down lists: create entries of room names from rooms
 		adapter1 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, rooms);
