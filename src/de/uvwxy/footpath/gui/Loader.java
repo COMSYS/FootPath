@@ -197,12 +197,16 @@ public class Loader extends Activity {
 		g = new Graph();
 		// And add layer(s) of ways
 		try {
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.map1ug));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.mapeg));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.map1og));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.map2og));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.map3og));
-//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.parkinglot));
+			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.demo));
+			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u2));
+			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u1));
+			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_0));
+			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_1));
+			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_2));
+			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_3));
+			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_4));
+			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_5));
+			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_6));
 			g.mergeNodes();
 			rooms = g.getRoomList();
 		} catch (NotFoundException e) {
