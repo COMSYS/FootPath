@@ -204,16 +204,7 @@ public class Loader extends Activity {
 		// Add new layer(s) of ways from XML-file from sdcard
 		try {
 			Log.i("FOOTPATH", "XML: opening " + Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_0.osm");
-			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_u2.osm");
-			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_u1.osm");
-			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_0.osm");
-			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_1.osm");
-			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_2.osm");
-			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_3.osm");
-			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_4.osm");
-			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_5.osm");
-			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_6.osm");
-			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_7.osm");
+			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "super_c.osm");
 			
 			g.mergeNodes();
 			rooms = g.getRoomList();

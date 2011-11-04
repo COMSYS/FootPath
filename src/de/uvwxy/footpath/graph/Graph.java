@@ -119,7 +119,7 @@ public class Graph {
 	
 						// we need values for k= and v= otherwise bogus xml
 						if (tagKValue != null && tagVValue != null) {
-	
+
 							if (tagKValue.equals("building")) {
 								// Add additional attribute handling here
 							} else if (tagKValue.equals("indoor")) {
@@ -175,6 +175,14 @@ public class Graph {
 			boolean isIndoor = false;
 			float level = 0;
 			short wheelchair = -1;
+			
+			// Just to remember our lazy brains:
+			// >0 := number correct steps given
+			//  0 := no steps
+			// -1 := undefined number of steps
+			// -2 := elevator
+			int numSteps = 0;
+			
 			LinkedList<Integer> refs = new LinkedList<Integer>();
 			
 
@@ -188,6 +196,7 @@ public class Graph {
 				// <tag k='indoor' v='yes' />
 				// <tag k='level' v='0' />
 				// <tag k='wheelchair' v='no' />
+				// <tag k='highway' v='no' />
 				Node tagOrNDNode = way_children.item(j);
 				
 				if ( tagOrNDNode.getNodeName().toString().equals("nd") ) {
@@ -218,16 +227,28 @@ public class Graph {
 								} else {
 									isIndoor = false;
 								}
-							} else if (tagKValue.equals("level")){
+							} else if (tagKValue.equals("level")) {
 								level = Float.parseFloat(tagVValue);
 							} else if (tagKValue.equals("wheelchair")) {
-								if (tagVValue.equals("yes")){
+								if (tagVValue.equals("yes")) {
 									wheelchair = 1;
-								} else if (tagVValue.equals("no")){
+								} else if (tagVValue.equals("no")) {
 									wheelchair = -1;
 								} else {
 									wheelchair = 0;
 								}
+							} else if (tagKValue.equals("highway")) {
+								if (tagVValue.equals("steps")) {
+									wheelchair = -1;
+									if (numSteps == 0) {
+										numSteps = -1;
+									}
+								} else if (tagVValue.equals("elevator")) {
+									numSteps = -2;
+									wheelchair = 1;
+								}
+							} else if (tagKValue.equals("step_count")) {
+								numSteps = Integer.parseInt(tagVValue);
 							}
 						}
 					} // -> if (tag_attributes != null)
@@ -239,6 +260,8 @@ public class Graph {
 			tempWay.setIndoor(isIndoor);
 			tempWay.setLevel(level);
 			tempWay.setRefs(refs);
+			tempWay.setWheelchair(wheelchair);
+			tempWay.setSteps(numSteps);
 			
 			allWays.add(tempWay);
 		}
