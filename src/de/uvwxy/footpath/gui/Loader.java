@@ -1,7 +1,11 @@
 package de.uvwxy.footpath.gui;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
@@ -13,6 +17,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -195,6 +200,21 @@ public class Loader extends Activity {
 		
 		// Create new graph
 		g = new Graph();
+		
+		// Add new layer(s) of ways from XML-file from sdcard
+		try {
+			Log.i("FOOTPATH", "XML: opening " + Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_0.osm");
+			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_0.osm");
+		} catch (FileNotFoundException e1) {
+			Log.i("FOOTPATH", "XML: File not found exception");
+		} catch (ParserConfigurationException e1) {
+			Log.i("FOOTPATH", "XML: ParserConfigurationException");
+		} catch (SAXException e1) {
+			Log.i("FOOTPATH", "XML: SAXException");
+		} catch (IOException e1) {
+			Log.i("FOOTPATH", "XML: IO exception");
+		}
+		
 		// And add layer(s) of ways
 		try {
 			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.demo));
