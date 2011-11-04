@@ -58,7 +58,7 @@ public class Navigator extends Activity implements StepTrigger {
 	private boolean outside;
 	private LinkedList<GraphEdge> navPathEdges;			// Contains path with corrected compass bearings
 														// used by PaintBoxMap to paint the path
-	private LinkedList<GraphEdge> simplifiedEdges;
+	
 	private LinkedList<GraphEdge> tempEdges;			// Stores the original edges on path
 														// Needs to be global: is used for logging in onResume()
 	private double navPathLen = 0.0;					// Total length of path
@@ -464,104 +464,9 @@ public class Navigator extends Activity implements StepTrigger {
 			
 			Log.i("FOOTPATH", "Number of edges before merge: " + tempEdges.size());
 			
-			// Now that we have the correct order of nodes, and initial bearings of edges
-			// we look for successive edges with little difference in their bearing
-			// to simplify the path, having less but longer edges
-			
-			// Allow a difference of 5 degrees to both sides
-			double diff = 8.0;
-			simplifiedEdges = new LinkedList<GraphEdge>();
-			// The current edge to find equaling edges to
-			GraphEdge edge_i = null;
-			// The first node of current edge
-			GraphNode node_i_0 = null;
-			// This will be the last node of the last edge equaling edge_i
-			GraphNode node_x_1 = null;
-			
-			// Data to sum up for needed merge;
-			short wheelchair;
-			float level;
-			boolean indoor;
-			boolean stairs;
-			boolean elevator;
-			int steps;
-			int last_i = -1;
-			// Iterate over all edges
-			for (int i = 0; i < tempEdges.size(); i++){
-				edge_i = tempEdges.get(i);
-				node_i_0 = tempEdges.get(i).getNode0();
-				level = edge_i.getLevel();
-				indoor = edge_i.isIndoor();
-				stairs = edge_i.isStairs();
-				elevator = edge_i.isElevator();
-				steps = edge_i.getSteps();
-				wheelchair = edge_i.getWheelchair();
-				Log.i("FOOTPATH", "Edge (" + (i+1) + "/" + tempEdges.size() + ") dir: " + edge_i.getCompDir());
-				last_i = i;
-				for (int j = i + 1; j < tempEdges.size(); j++){
-					GraphEdge edge_j = tempEdges.get(j);
-					// Only merge edges if they are identical in their characteristics
-					if(edge_i.getLevel() == edge_j.getLevel()
-							&& edge_i.isElevator() == edge_j.isElevator()
-							&& edge_i.isIndoor() == edge_j.isIndoor()
-							&& edge_i.isStairs() == edge_j.isStairs()
-							&& Positioner.isInRange(edge_i.getCompDir(), tempEdges.get(j).getCompDir(), diff)){
-						Log.i("FOOTPATH", "Adding " + edge_j.getCompDir());
-						// Edge_i and edge_j can be merged
-						// Save last node1 of last edge_j equaling edge_i
-						node_x_1 = edge_j.getNode1();
-						
-						// Set number of steps only if defined (-1 := undefined, but steps)
-						if(steps != -1){
-							// only change 0 or defined steps
-							if(edge_j.getSteps() != -1){
-								steps += edge_j.getSteps();
-							} else {
-								// edge_j has no defined step count, thus set to undefined
-								steps = -1;
-							}
-						}
-					} else {
-						Log.i("FOOTPATH", "Not Merging " + edge_j.getCompDir());
-						// Edge_i and edge_j can not be merged
-						// Merge possible previously found edges and add them
-						
-						// Point to latest edge to try matching from
-						i = j-1;
-						
-						// Nothing can be merged, leave edge_i as is
-						if(node_x_1 == null){
-							Log.i("FOOTPATH", "Created same edge i " + edge_i.getLen() + " and direction " + edge_i.getCompDir());
-							// Add same edge_i
-							simplifiedEdges.add(edge_i);
-							break;
-						} else {
-							// Add modified new edge
-							double bearing = g.getInitialBearing(node_i_0.getLat(), node_i_0.getLon(), node_x_1.getLat(), node_x_1.getLon());
-							double len = g.getDistance(node_i_0.getLat(), node_i_0.getLon(), node_x_1.getLat(), node_x_1.getLon());
-							GraphEdge tempEdge = new GraphEdge(node_i_0, node_x_1, len, bearing, wheelchair, level, indoor);
-							tempEdge.setElevator(elevator);
-							tempEdge.setStairs(stairs);
-							tempEdge.setSteps(steps);
-							simplifiedEdges.add(tempEdge);
-							Log.i("FOOTPATH", "Created edge with length of " + tempEdge.getLen() + " and direction " + tempEdge.getCompDir());
-							// Reset last node to null to distinguish if something has to be merged
-							node_x_1 = null;
-							break;
-						}
-					}
-				}
-			}
-			
-			if(last_i != -1){
-				for(int i = last_i; i < tempEdges.size(); i++){
-					Log.i("FOOTPATH", "Adding missing edges");
-					simplifiedEdges.add(tempEdges.get(i));
-				}
-			}
 			
 			// Set current path
-			navPathEdges = simplifiedEdges;
+			navPathEdges = tempEdges;
 			Log.i("FOOTPATH", "EDGES: " + navPathEdges);
 			Log.i("FOOTPATH", "Number of edges after merge: " + navPathEdges.size());	
 
@@ -612,7 +517,7 @@ public class Navigator extends Activity implements StepTrigger {
 			posBestFit = new Positioner_OnlineBestFit(this, this.navPathEdges, confBestFit);
 			posFirstFit = new Positioner_OnlineFirstFit(this, this.navPathEdges, confFirstFit);
 		
-			
+			Log.i("FOOTPATH", "Starting Navigation!");
 			
 			setNavigating( true );
 		} else { // navPathStack was null
