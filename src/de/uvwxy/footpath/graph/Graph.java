@@ -70,12 +70,12 @@ public class Graph {
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document dom = builder.parse(new FileInputStream(od));
 
-		NodeList nodes = dom.getDocumentElement().getElementsByTagName("node");
-		NodeList ways = dom.getDocumentElement().getElementsByTagName("way");
+		NodeList domNodes = dom.getDocumentElement().getElementsByTagName("node");
+		NodeList domWays = dom.getDocumentElement().getElementsByTagName("way");
 
 		// Collect GraphNodes:
-		for (int i = 0; i < nodes.getLength(); i++) {
-			Node node = nodes.item(i);
+		for (int i = 0; i < domNodes.getLength(); i++) {
+			Node node = domNodes.item(i);
 			NamedNodeMap node_attributes = node.getAttributes();
 
 			// Interesting attributes:
@@ -164,8 +164,8 @@ public class Graph {
 		}
 
 		// Collect GraphWays:
-		for (int i = 0; i < ways.getLength(); i++) {
-			Node way = ways.item(i);
+		for (int i = 0; i < domWays.getLength(); i++) {
+			Node way = domWays.item(i);
 			NamedNodeMap way_attributes = way.getAttributes();
 
 			// Interesting attributes:
@@ -195,16 +195,11 @@ public class Graph {
 					
 					NamedNodeMap tag_attributes = tagOrNDNode.getAttributes();
 					if (tag_attributes != null) {
-						String ndKValue = tag_attributes.getNamedItem("k")
+						String refValue = tag_attributes.getNamedItem("ref")
 								.getNodeValue();
-						String ndVValue = tag_attributes.getNamedItem("v")
-								.getNodeValue();
-						// we need values for k= and v= otherwise bogus xml
-						if (ndKValue != null && ndVValue != null) {
-							if (ndKValue.equals("ref")) {
-								refs.add(new Integer(ndVValue));
-							}
-						} // -> if (tagKValue != null && tagVValue != null)
+						if(refValue!=null){
+							refs.add(new Integer(refValue));
+						}
 					} // -> if (tag_attributes != null)
 				} else if ( tagOrNDNode.getNodeName().toString().equals("tag")){
 					// collect way attributes
@@ -248,7 +243,89 @@ public class Graph {
 			allWays.add(tempWay);
 		}
 		
-		
+		LinkedList<GraphWay> remainingWays = new LinkedList<GraphWay>();
+
+		for (GraphWay way : allWays) { // find ways which are indoors at some
+										// point
+			LinkedList<Integer> refs = way.getRefs();
+			if (way.isIndoor()) { // whole path is indoors -> keep
+				remainingWays.add(way);
+			} else { // check for path with indoor node
+				boolean stop = false;
+				for (Integer ref : refs) { // check if there is a node on path
+											// which is indoors
+					for (GraphNode node : allNodes) {
+						if (node.getId() == ref.intValue()) {
+							remainingWays.add(way);
+							stop = true; // found indoor node on path to be
+											// added to graph
+											// thus stop both for loops and
+											// continue with next way
+						}
+						if (stop)
+							break;
+					}
+					if (stop)
+						break;
+				}
+			}
+		}
+
+		if (remainingWays.size() == 0) // return false, nothing to be added to
+										// graph
+			return false;
+
+		for (GraphWay way : remainingWays) {
+			short wheelchair = way.getWheelchair();
+			float level = way.getLevel();
+			boolean indoor = way.isIndoor();
+			GraphNode firstNode = getNode(allNodes, way.getRefs().get(0)
+					.intValue());
+			for (int i = 1; i <= way.getRefs().size() - 1; i++) {
+				GraphNode nextNode = getNode(allNodes, way.getRefs().get(i)
+						.intValue());
+				double len = getDistance(
+						firstNode.getLat(), // get length between P1 and P2
+						firstNode.getLon(), nextNode.getLat(),
+						nextNode.getLon());
+				double compDegree = getInitialBearing(
+						firstNode.getLat(), // get initial bearing between P1
+											// and P2
+						firstNode.getLon(), nextNode.getLat(),
+						nextNode.getLon());
+				GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, len,
+						compDegree, wheelchair, level, indoor);
+				if (way.getSteps() > 0) { // make edge a staircase if
+											// steps_count
+					tempEdge.setStairs(true); // was set correctly
+					tempEdge.setElevator(false);
+					tempEdge.setSteps(way.getSteps());
+				} else if (way.getSteps() == -1) {
+					tempEdge.setStairs(true); // make edge a staircase if
+												// steps_count
+					tempEdge.setElevator(false);
+					tempEdge.setSteps(-1); // was set to -1 (undefined steps)
+				} else if (way.getSteps() == -2) {
+					tempEdge.setStairs(false); // make edge an elevator if
+												// steps_count
+					tempEdge.setElevator(true);
+					tempEdge.setSteps(-2); // was set to -2
+				} else if (way.getSteps() == 0) {
+					tempEdge.setStairs(false);
+					tempEdge.setElevator(false);
+					tempEdge.setSteps(0);
+				}
+				edges.add(tempEdge); // add edge to graph
+				if (!nodes.contains(firstNode)) {
+					nodes.add(firstNode); // add node to graph if not present
+				}
+				firstNode = nextNode;
+			}
+
+			if (!nodes.contains(firstNode)) {
+				nodes.add(firstNode); // add last node to graph if not present
+			}
+		}
 
 		return true;
 	} // -> addToGraphFromXMLFile(String filePath) { ... }

@@ -204,7 +204,19 @@ public class Loader extends Activity {
 		// Add new layer(s) of ways from XML-file from sdcard
 		try {
 			Log.i("FOOTPATH", "XML: opening " + Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_0.osm");
+			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_u2.osm");
+			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_u1.osm");
 			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_0.osm");
+			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_1.osm");
+			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_2.osm");
+			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_3.osm");
+			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_4.osm");
+			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_5.osm");
+			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_6.osm");
+			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_7.osm");
+			
+			g.mergeNodes();
+			rooms = g.getRoomList();
 		} catch (FileNotFoundException e1) {
 			Log.i("FOOTPATH", "XML: File not found exception");
 		} catch (ParserConfigurationException e1) {
@@ -216,26 +228,26 @@ public class Loader extends Activity {
 		}
 		
 		// And add layer(s) of ways
-		try {
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.demo));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u2));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u1));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_0));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_1));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_2));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_3));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_4));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_5));
-			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_6));
-			g.mergeNodes();
-			rooms = g.getRoomList();
-		} catch (NotFoundException e) {
-			longToast("Error: resource not found:\n\n" + e);
-		} catch (XmlPullParserException e) {
-			longToast("Error: xml error:\n\n" + e);
-		} catch (IOException e) {
-			longToast("Error: io error:\n\n" + e);
-		}
+//		try {
+//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.demo));
+//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u2));
+//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u1));
+//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_0));
+//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_1));
+//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_2));
+//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_3));
+//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_4));
+//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_5));
+//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_6));
+//			g.mergeNodes();
+//			rooms = g.getRoomList();
+//		} catch (NotFoundException e) {
+//			longToast("Error: resource not found:\n\n" + e);
+//		} catch (XmlPullParserException e) {
+//			longToast("Error: xml error:\n\n" + e);
+//		} catch (IOException e) {
+//			longToast("Error: io error:\n\n" + e);
+//		}
 		
 		// GUI - Create references to elements on the screen
 		spFrom 		= (Spinner)  findViewById(R.id.Spinner01);
