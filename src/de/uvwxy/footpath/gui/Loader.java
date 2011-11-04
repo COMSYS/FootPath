@@ -207,6 +207,9 @@ public class Loader extends Activity {
 			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "super_c.osm");
 			
 			g.mergeNodes();
+			
+//			g.writeGraphToXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "super_c_rewritten.osm");
+			
 			rooms = g.getRoomList();
 		} catch (FileNotFoundException e1) {
 			Log.i("FOOTPATH", "XML: File not found exception");

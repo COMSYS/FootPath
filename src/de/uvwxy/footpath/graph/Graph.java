@@ -1,8 +1,10 @@
 package de.uvwxy.footpath.graph;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Stack;
@@ -20,6 +22,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.res.XmlResourceParser;
+import android.os.Environment;
 import android.util.Log;
 
 /**
@@ -43,6 +46,52 @@ public class Graph {
 		edges = new LinkedList<GraphEdge>();
 	}
 
+	public boolean writeGraphToXMLFile(String filePath) throws IOException{
+		
+		boolean mExternalStorageAvailable = false;
+		boolean mExternalStorageWriteable = false;
+		String state = Environment.getExternalStorageState();
+
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+		    // We can read and write the media
+		    mExternalStorageAvailable = mExternalStorageWriteable = true;
+		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+		    // We can only read the media
+		    mExternalStorageAvailable = true;
+		    mExternalStorageWriteable = false;
+		} else {
+		    // Something else is wrong. It may be one of many other states, but all we need
+		    //  to know is we can neither read nor write
+		    mExternalStorageAvailable = mExternalStorageWriteable = false;
+		}
+		
+		if ( mExternalStorageAvailable && mExternalStorageWriteable ) {
+			String mFirstLine = "<?xml version='1.0' encoding='UTF-8'?>";
+			String mSecondLine = "\n<osm version='0.6' generator='JOSM'>";
+			String mLastLine = "\n</osm>";
+			
+			BufferedWriter out = new BufferedWriter(new FileWriter(filePath));
+			out.write(mFirstLine);
+			out.write(mSecondLine);
+			
+			for(GraphNode n : nodes){
+				out.write(n.toXML());
+			}
+			
+			for(GraphEdge e: edges){
+				out.write(e.toXML());
+			}
+			
+			out.write(mLastLine);
+			out.close();
+			
+			return true;
+		}
+		
+		
+		return false;
+	}
+	
 	/**
 	 * This function loads a OSM map from a XML/OSM file.
 	 * 
@@ -101,7 +150,7 @@ public class Graph {
 
 				// Possible tags:
 				// <tag k='building' v='entrance' /> NOT USED by FOOTPATH yet
-				// <tag k='indoor' v='yes|no|door' />
+				// <tag k='indoor' v='yes|no' />
 				// <tag k='level' v='0' />
 				// <tag k='name' v='C-Caffè' />
 				// <tag k='merge_id' v='RE_0' />
@@ -127,9 +176,6 @@ public class Graph {
 									isIndoor = true;
 								} else if (tagVValue.equals("no")) {
 									isIndoor = false;
-								} else if (tagVValue.equals("door")) {
-									isIndoor = true;
-									isDoor = true;
 								}
 							} else if (tagKValue.equals("level")) {
 								level = Float.parseFloat(tagVValue);
@@ -139,6 +185,11 @@ public class Graph {
 								merge_id = tagVValue;
 							} else if (tagKValue.equals("amenity")) {
 								// Add additional attribute handling here
+							} else if (tagKValue.equals("highway")) {
+								if (tagVValue.equals("door")) {
+									isIndoor = true;
+									isDoor = true;
+								}
 							}
 						} // -> if (tagKValue != null && tagVValue != null)
 					} // -> if (tag_attributes != null)
@@ -158,8 +209,6 @@ public class Graph {
 			tempGraphNode.setName(name);
 
 			allNodes.add(tempGraphNode);
-			
-			Log.i("FOOTPATH", "XML: " + tempGraphNode.toString());
 
 		}
 

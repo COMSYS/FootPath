@@ -163,4 +163,23 @@ public class GraphNode {
 		}
 		return ret;
 	}
+	
+	public String toXML(){
+		String ret = "\n  <node id='" + this.id + "' action='modify' visible='true' ";
+		ret += "lat='" + this.lat + "' lon='" + this.lon + "'>";
+		ret += tag("indoor", this.isInDoors ? "yes" : "no");
+		ret += tag("level", "" + level);
+		if (isDoor){
+			ret += tag("highway", "door");
+		}
+		if (name != null && !name.equals("")){
+			ret += tag("name", name);
+		}
+		ret += "\n  </node>";
+		return ret;
+	}
+	
+	private String tag(String k, String v){
+		return "\n    <tag k='" + k + "' v='" + v + "' />";
+	}
 }

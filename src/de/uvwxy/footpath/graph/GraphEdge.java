@@ -7,6 +7,7 @@ package de.uvwxy.footpath.graph;
  *
  */
 public class GraphEdge {
+	private static int ID = -1337;
 	private GraphNode node0;
 	private GraphNode node1;
 	private double len;
@@ -162,5 +163,45 @@ public class GraphEdge {
 		}
 		ret+="\n    Level: " + level;
 		return ret;
+	}
+	
+	public String toXML(){
+		// I'm not quite sure if this ID creating is considered ugly =) 
+		// (but it works)
+		String ret = "\n  <way id='" + (--GraphEdge.ID) + "' action='modify' visible='true'>";
+		ret += nd (this.node0.getId());
+		ret += nd (this.node1.getId());
+		ret += tag("indoor", this.isIndoor() ? "yes" : "no");
+		ret += tag("level", "" + level);
+		switch (wheelchair) {
+		case -1:
+			ret += tag("wheelchair", "no");
+			break;
+		case 0:
+			ret += tag("wheelchair", "limited");
+			break;
+		case 1:
+			ret += tag("wheelchair", "yes");
+			break;
+		default:
+		}
+		switch (this.numSteps) {
+		case -2:
+			ret += tag("highway", "elevator");
+			break;
+		default:
+			ret += tag("step_count", "" + numSteps);
+
+		}
+		ret += "\n  </way>";
+		return ret;
+	}
+	
+	private String nd(int iD){
+		return "\n    <nd ref='" + iD + "' />";
+	}
+	
+	private String tag(String k, String v){
+		return "\n    <tag k='" + k + "' v='" + v + "' />";
 	}
 }
