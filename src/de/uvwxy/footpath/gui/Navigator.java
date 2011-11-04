@@ -462,13 +462,8 @@ public class Navigator extends Activity implements StepTrigger {
 				node0 = node1;
 			}
 			
-			Log.i("FOOTPATH", "Number of edges before merge: " + tempEdges.size());
-			
-			
 			// Set current path
 			navPathEdges = tempEdges;
-			Log.i("FOOTPATH", "EDGES: " + navPathEdges);
-			Log.i("FOOTPATH", "Number of edges after merge: " + navPathEdges.size());	
 
 			// Get handles to button and zoom controls and save their configuration
 			ZoomControls zoomControls = (ZoomControls) findViewById(R.id.zoomCtrl);
@@ -516,8 +511,6 @@ public class Navigator extends Activity implements StepTrigger {
 			
 			posBestFit = new Positioner_OnlineBestFit(this, this.navPathEdges, confBestFit);
 			posFirstFit = new Positioner_OnlineFirstFit(this, this.navPathEdges, confFirstFit);
-		
-			Log.i("FOOTPATH", "Starting Navigation!");
 			
 			setNavigating( true );
 		} else { // navPathStack was null
