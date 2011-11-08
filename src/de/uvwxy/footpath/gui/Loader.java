@@ -204,11 +204,14 @@ public class Loader extends Activity {
 		// Add new layer(s) of ways from XML-file from sdcard
 		try {
 			Log.i("FOOTPATH", "XML: opening " + Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_0.osm");
+			
+			Log.i("FOOTPATH", "A");
 			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "super_c.osm");
-			
+			Log.i("FOOTPATH", "B");
 			g.mergeNodes();
-			
-//			g.writeGraphToXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "super_c_rewritten.osm");
+			Log.i("FOOTPATH", "C");
+			g.writeGraphToXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "super_c_rewritten.osm");
+			Log.i("FOOTPATH", "D");
 			
 			rooms = g.getRoomList();
 		} catch (FileNotFoundException e1) {
