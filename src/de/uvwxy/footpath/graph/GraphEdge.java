@@ -185,13 +185,14 @@ public class GraphEdge {
 			break;
 		default:
 		}
-		switch (this.numSteps) {
-		case -2:
+		
+		if (this.isElevator){
 			ret += tag("highway", "elevator");
-			break;
-		default:
+		}
+		
+		if (this.isStairs){
+			ret += tag("highway", "steps");
 			ret += tag("step_count", "" + numSteps);
-
 		}
 		ret += "\n  </way>";
 		return ret;
