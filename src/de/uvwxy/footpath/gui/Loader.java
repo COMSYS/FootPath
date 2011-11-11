@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,6 +15,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources.NotFoundException;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -408,8 +410,12 @@ public class Loader extends Activity {
 				selectedFilePaths[--posBitCount] = FOOTPATH_BASE_DIR + filePaths[i];
 			}
 		}
-
-		loadGraphFromFiles(selectedFilePaths);
+		if(selectedFilePaths == null || selectedFilePaths.length == 0){
+			staticLoadGraphFromResource();
+		} else {
+			loadGraphFromFiles(selectedFilePaths);
+		}
+		
 	}
 	
 	/**
@@ -500,29 +506,29 @@ public class Loader extends Activity {
 	}
 	
 	private void staticLoadGraphFromResource(){
-		// Old Static Code:
-		// g = new Graph();
-		// And add layer(s) of ways
-		// try {
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.demo));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u2));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u1));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_0));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_1));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_2));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_3));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_4));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_5));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_6));
-		// g.mergeNodes();
-		// rooms = g.getRoomList();
-		// } catch (NotFoundException e) {
-		// longToast("Error: resource not found:\n\n" + e);
-		// } catch (XmlPullParserException e) {
-		// longToast("Error: xml error:\n\n" + e);
-		// } catch (IOException e) {
-		// longToast("Error: io error:\n\n" + e);
-		//		}
+//		 Old Static Code:
+		 g = new Graph();
+//		 And add layer(s) of ways
+		 try {
+		 g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.stone_henge_demo));
+//		 g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u2));
+//		 g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u1));
+//		 g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_0));
+//		 g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_1));
+//		 g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_2));
+//		 g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_3));
+//		 g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_4));
+//		 g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_5));
+//		 g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_6));
+		 g.mergeNodes();
+		 	rooms = g.getRoomList();
+		 } catch (NotFoundException e) {
+			 longToast("Error: resource not found:\n\n" + e);
+		 } catch (XmlPullParserException e) {
+			 longToast("Error: xml error:\n\n" + e);
+		 } catch (IOException e) {
+			 longToast("Error: io error:\n\n" + e);
+		 }
 	}
 
 	// Navigator needs static access to graph
