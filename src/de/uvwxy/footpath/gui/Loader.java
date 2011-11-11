@@ -418,7 +418,9 @@ public class Loader extends Activity {
 				// add correct absolute path
 				selectedFilePaths[--posBitCount] = FOOTPATH_BASE_DIR + filePaths[i];
 			}
-		}		
+		}
+		
+		loadGraphFromFiles(selectedFilePaths);
 	}
 	
 	/**
