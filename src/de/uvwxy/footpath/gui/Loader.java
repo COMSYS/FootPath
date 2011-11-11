@@ -20,6 +20,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -200,6 +202,27 @@ public class Loader extends Activity {
 		}
 	}
 
+	private static final int MENU_GRP_ID = 1337;
+	private static final int MENU_ITEM_0 = 10;
+	
+	private static final String menu_str_0 = "Select Maps";
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		boolean result = super.onCreateOptionsMenu(menu);
+		menu.add(MENU_GRP_ID, MENU_ITEM_0, Menu.NONE, menu_str_0);
+		return result;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case MENU_ITEM_0:
+			showFileListSelector();
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 	
 	/** Called when the activity is first created. */
 	@Override
