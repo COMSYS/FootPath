@@ -186,12 +186,6 @@ public class Loader extends Activity {
 	    public void onProviderDisabled(String provider) {}
 	};
 	
-	
-	// Navigator needs static access to graph
-	public static Graph getGraph(){
-		return g;
-	}
-
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -363,6 +357,11 @@ public class Loader extends Activity {
 		locationManager.removeUpdates(locationListener);
 	}
 
+	// Navigator needs static access to graph
+	public static Graph getGraph(){
+		return g;
+	}
+	
 	private void shortToast(String s) {
 		Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
 	}
