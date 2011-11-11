@@ -128,7 +128,7 @@ public class GraphEdge {
 	
 	public void setSteps(int numSteps){
 		this.numSteps = numSteps;
-		if(numSteps>0)
+		if(numSteps>0 || numSteps==-1)
 			this.setWheelchair((short)-1);//if steps, NO wheelchair
 	}
 	
