@@ -78,7 +78,8 @@ public class Loader extends Activity {
 	
 	
 	// DialogSelctionClickHandler needs access to this
-	boolean[] selectedFilesMask =  null;	
+	private boolean[] selectedFilesMask =  null;	
+	private String[] filePaths = null;
 	
 	// LISTENERS
 	OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
@@ -198,9 +199,18 @@ public class Loader extends Activity {
 			DialogInterface.OnMultiChoiceClickListener {
 		public void onClick(DialogInterface dialog, int clicked,
 				boolean selected) {
-			Log.i("FOOTPATH", selectedFilesMask[clicked] + " selected: "
-					+ selected);
+			Log.i("FOOTPATH", "selectedFilesMask[" + clicked + "]" + " selected: "
+					+ selectedFilesMask[clicked]);
 		}
+	}
+	
+	private class ButtonClickHandler implements DialogInterface.OnClickListener {
+
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			finishGraphLoading();
+		}
+		
 	}
 
 	private static final int MENU_GRP_ID = 1337;
@@ -365,9 +375,16 @@ public class Loader extends Activity {
 		locationManager.removeUpdates(locationListener);
 	}
 	
+	/**
+	 * This function calls findOSMFiles(FOOTPATH_BASE_DIR) to find all files in
+	 * the configured footpath/ folder and displays the filenames in a list.
+	 * 
+	 * The ButtonClickHandler() is used to finish the Graph Loading process by
+	 * calling finishGraphLoading().
+	 */
 	private void showFileListSelector(){
-		String[] filePaths = findOSMFiles(FOOTPATH_BASE_DIR);
-		String[] selectedFilePaths = null;
+		filePaths = findOSMFiles(FOOTPATH_BASE_DIR);
+
 		
 		if(filePaths == null){
 			longToast("No Maps found!");
@@ -379,34 +396,41 @@ public class Loader extends Activity {
 		
 		// Create dialog with list of file names, i.e. with "super_c.osm"
 		AlertDialog d = new AlertDialog.Builder( this )
-				.setTitle( "Planets" )
+				.setTitle( "Select maps to load:" )
 				.setMultiChoiceItems( filePaths, selectedFilesMask, new DialogSelectionClickHandler() )
-				.setPositiveButton( "OK", null )
+				.setPositiveButton("OK", new ButtonClickHandler() )
 				.create();
 		d.show();
-		
-		// TODO: Is this code continued AFTER the dialog is closed?
+	}
+	
+	/**
+	 * This function is called when the user hits "OK" on the list dialog with
+	 * the found .osm/.xml files. This function finishes the Graph-loading by
+	 * calling load GraphFromFiles(files[]..). (This also merges merge_id's)
+	 */
+	private void finishGraphLoading() {
+		String[] selectedFilePaths = null;
 		
 		int posBitCount = 0;
-		// Calculate selectedFilePaths size
+		
+		// count number of selected items
 		for (int i = 0; i < selectedFilesMask.length; i++) {
-			if(selectedFilesMask[i]){
+			if (selectedFilesMask[i]) {
 				posBitCount++;
 			}
 		}
-		
 
 		selectedFilePaths = new String[filePaths.length];
-		
+
 		// fill selectedFilePaths backwards with selected files
 		for (int i = 0; i < filePaths.length; i++) {
-			if(selectedFilesMask[i]){
-				selectedFilePaths[--posBitCount] = filePaths[i];
+			if (selectedFilesMask[i]) {
+				// add correct absolute path
+				selectedFilePaths[--posBitCount] = FOOTPATH_BASE_DIR + filePaths[i];
 			}
-		}		
-		
+		}
+
 		loadGraphFromFiles(selectedFilePaths);
-		
 	}
 	
 	/**
@@ -424,7 +448,7 @@ public class Loader extends Activity {
 			longToast("External storage not writeable");
 			break;
 		case 1:
-			// here we are fine
+			// here we are fine ;)
 			break;
 		}
 				
@@ -438,8 +462,7 @@ public class Loader extends Activity {
 			String[] ret = new String[files.length];
 			for (int i = 0; i < files.length; i++) {
 				if (files[i] != null) {
-					ret[i] = files[i].toString();
-					Log.i("FOOTPATH", "found map: \"" + files[i].toString() + "\"");
+					ret[i] = files[i].getName();
 				}
 			}
 	
@@ -461,6 +484,8 @@ public class Loader extends Activity {
 			return;
 		}
 		
+		longToast("Loading can take a while...\n\n Please wait...");
+		
 		// TODO: We create a new graph, do we need to clean up sth.?
 		g = new Graph();
 		
@@ -469,16 +494,12 @@ public class Loader extends Activity {
 			try {
 				g.addToGraphFromXMLFile(file);
 			} catch (FileNotFoundException e1) {
-				Log.i("FOOTPATH", "XML: File not found exception");
 				longToast("Could not open\n" + file);
 			} catch (ParserConfigurationException e1) {
-				Log.i("FOOTPATH", "XML: ParserConfigurationException");
 				longToast("Parser error with\n" + file);
 			} catch (SAXException e1) {
-				Log.i("FOOTPATH", "XML: SAXException");
 				longToast("SAX error with\n" + file);
 			} catch (IOException e1) {
-				Log.i("FOOTPATH", "XML: IO exception");
 				longToast("IO error with\n" + file);
 			}
 		}
