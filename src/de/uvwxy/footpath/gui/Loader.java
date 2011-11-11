@@ -46,6 +46,7 @@ import de.uvwxy.footpath.graph.LatLonPos;
 public class Loader extends Activity {
 
 	public static final String LOADER_SETTINGS = "FootPathSettings";
+	public static final String FOOTPATH_BASE_DIR = Environment.getExternalStorageDirectory() + "/footpath/";
 	
 	// GRAPH
 	private static Graph g;					// Holds the data structure
@@ -365,18 +366,24 @@ public class Loader extends Activity {
 	}
 	
 	private void showFileListSelector(){
-		String[] filePaths = findOSMFiles(Environment.getExternalStorageDirectory() + "footpath/");
+		String[] filePaths = findOSMFiles(FOOTPATH_BASE_DIR);
 		String[] selectedFilePaths = null;
+		
+		if(filePaths == null){
+			longToast("No Maps found!");
+			return;
+		}
 		
 		selectedFilesMask = new boolean[filePaths.length];
 		
 		
 		// Create dialog with list of file names, i.e. with "super_c.osm"
-		new AlertDialog.Builder( this )
+		AlertDialog d = new AlertDialog.Builder( this )
 				.setTitle( "Planets" )
 				.setMultiChoiceItems( filePaths, selectedFilesMask, new DialogSelectionClickHandler() )
 				.setPositiveButton( "OK", null )
 				.create();
+		d.show();
 		
 		// TODO: Is this code continued AFTER the dialog is closed?
 		
@@ -402,6 +409,46 @@ public class Loader extends Activity {
 		
 	}
 	
+	/**
+	 * This function returns a String array of file paths of .osm/.xml files
+	 * found non-recursively in the directory prefixDir.
+	 * @param prefixDir the directory too look for files in
+	 * @return a String array of file paths/names? TODO: make this clear
+	 */
+	private String[] findOSMFiles(String prefixDir){
+		switch(checkStorageEnvironment()) {
+		case -1:
+			longToast("External storage not availiable");
+			return null;
+		case 0:
+			longToast("External storage not writeable");
+			break;
+		case 1:
+			// here we are fine
+			break;
+		}
+				
+		File searchFolder = new File(prefixDir);
+		
+		String[] endingsToFilter = {"osm","xml"};
+		FileNameFilterFromStringArray fileFilter = new FileNameFilterFromStringArray(endingsToFilter);
+		File[] files = searchFolder.listFiles(fileFilter);
+		
+		if (files != null) {
+			String[] ret = new String[files.length];
+			for (int i = 0; i < files.length; i++) {
+				if (files[i] != null) {
+					ret[i] = files[i].toString();
+					Log.i("FOOTPATH", "found map: \"" + files[i].toString() + "\"");
+				}
+			}
+	
+			return ret;
+		} else { // -> if(files!=null)
+			return null;
+		} // else -> if(files!=null)
+	}
+
 	/**
 	 * This creates a Graph from the given files. Some Toast message are given
 	 * on error. After the files have been loaded merge_id's are merged, and the
@@ -452,26 +499,6 @@ public class Loader extends Activity {
 		return;
 	}
 
-	/**
-	 * This function returns a String array of file paths of .osm/.xml files
-	 * found non-recursively in the directory prefixDir.
-	 * @param prefixDir the directory too look for files in
-	 * @return a String array of file paths/names? TODO: make this clear
-	 */
-	private String[] findOSMFiles(String prefixDir){
-		File searchFolder = new File(prefixDir);
-		String[] endingsToFilter = {"osm","xml"};
-		FileNameFilterFromStringArray fileFilter = new FileNameFilterFromStringArray(endingsToFilter);
-		File[] files = searchFolder.listFiles(fileFilter);
-		String[] ret = new String[files.length];
-		for (int i = 0; i < files.length; i++) {
-			if(files[i] != null){
-				ret[i] = files[i].toString();
-			}
-		}
-		return ret;
-	}
-	
 	// Navigator needs static access to graph
 	public static Graph getGraph(){
 		return g;
@@ -507,5 +534,38 @@ public class Loader extends Activity {
 		intentNavigator.putExtra("stepLength", 	Float.parseFloat(et01.getText().toString()) * 0.415f);
 		// Start intent for navigation
 		startActivityForResult(intentNavigator, 1);
+	}
+	
+	/**
+	 * This checks if the external storage is present/read/writeable
+	 * @return -1 = not present, 0 = readable, 1 = writeable
+	 */
+	private short checkStorageEnvironment(){
+		boolean mExternalStorageAvailable = false;
+		boolean mExternalStorageWriteable = false;
+		String state = Environment.getExternalStorageState();
+
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+		    // We can read and write the media
+		    mExternalStorageAvailable = mExternalStorageWriteable = true;
+		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+		    // We can only read the media
+		    mExternalStorageAvailable = true;
+		    mExternalStorageWriteable = false;
+		} else {
+		    // Something else is wrong. It may be one of many other states, but all we need
+		    //  to know is we can neither read nor write
+		    mExternalStorageAvailable = mExternalStorageWriteable = false;
+		}
+		
+		if(!mExternalStorageAvailable){
+			return -1;
+		}
+		
+		if (!mExternalStorageWriteable){
+			return 0;
+		}
+		
+		return 1;
 	}
 }

@@ -3,6 +3,8 @@ package de.uvwxy.footpath.gui;
 import java.io.File;
 import java.io.FilenameFilter;
 
+import android.util.Log;
+
 public class FileNameFilterFromStringArray implements FilenameFilter {
 	private String[] postfixes = null;
 	

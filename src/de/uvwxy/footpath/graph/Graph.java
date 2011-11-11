@@ -106,6 +106,10 @@ public class Graph {
 	public boolean addToGraphFromXMLFile(String filePath)
 			throws ParserConfigurationException, FileNotFoundException,
 			SAXException, IOException {
+		
+		if (filePath == null)
+			return false;
+		
 		File od = new File(filePath);
 
 		// store all nodes found in file
