@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version='0.6' generator='JOSM'>
+  <node id='-18' action='modify' visible='true' lat='51.178990757023094' lon='-1.8263347717479688'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='6' />
+    <tag k='name' v='start' />
+  </node>
+  <node id='-16' action='modify' visible='true' lat='51.1789925853381' lon='-1.8261182649742629'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='6' />
+  </node>
+  <node id='-14' action='modify' visible='true' lat='51.17871356898588' lon='-1.826117007104587'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='6' />
+  </node>
+  <node id='-12' action='modify' visible='true' lat='51.17871402449759' lon='-1.8263458327677289'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='6' />
+  </node>
+  <node id='-4' action='modify' visible='true' lat='51.17897980497582' lon='-1.82634163435368'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='6' />
+    <tag k='name' v='end' />
+  </node>
+  <way id='-20' action='modify' visible='true'>
+    <nd ref='-18' />
+    <nd ref='-16' />
+    <nd ref='-14' />
+    <nd ref='-12' />
+    <nd ref='-4' />
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='6' />
+    <tag k='wheelchair' v='yes' />
+  </way>
+</osm>
