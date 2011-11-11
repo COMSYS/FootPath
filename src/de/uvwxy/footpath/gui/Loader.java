@@ -241,29 +241,8 @@ public class Loader extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.selectroom);
 		
-		// Old Static Code:
-		// g = new Graph();
-		// And add layer(s) of ways
-		// try {
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.demo));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u2));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u1));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_0));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_1));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_2));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_3));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_4));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_5));
-		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_6));
-		// g.mergeNodes();
-		// rooms = g.getRoomList();
-		// } catch (NotFoundException e) {
-		// longToast("Error: resource not found:\n\n" + e);
-		// } catch (XmlPullParserException e) {
-		// longToast("Error: xml error:\n\n" + e);
-		// } catch (IOException e) {
-		// longToast("Error: io error:\n\n" + e);
-		//		}
+		// If you want to know how to load a map from xml resource:
+		// staticLoadGraphFromResource();
 		
 		// GUI - Create references to elements on the screen
 		spFrom 		= (Spinner)  findViewById(R.id.Spinner01);
@@ -518,6 +497,32 @@ public class Loader extends Activity {
 		spTo.setAdapter(adapter2);
 		
 		return;
+	}
+	
+	private void staticLoadGraphFromResource(){
+		// Old Static Code:
+		// g = new Graph();
+		// And add layer(s) of ways
+		// try {
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.demo));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u2));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u1));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_0));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_1));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_2));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_3));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_4));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_5));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_6));
+		// g.mergeNodes();
+		// rooms = g.getRoomList();
+		// } catch (NotFoundException e) {
+		// longToast("Error: resource not found:\n\n" + e);
+		// } catch (XmlPullParserException e) {
+		// longToast("Error: xml error:\n\n" + e);
+		// } catch (IOException e) {
+		// longToast("Error: io error:\n\n" + e);
+		//		}
 	}
 
 	// Navigator needs static access to graph
