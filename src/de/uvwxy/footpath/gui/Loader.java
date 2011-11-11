@@ -367,8 +367,17 @@ public class Loader extends Activity {
 		filePaths = findOSMFiles(FOOTPATH_BASE_DIR);
 
 		
-		if(filePaths == null){
-			longToast("No Maps found!");
+		if (filePaths == null || filePaths.length == 0) {
+			longToast("No Maps found!\nLoading demo...");
+			staticLoadGraphFromResource();
+			// Drop down lists: create entries of room names from rooms
+			adapter1 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, rooms);
+			adapter1.setDropDownViewResource(android.R.layout.simple_spinner_item);
+			adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, rooms);
+			adapter2.setDropDownViewResource(android.R.layout.simple_spinner_item);
+		
+			spFrom.setAdapter(adapter1);
+			spTo.setAdapter(adapter2);
 			return;
 		}
 		
@@ -409,13 +418,7 @@ public class Loader extends Activity {
 				// add correct absolute path
 				selectedFilePaths[--posBitCount] = FOOTPATH_BASE_DIR + filePaths[i];
 			}
-		}
-		if(selectedFilePaths == null || selectedFilePaths.length == 0){
-			staticLoadGraphFromResource();
-		} else {
-			loadGraphFromFiles(selectedFilePaths);
-		}
-		
+		}		
 	}
 	
 	/**
