@@ -1,18 +1,19 @@
 package de.uvwxy.footpath.gui;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
-import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources.NotFoundException;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -22,13 +23,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemSelectedListener;
 import de.uvwxy.footpath.R;
 import de.uvwxy.footpath.Rev;
 import de.uvwxy.footpath.graph.Graph;
@@ -71,6 +72,10 @@ public class Loader extends Activity {
 	private CheckBox cbAudio = null;
 	private ArrayAdapter<String> adapter1 = null;	// Adapter to manage drop down lists
 	private ArrayAdapter<String> adapter2 = null;
+	
+	
+	// DialogSelctionClickHandler needs access to this
+	boolean[] selectedFilesMask =  null;	
 	
 	// LISTENERS
 	OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
@@ -185,6 +190,16 @@ public class Loader extends Activity {
 	
 	    public void onProviderDisabled(String provider) {}
 	};
+
+	private class DialogSelectionClickHandler implements
+			DialogInterface.OnMultiChoiceClickListener {
+		public void onClick(DialogInterface dialog, int clicked,
+				boolean selected) {
+			Log.i("FOOTPATH", selectedFilesMask[clicked] + " selected: "
+					+ selected);
+		}
+	}
+
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -192,53 +207,29 @@ public class Loader extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.selectroom);
 		
-		// Create new graph
-		g = new Graph();
-		
-		// Add new layer(s) of ways from XML-file from sdcard
-		try {
-			Log.i("FOOTPATH", "XML: opening " + Environment.getExternalStorageDirectory() + "/footpath/"+ "sc_floor_0.osm");
-			
-			Log.i("FOOTPATH", "A");
-			g.addToGraphFromXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "super_c.osm");
-			Log.i("FOOTPATH", "B");
-			g.mergeNodes();
-			Log.i("FOOTPATH", "C");
-			g.writeGraphToXMLFile(Environment.getExternalStorageDirectory() + "/footpath/"+ "super_c_rewritten.osm");
-			Log.i("FOOTPATH", "D");
-			
-			rooms = g.getRoomList();
-		} catch (FileNotFoundException e1) {
-			Log.i("FOOTPATH", "XML: File not found exception");
-		} catch (ParserConfigurationException e1) {
-			Log.i("FOOTPATH", "XML: ParserConfigurationException");
-		} catch (SAXException e1) {
-			Log.i("FOOTPATH", "XML: SAXException");
-		} catch (IOException e1) {
-			Log.i("FOOTPATH", "XML: IO exception");
-		}
-		
+		// Old Static Code:
+		// g = new Graph();
 		// And add layer(s) of ways
-//		try {
-//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.demo));
-//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u2));
-//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u1));
-//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_0));
-//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_1));
-//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_2));
-//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_3));
-//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_4));
-//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_5));
-//			g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_6));
-//			g.mergeNodes();
-//			rooms = g.getRoomList();
-//		} catch (NotFoundException e) {
-//			longToast("Error: resource not found:\n\n" + e);
-//		} catch (XmlPullParserException e) {
-//			longToast("Error: xml error:\n\n" + e);
-//		} catch (IOException e) {
-//			longToast("Error: io error:\n\n" + e);
-//		}
+		// try {
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.demo));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u2));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_u1));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_0));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_1));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_2));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_3));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_4));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_5));
+		// g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.sc_floor_6));
+		// g.mergeNodes();
+		// rooms = g.getRoomList();
+		// } catch (NotFoundException e) {
+		// longToast("Error: resource not found:\n\n" + e);
+		// } catch (XmlPullParserException e) {
+		// longToast("Error: xml error:\n\n" + e);
+		// } catch (IOException e) {
+		// longToast("Error: io error:\n\n" + e);
+		//		}
 		
 		// GUI - Create references to elements on the screen
 		spFrom 		= (Spinner)  findViewById(R.id.Spinner01);
@@ -256,16 +247,7 @@ public class Loader extends Activity {
 		cbLog		= (CheckBox) findViewById(R.id.cbLog);
 		cbAudio		= (CheckBox) findViewById(R.id.cbAudio);
 		this.setTitle("Footpath r(" + Rev.rev.substring(0,8) + ")");
-		
-		// Drop down lists: create entries of room names from rooms
-		adapter1 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, rooms);
-		adapter1.setDropDownViewResource(android.R.layout.simple_spinner_item);
-		adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, rooms);
-		adapter2.setDropDownViewResource(android.R.layout.simple_spinner_item);
-	
-		spFrom.setAdapter(adapter1);
-		spTo.setAdapter(adapter2);
-				
+						
 		// Set select/click listeners
 		spFrom.setOnItemSelectedListener(spinnerListener);
 		spTo.setOnItemSelectedListener(spinnerListener);
@@ -277,6 +259,8 @@ public class Loader extends Activity {
 		bQRCode.setOnClickListener(onListener);
 		
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		
+		showFileListSelector();
 	}
 
 	@Override
@@ -356,7 +340,115 @@ public class Loader extends Activity {
 		bGPS.setEnabled(true);
 		locationManager.removeUpdates(locationListener);
 	}
+	
+	private void showFileListSelector(){
+		String[] filePaths = findOSMFiles(Environment.getExternalStorageDirectory() + "footpath/");
+		String[] selectedFilePaths = null;
+		
+		selectedFilesMask = new boolean[filePaths.length];
+		
+		
+		// Create dialog with list of file names, i.e. with "super_c.osm"
+		new AlertDialog.Builder( this )
+				.setTitle( "Planets" )
+				.setMultiChoiceItems( filePaths, selectedFilesMask, new DialogSelectionClickHandler() )
+				.setPositiveButton( "OK", null )
+				.create();
+		
+		// TODO: Is this code continued AFTER the dialog is closed?
+		
+		int posBitCount = 0;
+		// Calculate selectedFilePaths size
+		for (int i = 0; i < selectedFilesMask.length; i++) {
+			if(selectedFilesMask[i]){
+				posBitCount++;
+			}
+		}
+		
 
+		selectedFilePaths = new String[filePaths.length];
+		
+		// fill selectedFilePaths backwards with selected files
+		for (int i = 0; i < filePaths.length; i++) {
+			if(selectedFilesMask[i]){
+				selectedFilePaths[--posBitCount] = filePaths[i];
+			}
+		}		
+		
+		loadGraphFromFiles(selectedFilePaths);
+		
+	}
+	
+	/**
+	 * This creates a Graph from the given files. Some Toast message are given
+	 * on error. After the files have been loaded merge_id's are merged, and the
+	 * spinners are updated with their new list of rooms.
+	 * @param filePaths an array of absolute paths to .osm/.xml files
+	 */
+	private void loadGraphFromFiles(String[] filePaths ){
+		// Cancel on null or empty array.
+		if (filePaths == null || filePaths.length == 0) {
+			return;
+		}
+		
+		// TODO: We create a new graph, do we need to clean up sth.?
+		g = new Graph();
+		
+		// Add new layer(s) of ways from XML-file from sdcard
+		for (String file : filePaths){
+			try {
+				g.addToGraphFromXMLFile(file);
+			} catch (FileNotFoundException e1) {
+				Log.i("FOOTPATH", "XML: File not found exception");
+				longToast("Could not open\n" + file);
+			} catch (ParserConfigurationException e1) {
+				Log.i("FOOTPATH", "XML: ParserConfigurationException");
+				longToast("Parser error with\n" + file);
+			} catch (SAXException e1) {
+				Log.i("FOOTPATH", "XML: SAXException");
+				longToast("SAX error with\n" + file);
+			} catch (IOException e1) {
+				Log.i("FOOTPATH", "XML: IO exception");
+				longToast("IO error with\n" + file);
+			}
+		}
+		
+		g.mergeNodes();
+		
+		rooms = g.getRoomList();
+		
+		// Drop down lists: create entries of room names from rooms
+		adapter1 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, rooms);
+		adapter1.setDropDownViewResource(android.R.layout.simple_spinner_item);
+		adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, rooms);
+		adapter2.setDropDownViewResource(android.R.layout.simple_spinner_item);
+	
+		spFrom.setAdapter(adapter1);
+		spTo.setAdapter(adapter2);
+		
+		return;
+	}
+
+	/**
+	 * This function returns a String array of file paths of .osm/.xml files
+	 * found non-recursively in the directory prefixDir.
+	 * @param prefixDir the directory too look for files in
+	 * @return a String array of file paths/names? TODO: make this clear
+	 */
+	private String[] findOSMFiles(String prefixDir){
+		File searchFolder = new File(prefixDir);
+		String[] endingsToFilter = {"osm","xml"};
+		FileNameFilterFromStringArray fileFilter = new FileNameFilterFromStringArray(endingsToFilter);
+		File[] files = searchFolder.listFiles(fileFilter);
+		String[] ret = new String[files.length];
+		for (int i = 0; i < files.length; i++) {
+			if(files[i] != null){
+				ret[i] = files[i].toString();
+			}
+		}
+		return ret;
+	}
+	
 	// Navigator needs static access to graph
 	public static Graph getGraph(){
 		return g;
