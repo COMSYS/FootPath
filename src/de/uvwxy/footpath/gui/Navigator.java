@@ -116,7 +116,6 @@ public class Navigator extends Activity implements StepTrigger {
 					conf = confBestFit;
 				}
 			}
-			
 		}
 		
 	};
@@ -511,6 +510,7 @@ public class Navigator extends Activity implements StepTrigger {
 			
 			posBestFit = new Positioner_OnlineBestFit(this, this.navPathEdges, confBestFit);
 			posFirstFit = new Positioner_OnlineFirstFit(this, this.navPathEdges, confFirstFit);
+			
 			
 			setNavigating( true );
 		} else { // navPathStack was null

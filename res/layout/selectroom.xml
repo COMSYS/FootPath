@@ -65,4 +65,5 @@
 		android:layout_height="wrap_content" android:layout_above="@+id/btnLoad"
 		android:layout_alignLeft="@+id/btnLoad" android:layout_alignRight="@+id/btnLoad"
 		android:id="@+id/btnCalibrate"></Button>
+
 </RelativeLayout>

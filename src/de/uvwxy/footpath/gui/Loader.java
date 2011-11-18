@@ -217,13 +217,16 @@ public class Loader extends Activity {
 
 	private static final int MENU_GRP_ID = 1337;
 	private static final int MENU_ITEM_0 = 10;
+	private static final int MENU_ITEM_1 = 20;
 	
 	private static final String menu_str_0 = "Select Maps";
+	private static final String menu_str_1 = "Test Flow Path";
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
 		menu.add(MENU_GRP_ID, MENU_ITEM_0, Menu.NONE, menu_str_0);
+		menu.add(MENU_GRP_ID, MENU_ITEM_1, Menu.NONE, menu_str_1);
 		return result;
 	}
 	
@@ -232,6 +235,12 @@ public class Loader extends Activity {
 		switch (item.getItemId()) {
 		case MENU_ITEM_0:
 			showFileListSelector();
+			break;
+		case MENU_ITEM_1:
+			Intent intentFlowTest = new Intent(Loader.this,
+					FlowPathTest.class);
+//			intentFlowTest.putExtra("my_variable", my_variable);
+			startActivityForResult(intentFlowTest, 0);
 			break;
 		}
 		return super.onOptionsItemSelected(item);
