@@ -18,7 +18,7 @@ import android.view.Surface;
  * 
  */
 public class FlowDetection {
-	private static String outputFileName = "out.mp4";
+	private static String outputFileName = "out.3gp";
 	// Capture object
 	MediaRecorder recorder;
 
@@ -37,7 +37,7 @@ public class FlowDetection {
 		recorder = new MediaRecorder();
 		recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
 		recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
-		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
 		recorder.setVideoFrameRate(24);
