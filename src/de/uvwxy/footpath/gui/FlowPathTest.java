@@ -33,7 +33,7 @@ public class FlowPathTest extends Activity {
 				Log.i("FOOTPATH", ".loadFlowDetection()");
 				SurfaceView sv01 = (SurfaceView) findViewById(R.id.svCam);
 				SurfaceHolder sh01 = sv01.getHolder();
-				sh01.setSizeFromLayout();
+//				sh01.setSizeFromLayout();
 				sh01.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 				if (flowDetection.loadFlowDetection(sh01.getSurface())) {
 					Log.i("FOOTPATH", "parse()");

@@ -37,11 +37,11 @@ public class FlowDetection {
 		recorder = new MediaRecorder();
 		recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
 		recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
-		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
-		recorder.setVideoFrameRate(24);
-		recorder.setVideoSize(320, 240);
+		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
+//		recorder.setVideoFrameRate(24);
+		recorder.setVideoSize(640, 480);
 		// Note: Camera orientation can only be changed since API level 8
 		// (2.2/Froyo)
 		// recorder.setOrientationHint(270);
@@ -84,9 +84,11 @@ public class FlowDetection {
 			Log.i("FOOTPATH", "Started Capture");
 			return true;
 		} catch (IllegalStateException e) {
+			unregisterCapture();
 			Log.i("FOOTPATH", "Och nööö, is kaputt\n" + e.getLocalizedMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
+			unregisterCapture();
 			Log.i("FOOTPATH", "Och nööö, is kaputt\n" + e.getLocalizedMessage());
 			e.printStackTrace();
 		}
