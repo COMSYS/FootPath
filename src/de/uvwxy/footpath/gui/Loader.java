@@ -238,7 +238,7 @@ public class Loader extends Activity {
 			break;
 		case MENU_ITEM_1:
 			Intent intentFlowTest = new Intent(Loader.this,
-					FlowPathTest.class);
+					FlowPath.class);
 //			intentFlowTest.putExtra("my_variable", my_variable);
 			startActivityForResult(intentFlowTest, 0);
 			break;
