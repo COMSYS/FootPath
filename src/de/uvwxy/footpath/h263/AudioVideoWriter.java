@@ -1,4 +1,4 @@
-package de.uvwxy.footpath.core;
+package de.uvwxy.footpath.h263;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +23,10 @@ public class AudioVideoWriter {
 
 	// File string
 	String filePath;
+	
+	public String getFilePath(){
+		return filePath;
+	}
 
 	/**
 	 * Constructor
@@ -52,7 +56,7 @@ public class AudioVideoWriter {
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
 		recorder.setVideoFrameRate(24);
-		recorder.setVideoSize(640, 480);
+		recorder.setVideoSize(320, 240);
 		// Note: Camera orientation can only be changed since API level 8 (2.2/Froyo)
 //		recorder.setOrientationHint(270);
 		recorder.setOutputFile(filePath);

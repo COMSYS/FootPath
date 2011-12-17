@@ -24,6 +24,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -33,8 +34,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath.core.AudioVideoWriter;
-import de.uvwxy.footpath.core.FileWriter;
+import de.uvwxy.footpath.h263.AudioVideoWriter;
+import de.uvwxy.footpath.h263.FileWriter;
 
 /**
  * This activity gives the user the possiblity of recording sensor,wifi and
@@ -62,6 +63,8 @@ public class FlowPath extends Activity {
 	TextView lbl01;
 	TextView lbl02;
 	EditText txt01;
+	private TextView lblParserInfo = null;
+	
 	public static SurfaceView sv01;
 	public static SurfaceHolder sh01;
 
@@ -98,6 +101,32 @@ public class FlowPath extends Activity {
 	private String stepsBuf = "";
 	private double lastDirection = 0.0;
 
+	// Stream parsing
+	private FlowPathParsingThread parsingThread = null;
+	
+	private Handler mHandler = new Handler();
+	private long delayMillis = 1000;
+
+	private Runnable mUpdateTimeTask = new Runnable() {
+
+		public void run() {
+
+			// Action
+			lblParserInfo.setText(parsingThread.getParser().getStats());
+
+			mHandler.postDelayed(this, delayMillis);
+		}
+	};
+
+	private void pauseHandler() {
+		mHandler.removeCallbacks(mUpdateTimeTask);
+	}
+
+	private void unPauseHandler() {
+		mHandler.removeCallbacks(mUpdateTimeTask);
+		mHandler.postDelayed(mUpdateTimeTask, delayMillis);
+	}		
+	
 	/*
 	 * needed for: test if video stream readable BufferedReader inBuffer;
 	 */
@@ -118,6 +147,8 @@ public class FlowPath extends Activity {
 		lbl01 = (TextView) findViewById(R.id.lbl01);
 		lbl02 = (TextView) findViewById(R.id.lbl02);
 		txt01 = (EditText) findViewById(R.id.txt01);
+		
+		lblParserInfo = (TextView) findViewById(R.id.lblParserInfo);
 
 		sv01 = (SurfaceView) findViewById(R.id.sv01);
 		sh01 = sv01.getHolder();
@@ -323,6 +354,13 @@ public class FlowPath extends Activity {
 		 * inBuf)); } catch (IOException e) { // TODO Auto-generated catch block
 		 * lbl02.setText("Could not read from buffer/video file"); }
 		 */
+		
+		
+		parsingThread = new FlowPathParsingThread(avwCapture.getFilePath());
+		parsingThread.setRunning(true);
+		parsingThread.start();
+		unPauseHandler();
+		
 		return true;
 	}
 
@@ -334,6 +372,9 @@ public class FlowPath extends Activity {
 	 * 'stop'.
 	 */
 	private void stopLogging() {
+		parsingThread.setRunning(false);
+		pauseHandler();
+		
 		if (logging) {
 			// set to false, so listeners stop writing on files
 			logging = false;

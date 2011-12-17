@@ -31,8 +31,21 @@ android:layout_below="@+id/btn01"
 android:textSize="24px" 
 android:textColor="#ff0000" android:text="Please try to count your steps! (Logging will stop if window gets hidden behind things ;) )"></TextView>
 
-<SurfaceView android:layout_below="@+id/lbl02" 
-android:id="@+id/sv01" 
-android:layout_centerHorizontal="true" 
-android:layout_height="fill_parent" android:layout_width="fill_parent"></SurfaceView>
+<SurfaceView
+    android:id="@+id/sv01"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_below="@+id/lbl02"
+    android:layout_centerHorizontal="true" >
+
+</SurfaceView>
+
+<TextView
+    android:id="@+id/lblParserInfo"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignBottom="@+id/btn01"
+    android:layout_alignParentRight="true"
+    android:text="N/A"/>
+
 </RelativeLayout>
