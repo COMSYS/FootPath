@@ -20,7 +20,7 @@ public class FlowPathParsingThread extends Thread{
 	
 	public FlowPathParsingThread(String filePath){
 		this.filePath = filePath;
-		log = new DebugOut(true,true,false);
+		log = new DebugOut(false,false,false);
 		
 		FileInputStream in;
 		try {
@@ -33,7 +33,7 @@ public class FlowPathParsingThread extends Thread{
 		
 //		int newPtr = boxParser.jumpIntoMDATBox();
 		boolean parsePs = true; // parse picture layer
-		boolean parseGOBs = true; // parse Group of Blocks layer
+		boolean parseGOBs = false; // parse Group of Blocks layer
 		boolean parseMBs = false; // parse Macro Block layer
 		boolean parseBs = false; // parse Block layer
 		boolean blocking = false; // blocking parsing?

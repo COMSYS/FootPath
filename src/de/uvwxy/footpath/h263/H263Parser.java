@@ -28,6 +28,8 @@ public class H263Parser {
 	int k = 2;
 	int width = 640;
 	int height = 480;
+	int blockWidth = 0;
+	int blockHeight = 0;
 
 	boolean parsePs = false; // parse picture layer
 	boolean parseGOBs = false; // parse Group of Blocks layer
@@ -36,9 +38,10 @@ public class H263Parser {
 	
 	boolean blocking = false;
 	
-	boolean tcoef_alive = true; // TODO: is this a good idea? (it doesn't work)
+//	boolean tcoef_alive = true; // TODO: is this a good idea? (it doesn't work) <- naughty boy, this was wrong!
 	
 	private boolean breakOnBitErrors = true;
+	private boolean noGSCMode = true;
 	
 	/**
 	 * TODO: write this.
@@ -283,6 +286,7 @@ public class H263Parser {
 		if (p.hExtendedPTYPE) {
 			// "If PLUSPTYPE is present, then CPM follows immediately after
 			// PLUSPTYPE in the picture header."
+			DebugOut.debug_vv("READING CPM AT FIRST LOCATION");
 			p.hCPM = readBits(1) == 1;
 			if (p.hCPM) {
 				// "PSBI always follows immediately after CPM (if CPM = "1")"
@@ -479,7 +483,7 @@ public class H263Parser {
 		if (!p.hExtendedPTYPE) {
 			// [...] but follows PQUANT in the picture header if PLUSPTYPE is
 			// not present.
-
+			DebugOut.debug_vv("READING CPM!!!!!!");
 			p.hCPM = readBits(1) == 1;
 			if (p.hCPM) {
 				// "PSBI always follows immediately after CPM (if CPM = "1")"
@@ -515,8 +519,7 @@ public class H263Parser {
 		p.hExtraInsertionInformation = readBits(1) == 1;
 
 		if (p.hExtraInsertionInformation) {
-			// whohoo Feierabend =)
-
+			DebugOut.debug_vv("Extra Insertion Information not supported");
 			// A codeword of variable length consisting of less than 8
 			// zero-bits. Encoders may insert this codeword directly before an
 			// EOS codeword. Encoders shall insert this codeword as necessary to
@@ -529,6 +532,8 @@ public class H263Parser {
 
 		}
 
+		// Remove Stuffing here for byte alignment?
+		
 		// OUTPUT CRAP FROM ABOVE:
 
 		DebugOut.debug_vvv("Temporal Reference = " + p.hTemporalReference);
@@ -561,8 +566,24 @@ public class H263Parser {
 			DebugOut.debug_vv("Picutre dimensions: " + width + "x" + height);
 		}
 		
-		if (parseGOBs)
-			decodeGOBS(p);
+		// only decode P frames (INTER). I Frames have no MVD!
+		if (parseGOBs && p.hPictureCodingType == H263PCT.INTER){
+			if(noGSCMode ){
+				// directly parse all macro blocks
+				blockWidth = (width+15)/16;
+				blockHeight = (height+15)/16;
+				int numOfMBs = (blockWidth * blockHeight);
+				DebugOut.debug_vv("Decoding " + numOfMBs  + " macroblocks");
+				for (int i = 0; i < numOfMBs; i++){
+					decodeMacroBlock(p, i);
+				}
+			} else {
+				// find start code sequence and then decode macro block
+				decodeGOBS(p);
+			}
+		} else {
+			DebugOut.debug_vv("Deeper parsing disabled or not P-Frame");
+		}
 		
 		pictureBoxCount++;
 		DebugOut.debug_vv("Picture count: " + pictureBoxCount);
@@ -589,6 +610,7 @@ public class H263Parser {
 		} else if (height >= 801 && height <= 1152) {
 			k = 4;
 		}
+		
 		DebugOut.debug_vv("gobs per picture: " + (height / 16) / k);
 
 		// note: Group Number between 0 and (480/16)/k
@@ -608,8 +630,6 @@ public class H263Parser {
 			// Jump to GOB Start Code (works only for GOBS n > 0)
 			checkForGOBStartCode();
 			groupOfBlocksCount++;
-
-			tcoef_alive  = true;
 			
 			// Group Number
 			int hGN = readBits(5);
@@ -658,32 +678,34 @@ public class H263Parser {
 			// motion vector for the whole block equal to zero
 			// no coefficient data
 			// LUMINANCE 0 BLOCK
-			decodeBlockLayer(true, false);
+//			decodeBlockLayer(true, false);
 				
 			// LUMINANCE 1 BLOCK			
-			decodeBlockLayer(true, false);
+//			decodeBlockLayer(true, false);
 
 			// LUMINANCE 2 BLOCK
-			decodeBlockLayer(true, false);
+//			decodeBlockLayer(true, false);
 
 			// LUMINANCE 3 BLOCK
-			decodeBlockLayer(true, false);
+//			decodeBlockLayer(true, false);
 			
 			// COLOR DIFF 0 BLOCK
-			decodeBlockLayer(true, false);
+//			decodeBlockLayer(true, false);
 			
 			// COLOR DIFF 1 BLOCK
-			decodeBlockLayer(true, false);
+//			decodeBlockLayer(true, false);
 						
 		} else {
 			// coded macroblock
-			DebugOut.debug_vv("(" + hGN + ") Coded macroblock");
+			DebugOut.debug_vv("(" + hGN + ") Coded macroblock @ " + fisPtr + "/" + bitPtr);
 
 			// only decode normal pictures
 
 			// TODO: parse MCBPC (always present, variable length)
 			// use Table 8
 			int hmMCBPC[] = readMCBPC4PFrames();
+			DebugOut.debug_vv("(" + hGN + ") Read MCBPC @ " + fisPtr + "/" + bitPtr);
+
 			if(hmMCBPC!=null){
 				DebugOut.debug_vv("Macroblock type " + hmMCBPC[0] + " CBPC_0 = " + hmMCBPC[1] + " CBPC_1 = " + hmMCBPC[2]);
 			
@@ -695,21 +717,26 @@ public class H263Parser {
 			// Coded Block Pattern for luminance (CBPY) (Variable
 			// length)
 			int[] hmCBPY = null;
-			if (hmMCBPC[0] != -1){ // stuffing check
+			if (hmMCBPC != null && hmMCBPC[0] != -1){ // stuffing check
 				hmCBPY = readCBPY();
+				DebugOut.debug_vv("(" + hGN + ") Read CBPY @ " + fisPtr + "/" + bitPtr);
 				if (hmCBPY != null){
-					DebugOut.debug_vv("CBPY says CBPY_0 = " + hmCBPY[0] + " CBPY_1 = " + hmMCBPC[1] + 
+					DebugOut.debug_vv("CBPY says CBPY_0 = " + hmCBPY[0] + " CBPY_1 = " + hmCBPY[1] + 
 							" CBPY_2 = " + hmCBPY[2] + " CBPY_3 = " + hmCBPY[3]);
 				} else {
-					DebugOut.debug_vv("CBPY decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\");
+					DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ CBPY decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! ");
 				}
+			} else {
+				// TODO: there might be stuffing
+				DebugOut.debug_vv("MCBPC decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! /!!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\");
 			}
 
-			if (!p.hModifiedQuantization) {
+			if (!p.hModifiedQuantization && (hmMCBPC[0] == 1 ||hmMCBPC[0] == 4 || hmMCBPC[0] == 5)) {
 				// TODO: parse DQUANT (2bits)
-				// DebugOut.debug_vv("WHOHOOOOO LUCKY!!!!!!!!!!!!!!");
+				DebugOut.debug_vv("Reading hMDQUANT");
 				int hMDQUANT = readBits(2);
-			} else {
+			} else if (p.hModifiedQuantization) {
+				// TODO: THIS MIGHT BE WRONG.
 				DebugOut.debug_vv("FUUUUUUUUUUUUUUUUUU (ModifiedQuantization)");
 			}
 
@@ -719,14 +746,20 @@ public class H263Parser {
 				if (!p.hUnrestrictedMotionVector) {
 					// horizontal component followed by vertical component
 					double[] mvdHorizontal = readMVDComponent();
-					double[] mvdVertical = readMVDComponent();
-					
-					if (mvdHorizontal!=null && mvdVertical!=null){
-						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ MVD Components: " + mvdHorizontal[0] + "/" + mvdHorizontal[1] + " " + mvdHorizontal[0] + "/" + mvdHorizontal[1]);
+					if (mvdHorizontal == null){
+						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ horiz. MVD  component failed!");
 					}
+					double[] mvdVertical = readMVDComponent();
+					if (mvdVertical == null){
+						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ vert. MVD  component failed!");
+					}
+					if (mvdHorizontal!=null && mvdVertical!=null){
+						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ MVD Components: " + mvdHorizontal[0] + "/" + mvdHorizontal[1] + " " + mvdVertical[0] + "/" + mvdVertical[1]);
+					} 
 					
-					if (hmMCBPC[0] != 2 || hmMCBPC[0] != 5){
+					if (hmMCBPC[0] == 2 || hmMCBPC[0] == 5){
 						// we have MVD_(2-4) as indicated by MCBPC block types 2 and 5 from table 9
+						DebugOut.debug_vv("Reading further MVDs");
 						double[] mvdHorizontal2 = readMVDComponent();
 						double[] mvdVertical2 = readMVDComponent();
 						double[] mvdHorizontal3 = readMVDComponent();
@@ -738,8 +771,11 @@ public class H263Parser {
 					// read MVD component (x2) from Table D.3
 					DebugOut.debug_vv("FUUUUUUUUUUUUUUUUUU (UnrestrictedMotionVector)");
 				}
+			} else if(hmMCBPC[0] == 3) {
+				DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ No MVD data, MB type" + hmMCBPC[0]);
+				
 			} else {
-				// no macroblock at all
+				DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ MB decoding failed (unimplemented)" + hmMCBPC[0]);
 			}
 			
 			// TODO: Read 6 blocks
@@ -753,17 +789,22 @@ public class H263Parser {
 			
 			// TCOEF is present if indicated by MCBPC or CBPY
 			
+			
 			// LUMINANCE 0 BLOCK
-			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[0] == 1);
+//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[0] == 1);
+			decodeBlockLayer(bINTRADC, (hmMCBPC[0] == 3) ? !(hmCBPY!=null && hmCBPY[0] == 1) : (hmCBPY!=null && hmCBPY[0] == 1));
 				
 			// LUMINANCE 1 BLOCK			
-			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[1] == 1);
+//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[1] == 1);
+			decodeBlockLayer(bINTRADC, (hmMCBPC[0] == 3) ? !(hmCBPY!=null && hmCBPY[1] == 1) : (hmCBPY!=null && hmCBPY[1] == 1));
 
 			// LUMINANCE 2 BLOCK
-			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[2] == 1);
+//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[2] == 1);
+			decodeBlockLayer(bINTRADC, (hmMCBPC[0] == 3) ? !(hmCBPY!=null && hmCBPY[2] == 1) : (hmCBPY!=null && hmCBPY[2] == 1));
 
 			// LUMINANCE 3 BLOCK
-			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[3] == 1);
+//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[3] == 1);
+			decodeBlockLayer(bINTRADC, (hmMCBPC[0] == 3) ? !(hmCBPY!=null && hmCBPY[3] == 1) : (hmCBPY!=null && hmCBPY[3] == 1));
 			
 			// COLOR DIFF 0 BLOCK
 			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmMCBPC[0] == 1);
@@ -780,15 +821,27 @@ public class H263Parser {
 		if (intradc) {
 			// read INTRADC
 			int hmINTRADC = readBits(8);
+			DebugOut.debug_vv("[block] hmINTRADC read (" + hmINTRADC +")");
 		}
 		
-		if(tcoef && tcoef_alive){
-			int[] ret = consumeTCOEFF();
-			DebugOut.debug_vv("ret=" + (ret==null));
-			if(ret!=null){
-				DebugOut.debug_vv("ret[0]=" + ret[0]);
-				if (ret[0]==1){
-					tcoef_alive = false;
+		
+		
+		if(tcoef){
+			boolean tcoef_alive = true;
+			while(tcoef_alive){
+				int[] ret = consumeTCOEFF();
+				// ret contains last0 run1 and level2
+				//  [block] 1, level 1, last 1
+//				DebugOut.debug_vvv("ret=" + (ret == null));
+				if (ret != null) {
+					DebugOut.debug_vv("[block] " + ret[1] + ", level " + ret[2] +", last " + ret[0]);
+					DebugOut.debug_vvv("ret[0]=" + ret[0]);
+					if (ret[0] == 1) {
+						tcoef_alive = false;
+						DebugOut.debug_vv("[block] stop");
+					}
+				} else {
+					DebugOut.debug_vv("[block] failed");
 				}
 			}
 		}
@@ -865,8 +918,8 @@ public class H263Parser {
 //					+ " = " + Integer.toHexString(tmp));
 
 			if (bitCount >= 17 && tmp == 0x01) {
-				DebugOut.debug_vvv("found GOB Start Code @ " + fisPtr + " bit "
-						+ bitPtr);
+				DebugOut.debug_vv("found GOB Start Code @ " + fisPtr + " bit "
+						+ bitPtr + ", " + (fisPtr - lastFisPtr) + " bits behind PSC");
 				return;
 			}
 		}
@@ -1427,7 +1480,7 @@ public class H263Parser {
 			double[] res = {-5.5, 26.5};
 			return res;
 		}
-		tempBits = evalNext(tempBits, 0, 0x24, 11);
+		tempBits = evalNext(tempBits, 0, 0x22, 11); // fixed 0x24 to 0x22
 		if (tempBits == -1){
 			double[] res = {5.5, -26.5};
 			return res;
@@ -2292,6 +2345,7 @@ public class H263Parser {
 		}
 	
 		if ((tempBits & getBitMask(refLen)) == ref) {
+			DebugOut.debug_vv("Matched " + refLen + " bits and found " + Integer.toBinaryString(ref) +" @ " + fisPtr + "/" + bitPtr);
 			return -1;
 		}
 	
@@ -2317,6 +2371,7 @@ public class H263Parser {
 	
 		// by right shifting we ignore le right most bit!
 		if (((tempBits>>1) & getBitMask(refLen)) == ref) {
+			DebugOut.debug_vv("Matched_ " + refLen + " bits and found " + Integer.toBinaryString(ref) +" @ " + fisPtr + "/" + bitPtr);
 			return -1;
 		}
 	
