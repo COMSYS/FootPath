@@ -28,8 +28,8 @@ public class H263Parser {
 	int k = 2;
 	
 	// resolution from nexus s is
-	int width = 176;
-	int height = 144;
+	int width = 640;
+	int height = 480;
 	int blockWidth = 0;
 	int blockHeight = 0;
 
@@ -94,6 +94,10 @@ public class H263Parser {
 		}
 		
 		return null;
+	}
+	
+	public void skipH263Frame() throws IOException, EOSException {
+		checkForPictureStartCode();
 	}
 
 	private double[][][] decodePicture() throws IOException, EOSException {
@@ -677,17 +681,17 @@ public class H263Parser {
 					mvs[x][y] = mv;
 
 					// print MVs:
-					if (x == 0) {
-						buf += "" + mv[0] + "/" + mv[1];
-					} else {
-						buf += ", " + mv[0] + "/" + mv[1];
-					}
+//					if (x == 0) {
+//						buf += "" + mv[0] + "/" + mv[1];
+//					} else {
+//						buf += ", " + mv[0] + "/" + mv[1];
+//					}
 					// print differences, deprecated
 					// buf += ", " + p.hMVDs[x][y][0][0] + "/" +
 					// p.hMVDs[x][y][0][1] +
 					// "|" + p.hMVDs[x][y][1][0] +"/" + p.hMVDs[x][y][1][1];
 				}
-				DebugOut.debug_v(buf);
+//				DebugOut.debug_v(buf);
 			}
 			
 			DebugOut.debug_v("########################################");

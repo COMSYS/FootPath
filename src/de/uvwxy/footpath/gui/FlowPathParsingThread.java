@@ -4,7 +4,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import android.util.Log;
 import de.uvwxy.footpath.h263.DebugOut;
+import de.uvwxy.footpath.h263.EOSException;
 import de.uvwxy.footpath.h263.H263Parser;
 
 /**
@@ -48,23 +50,39 @@ public class FlowPathParsingThread extends Thread{
 		bRunning = run;
 	}
 
+	int frame_count = 0;
+	int periodicity = 16;
 	@Override
-	public void run() {		
+	public void run() {
+		double[][][] mvs = null;
+		
 		log.debug_v("parsing started");
 		while(bRunning){
 		//		ISOBoxParser boxParser = new ISOBoxParser(in);
 			try {
 				log.debug_v("parsing next frame");
-				double[][][] mvs = parser.parseH263Frame();
-				
-				if (mvs != null){
-					// wahay we have dem vectorz
-					log.debug_v("read " + mvs.length*mvs[0].length + " vectors");
-					if (pbMVs!=null){
-						pbMVs.updateMVs(mvs);
+				frame_count++;
+				if (frame_count % periodicity == 0){
+					Log.i("FLOWPATH", "parsing frame");
+					mvs = parser.parseH263Frame();
+					
+					if (mvs != null){
+						// wahay we have dem vectorz
+						log.debug_v("read " + mvs.length*mvs[0].length + " vectors");
+						if (pbMVs!=null){
+							pbMVs.updateMVs(mvs);
+						}
 					}
+				
+				} else {
+					Log.i("FLOWPATH", "skipping frame");
+					parser.skipH263Frame();
 				}
 			} catch (IOException e) {
+				log.debug_v("error parsing H263 "
+						+ e.getLocalizedMessage());
+				e.printStackTrace();
+			} catch (EOSException e) {
 				log.debug_v("error parsing H263 "
 						+ e.getLocalizedMessage());
 				e.printStackTrace();
