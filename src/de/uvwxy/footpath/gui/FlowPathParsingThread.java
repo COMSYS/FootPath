@@ -17,10 +17,14 @@ public class FlowPathParsingThread extends Thread{
 	private H263Parser parser = null;
 	private String filePath = null;
 	private DebugOut log = null;
+	private PaintBoxMVs pbMVs = null;
 	
-	public FlowPathParsingThread(String filePath){
+	
+	public FlowPathParsingThread(String filePath, PaintBoxMVs pbMVs){
 		this.filePath = filePath;
-		log = new DebugOut(true,false,false);
+		this.pbMVs = pbMVs;
+		
+		log = new DebugOut(false,false,false);
 		
 		FileInputStream in;
 		try {
@@ -56,6 +60,9 @@ public class FlowPathParsingThread extends Thread{
 				if (mvs != null){
 					// wahay we have dem vectorz
 					log.debug_v("read " + mvs.length*mvs[0].length + " vectors");
+					if (pbMVs!=null){
+						pbMVs.updateMVs(mvs);
+					}
 				}
 			} catch (IOException e) {
 				log.debug_v("error parsing H263 "

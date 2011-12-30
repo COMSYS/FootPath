@@ -30,8 +30,11 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import de.uvwxy.footpath.R;
 import de.uvwxy.footpath.h263.AudioVideoWriter;
@@ -106,6 +109,8 @@ public class FlowPath extends Activity {
 	
 	private Handler mHandler = new Handler();
 	private long delayMillis = 1000;
+	
+	private PaintBoxMVs svMVs = null;
 
 	private Runnable mUpdateTimeTask = new Runnable() {
 
@@ -154,6 +159,21 @@ public class FlowPath extends Activity {
 		sh01 = sv01.getHolder();
 		sh01.setSizeFromLayout();
 		sh01.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		
+		
+				// get SurfaceView defined in xml
+								// get its layout params
+		
+		
+		
+		svMVs = new PaintBoxMVs(this);
+		
+		RelativeLayout layout = (RelativeLayout) findViewById(R.id.RelativeLayout01);
+		SurfaceView svOld = (SurfaceView) findViewById(R.id.svMVPaint);	
+		LayoutParams lpHistory = svOld.getLayoutParams();
+		
+		layout.removeView(svOld);
+		layout.addView(svMVs, lpHistory);
 
 		// Sensors
 		sm = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -356,7 +376,7 @@ public class FlowPath extends Activity {
 		 */
 		
 		
-		parsingThread = new FlowPathParsingThread(avwCapture.getFilePath());
+		parsingThread = new FlowPathParsingThread(avwCapture.getFilePath(), svMVs);
 		parsingThread.setRunning(true);
 		parsingThread.start();
 		unPauseHandler();

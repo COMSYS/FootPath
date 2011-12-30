@@ -10,7 +10,7 @@ import android.util.Log;
  *
  */
 public class DebugOut {
-	private static boolean v = true;
+	private static boolean v = false;
 	private static boolean vv = false;
 	private static boolean vvv = false;
 	
