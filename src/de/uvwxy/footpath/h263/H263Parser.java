@@ -26,8 +26,10 @@ public class H263Parser {
 	// as we assume we are working with a video height between 404 and 800
 	// we already set it to 2, see H.263(01/2005) page 10 (19 in pdf)
 	int k = 2;
-	int width = 640;
-	int height = 480;
+	
+	// resolution from nexus s is
+	int width = 176;
+	int height = 144;
 	int blockWidth = 0;
 	int blockHeight = 0;
 
