@@ -43,6 +43,10 @@ public class H263Parser {
 	private boolean breakOnBitErrors = true;
 	private boolean noGSCMode = true;
 	
+	// I herby assume that there will be no frame smaller than 128 bytes
+	// this is supposed to stop the parser wandering off into areas at the
+	// end of the file where PSC are detected but no pictures are to befound
+	private static int MINIMUM_BYTES_BETWEEN_PICTURES = 128;
 	/**
 	 * TODO: write this.
 	 * 
@@ -96,7 +100,16 @@ public class H263Parser {
 
 		checkForPictureStartCode();
 		
-		DebugOut.debug_vv("Found PSC @ " + fisPtr + "/" + bitPtr + " diff: " + (fisPtr - lastFisPtr) +  " bytes");
+		DebugOut.debug_v("Found PSC @ " + fisPtr + "/" + bitPtr + " diff: " + (fisPtr - lastFisPtr) +  " bytes");
+		
+		// ugly hack to prevent crashing at end of file
+		if ((fisPtr - lastFisPtr) < MINIMUM_BYTES_BETWEEN_PICTURES 
+				&& pictureBoxCount > 2 ){
+			DebugOut.debug_v("We assume " + (fisPtr - lastFisPtr) +  " bytes are not enough to be a picture, skipping...");
+			lastFisPtr = fisPtr;
+			return;
+		}
+		
 		lastFisPtr = fisPtr;
 		
 		p.hTemporalReference = readBits(8);
