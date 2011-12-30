@@ -807,10 +807,10 @@ public class H263Parser {
 			decodeBlockLayer(bINTRADC, (hmMCBPC[0] == 3) ? !(hmCBPY!=null && hmCBPY[3] == 1) : (hmCBPY!=null && hmCBPY[3] == 1));
 			
 			// COLOR DIFF 0 BLOCK
-			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmMCBPC[0] == 1);
+			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmMCBPC[1] == 1);
 			
 			// COLOR DIFF 1 BLOCK
-			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmMCBPC[1] == 1);
+			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmMCBPC[2] == 1);
 			
 		} // else if (hMCOD)
 	}
