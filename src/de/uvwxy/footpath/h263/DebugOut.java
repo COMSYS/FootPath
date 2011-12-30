@@ -15,7 +15,7 @@ public class DebugOut {
 	private static boolean vvv = false;
 	
 	/**
-	 * We have all learnt that this should be a singleton object. But as we just
+	 * We have all learned that this should be a singleton object. But as we just
 	 * want to have things working right _now_ it aint ;)
 	 * @param v
 	 * @param vv

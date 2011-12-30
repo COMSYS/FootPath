@@ -20,7 +20,7 @@ public class FlowPathParsingThread extends Thread{
 	
 	public FlowPathParsingThread(String filePath){
 		this.filePath = filePath;
-		log = new DebugOut(false,false,false);
+		log = new DebugOut(true,false,false);
 		
 		FileInputStream in;
 		try {
@@ -33,9 +33,9 @@ public class FlowPathParsingThread extends Thread{
 		
 //		int newPtr = boxParser.jumpIntoMDATBox();
 		boolean parsePs = true; // parse picture layer
-		boolean parseGOBs = false; // parse Group of Blocks layer
-		boolean parseMBs = false; // parse Macro Block layer
-		boolean parseBs = false; // parse Block layer
+		boolean parseGOBs = true; // parse Group of Blocks layer
+		boolean parseMBs = true; // parse Macro Block layer
+		boolean parseBs = true; // parse Block layer
 		boolean blocking = false; // blocking parsing?
 		parser = new H263Parser(in, 0, parsePs, parseGOBs, parseMBs, parseBs, blocking);
 	}
@@ -51,7 +51,12 @@ public class FlowPathParsingThread extends Thread{
 		//		ISOBoxParser boxParser = new ISOBoxParser(in);
 			try {
 				log.debug_v("parsing next frame");
-				parser.parseH263Frame();
+				double[][][] mvs = parser.parseH263Frame();
+				
+				if (mvs != null){
+					// wahay we have dem vectorz
+					log.debug_v("read " + mvs.length*mvs[0].length + " vectors");
+				}
 			} catch (IOException e) {
 				log.debug_v("error parsing H263 "
 						+ e.getLocalizedMessage());

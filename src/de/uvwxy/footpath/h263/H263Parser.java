@@ -84,20 +84,19 @@ public class H263Parser {
 		DebugOut.debug_v("Found " + numIframes + " I-Frames, " + numPframes + " P-Frames");
 	}
 	
-	public void parseH263Frame() throws IOException {
+	public double[][][] parseH263Frame() throws IOException {
 		DebugOut.debug_vv("Parsing H263 video data beginning from " + fisPtr);
 
 		try {
-			decodePicture();
+			return decodePicture();
 		} catch (EOSException e) {
 			DebugOut.debug_vv("end of stream occured, or is blocking");
 		}
-
-		DebugOut.debug_vv("Parsing of H263 video data ended at " + fisPtr);
-		DebugOut.debug_v("Found " + numIframes + " I-Frames, " + numPframes + " P-Frames");
+		
+		return null;
 	}
 
-	private void decodePicture() throws IOException, EOSException {
+	private double[][][] decodePicture() throws IOException, EOSException {
 		H263PictureLayer p = new H263PictureLayer();
 
 		checkForPictureStartCode();
@@ -109,7 +108,7 @@ public class H263Parser {
 				&& pictureBoxCount > 2 ){
 			DebugOut.debug_v("We assume " + (fisPtr - lastFisPtr) +  " bytes are not enough to be a picture, skipping...");
 			lastFisPtr = fisPtr;
-			return;
+			return null;
 		}
 		
 		lastFisPtr = fisPtr;
@@ -124,7 +123,7 @@ public class H263Parser {
 		if (!(b(hPTYPE, 4) && !b(hPTYPE, 3))) {
 			// break here if something goes wrong!
 			if (breakOnBitErrors)
-				return;
+				return null;
 		}
 
 		p.hSplitScreen = b(hPTYPE, 2);
@@ -197,7 +196,7 @@ public class H263Parser {
 				if (!((b(hOPPTYPE_footer, 3) && !b(hOPPTYPE_footer, 2)
 						&& !b(hOPPTYPE_footer, 1) && !b(hOPPTYPE_footer, 0)))) {
 					if (breakOnBitErrors)
-						return;
+						return null;
 				}
 
 			} else {
@@ -268,7 +267,7 @@ public class H263Parser {
 					hMPPTYPE_footer, 0))) {
 				DebugOut.debug_vv("ÖRKS");
 				if (breakOnBitErrors)
-					return;
+					return null;
 			}
 
 		} else {
@@ -339,7 +338,7 @@ public class H263Parser {
 			DebugOut.debug_vvv("Must be True: " + (mustBeOne == 1));
 
 			if (!(mustBeOne == 1)) {
-				return;
+				return null;
 			}
 
 			// Number of lines = PHI * 4
@@ -692,6 +691,9 @@ public class H263Parser {
 			}
 			
 			DebugOut.debug_v("########################################");
+			return mvs;
+		} else {
+			return null;
 		}
 	}
 	
