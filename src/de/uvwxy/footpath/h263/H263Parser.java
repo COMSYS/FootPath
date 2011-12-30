@@ -589,8 +589,14 @@ public class H263Parser {
 				blockHeight = (height+15)/16;
 				int numOfMBs = (blockWidth * blockHeight);
 				DebugOut.debug_vv("Decoding " + numOfMBs  + " macroblocks");
-				for (int i = 0; i < numOfMBs; i++){
-					decodeMacroBlock(p, i);
+				// set up some space for mvds
+				// vertical + horizontal
+				// [2] because of value and predictor
+				p.hMVDs = new double[blockWidth][blockHeight][2][2];
+				for (int x = 0; x < blockWidth; x++){
+					for (int y = 0; y < blockHeight; y++){
+						decodeMacroBlock(p, x,y);
+					}
 				}
 			} else {
 				// find start code sequence and then decode macro block
@@ -605,6 +611,122 @@ public class H263Parser {
 		DebugOut.debug_vvv("GOB count: " + groupOfBlocksCount);
 		// DebugOut.debug_v("Macroblock count (TODO): " + macroBlockCount);
 		DebugOut.debug_v("########################################");
+		
+		
+		
+		if (p.hMVDs != null){
+			
+			//     | B | C |
+			//   ----------
+			//   A | X |   |
+			// 
+			
+			double[][][] mvs = new double[blockWidth][blockHeight][2];
+			double[] empty = { 0.0, 0.0 };
+			double[] mvA, mvB, mvC;
+			double predictorX;
+			double predictorY;
+			double[] horizDiffs;
+			double[] vertDiffs;
+			double tempX;
+			double tempY;
+			for (int y = 0; y < blockHeight; y++) {
+				String buf = "";
+				for (int x = 0; x < blockWidth; x++) {
+
+					// setting up candidates
+
+					if (x == 0) {
+						mvA = empty;
+					} else {
+						mvA = mvs[x - 1][y];
+					}
+					if (y == 0) {
+						mvB = mvA;
+						mvC = mvB;
+					} else {
+						mvB = mvs[x][y - 1];
+						if (x != blockWidth - 1) {
+							mvC = mvs[x + 1][y - 1];
+						} else {
+							mvC = empty;
+						}
+					}
+
+					predictorX = mvMedian(false, mvA, mvB, mvC);
+					predictorY = mvMedian(true, mvA, mvB, mvC);
+					horizDiffs = p.hMVDs[x][y][0];
+					vertDiffs = p.hMVDs[x][y][1];
+
+					tempX = horizDiffs[0] + predictorX;
+
+					// [-16,15.5] range!
+					if (tempX >= -16.0 && tempX <= 15.5) {
+						// tada
+					} else {
+						tempX = horizDiffs[1] + predictorX;
+					}
+
+					tempY = vertDiffs[0] + predictorY;
+					if (tempY >= -16.0 && tempY <= 15.5) {
+						// tada
+					} else {
+						tempY = vertDiffs[1] + predictorY;
+					}
+
+					double[] mv = { tempX, tempY };
+					mvs[x][y] = mv;
+
+					// print MVs:
+					if (x == 0) {
+						buf += "" + mv[0] + "/" + mv[1];
+					} else {
+						buf += ", " + mv[0] + "/" + mv[1];
+					}
+					// print differences, deprecated
+					// buf += ", " + p.hMVDs[x][y][0][0] + "/" +
+					// p.hMVDs[x][y][0][1] +
+					// "|" + p.hMVDs[x][y][1][0] +"/" + p.hMVDs[x][y][1][1];
+				}
+				DebugOut.debug_v(buf);
+			}
+			
+			DebugOut.debug_v("########################################");
+		}
+	}
+	
+	private double mvMedian(boolean vertical, double[] mvA, double[] mvB,
+			double[] mvC) {
+		double a;
+		double b;
+		double c;
+		if (vertical) {
+			// return vertical component [1]
+			a = mvA[1];
+			b = mvB[1];
+			c = mvC[1];
+		} else {
+			// return horizontal component [0]
+			a = mvA[0];
+			b = mvB[0];
+			c = mvC[0];
+		}
+
+		if (a <= b) {
+			// check b <= c
+			if (b <= c) {
+				return b;
+			} else {
+				return c;
+			}
+		} else {
+			// check a < c
+			if (a <= c) {
+				return a;
+			} else {
+				return c;
+			}
+		}
 	}
 	
 	private void decodeGOBS(H263PictureLayer p) throws IOException, EOSException{
@@ -681,14 +803,19 @@ public class H263Parser {
 	}
 	
 	
-	private void decodeMacroBlock(H263PictureLayer p, int hGN) throws IOException{
+	private void decodeMacroBlock(H263PictureLayer p, int x, int y) throws IOException{
 		boolean hMCOD = readBits(1) == 1; // false = coded
 
 		
 		if (hMCOD) {
 			DebugOut.debug_vv("("
-					+ hGN
+					+ x + "/" + y
 					+ ") INTER macroblock /!\\ MVDS in this macroblock are all zero");
+			
+			double[] empty = {0,0};
+			p.hMVDs[x][y][0] = empty;
+			p.hMVDs[x][y][1] = empty;
+			
 			// no further information in this macro block
 			// motion vector for the whole block equal to zero
 			// no coefficient data
@@ -712,14 +839,14 @@ public class H263Parser {
 						
 		} else {
 			// coded macroblock
-			DebugOut.debug_vv("(" + hGN + ") Coded macroblock @ " + fisPtr + "/" + bitPtr);
+			DebugOut.debug_vv("(" + x + "/" + y + ") Coded macroblock @ " + fisPtr + "/" + bitPtr);
 
 			// only decode normal pictures
 
 			// TODO: parse MCBPC (always present, variable length)
 			// use Table 8
 			int hmMCBPC[] = readMCBPC4PFrames();
-			DebugOut.debug_vv("(" + hGN + ") Read MCBPC @ " + fisPtr + "/" + bitPtr);
+			DebugOut.debug_vv("(" + x + "/" + y + ") Read MCBPC @ " + fisPtr + "/" + bitPtr);
 
 			if(hmMCBPC!=null){
 				DebugOut.debug_vv("Macroblock type " + hmMCBPC[0] + " CBPC_0 = " + hmMCBPC[1] + " CBPC_1 = " + hmMCBPC[2]);
@@ -734,7 +861,7 @@ public class H263Parser {
 			int[] hmCBPY = null;
 			if (hmMCBPC != null && hmMCBPC[0] != -1){ // stuffing check
 				hmCBPY = readCBPY();
-				DebugOut.debug_vv("(" + hGN + ") Read CBPY @ " + fisPtr + "/" + bitPtr);
+				DebugOut.debug_vv("(" + x + "/" + y + ")  Read CBPY @ " + fisPtr + "/" + bitPtr);
 				if (hmCBPY != null){
 					DebugOut.debug_vv("CBPY says CBPY_0 = " + hmCBPY[0] + " CBPY_1 = " + hmCBPY[1] + 
 							" CBPY_2 = " + hmCBPY[2] + " CBPY_3 = " + hmCBPY[3]);
@@ -763,14 +890,21 @@ public class H263Parser {
 					double[] mvdHorizontal = readMVDComponent();
 					if (mvdHorizontal == null){
 						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ horiz. MVD  component failed!");
-					}
+					} 
 					double[] mvdVertical = readMVDComponent();
 					if (mvdVertical == null){
 						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ vert. MVD  component failed!");
 					}
 					if (mvdHorizontal!=null && mvdVertical!=null){
 						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ MVD Components: " + mvdHorizontal[0] + "/" + mvdHorizontal[1] + " " + mvdVertical[0] + "/" + mvdVertical[1]);
-					} 
+						
+						p.hMVDs[x][y][0] = mvdHorizontal;
+						p.hMVDs[x][y][1] = mvdVertical;
+					} else {
+						double[] empty = {0,0};
+						p.hMVDs[x][y][0] = empty;
+						p.hMVDs[x][y][1] = empty;
+					}
 					
 					if (hmMCBPC[0] == 2 || hmMCBPC[0] == 5){
 						// we have MVD_(2-4) as indicated by MCBPC block types 2 and 5 from table 9
@@ -788,6 +922,9 @@ public class H263Parser {
 				}
 			} else if(hmMCBPC[0] == 3) {
 				DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ No MVD data, MB type" + hmMCBPC[0]);
+				double[] empty = {0,0};
+				p.hMVDs[x][y][0] = empty;
+				p.hMVDs[x][y][1] = empty;
 				
 			} else {
 				DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ MB decoding failed (unimplemented)" + hmMCBPC[0]);
