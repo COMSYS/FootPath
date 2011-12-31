@@ -173,7 +173,7 @@ public class FlowPath extends Activity {
 		LayoutParams lpHistory = svOld.getLayoutParams();
 		
 		layout.removeView(svOld);
-		layout.addView(svMVs, lpHistory);
+//		layout.addView(svMVs, lpHistory);
 
 //		// Sensors
 //		sm = (SensorManager) getSystemService(SENSOR_SERVICE);

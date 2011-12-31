@@ -51,10 +51,12 @@ public class FlowPathParsingThread extends Thread{
 	}
 
 	int frame_count = 0;
-	int periodicity = 16;
+	int periodicity = 1;
+	long timeMillis = 0;
 	@Override
 	public void run() {
 		double[][][] mvs = null;
+		timeMillis = System.currentTimeMillis();
 		
 		log.debug_v("parsing started");
 		while(bRunning){
@@ -63,7 +65,8 @@ public class FlowPathParsingThread extends Thread{
 				log.debug_v("parsing next frame");
 				frame_count++;
 				if (frame_count % periodicity == 0){
-					Log.i("FLOWPATH", "parsing frame");
+					Log.i("FLOWPATH", "parsing frame after (" + (System.currentTimeMillis()-timeMillis) + "ms)");
+					timeMillis = System.currentTimeMillis();
 					mvs = parser.parseH263Frame();
 					
 					if (mvs != null){

@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import android.util.Log;
+
 /**
  * Warning: this is highly unstable and undocumented code ;)
  * asdf you know!
@@ -102,6 +104,7 @@ public class H263Parser {
 	}
 
 	private double[][][] decodePicture() throws IOException, EOSException {
+		long timeMillis = System.currentTimeMillis();
 		H263PictureLayer p = new H263PictureLayer();
 
 		checkForPictureStartCode();
@@ -592,15 +595,17 @@ public class H263Parser {
 				blockWidth = (width+15)/16;
 				blockHeight = (height+15)/16;
 				int numOfMBs = (blockWidth * blockHeight);
+				
 				DebugOut.debug_vv("Decoding " + numOfMBs  + " macroblocks");
 				// set up some space for mvds
 				// vertical + horizontal
 				// [2] because of value and predictor
 				p.hMVDs = new double[blockWidth][blockHeight][2][2];
-				for (int x = 0; x < blockWidth; x++){
-					for (int y = 0; y < blockHeight; y++){
+				for (int y = 0; y < blockHeight; y++) {
+					for (int x = 0; x < blockWidth; x++){
 						decodeMacroBlock(p, x,y);
 					}
+					
 				}
 			} else {
 				// find start code sequence and then decode macro block
@@ -615,8 +620,6 @@ public class H263Parser {
 		DebugOut.debug_vvv("GOB count: " + groupOfBlocksCount);
 		// DebugOut.debug_v("Macroblock count (TODO): " + macroBlockCount);
 		DebugOut.debug_v("########################################");
-		
-		
 		
 		if (p.hMVDs != null){
 			
@@ -697,7 +700,6 @@ public class H263Parser {
 				}
 //				DebugOut.debug_v(buf);
 			}
-			
 			DebugOut.debug_v("########################################");
 			return mvs;
 		} else {
@@ -2625,17 +2627,40 @@ public class H263Parser {
 		return res;
 	}
 
+	private boolean useByteBuffer = true;
 	private void readNextByte() throws IOException {
 		fisPtr++;
-		int b = fis.read();
+		int b;
+		if (useByteBuffer){
+			b = byteBufferNextByte();
+		} else {
+			b = fis.read();
+		}
 //		DebugOut.debug_vvv("read b = " + Integer.toBinaryString(b));
 		this.currentByte = b;
 	}
 
+	private int byteBufferSize = 3072; // ~3kb
+	private byte[] byteBuffer = new byte[byteBufferSize];
+	private int byteBufferPointer = -1;
+	
+	private int byteBufferNextByte() throws IOException{
+		if ( byteBufferPointer == -1 || byteBufferPointer == byteBufferSize){
+			// update buffer
+			int x = fis.read(byteBuffer);
+			byteBufferPointer = 0;
+		}
+		
+		int b = byteBuffer[byteBufferPointer];
+		
+		byteBufferPointer++;		
+		return b;
+	}
 	
 	public String getStats(){
 		return "I Frames: " + numIframes + ", P Frames: " + numPframes +
-				"\nGOBs: " + groupOfBlocksCount + ", MBs: " + macroBlockCount;
+				"\nGOBs: " + groupOfBlocksCount + ", MBs: " + macroBlockCount +
+				"\nSize: " + width + "x" + height;
 	}
 	
 	// #########################################################################
