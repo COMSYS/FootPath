@@ -38,7 +38,7 @@ public class AudioVideoWriter {
 		File dir = new File(Environment.getExternalStorageDirectory(),
 				FlowPath.LOG_DIR);
 		dir.mkdir();
-		this.filePath = dir.getAbsolutePath() + "/" + fileName;
+		this.filePath = dir.getAbsolutePath() + "/"  + fileName; // "/sdcard/external_sd/"
 	}
 
 	/**

@@ -42,9 +42,7 @@ public class H263Parser {
 	boolean parseBs = false; // parse Block layer
 	
 	boolean blocking = false;
-	
-//	boolean tcoef_alive = true; // TODO: is this a good idea? (it doesn't work) <- naughty boy, this was wrong!
-	
+		
 	private boolean breakOnBitErrors = true;
 	private boolean noGSCMode = true;
 	
@@ -196,10 +194,10 @@ public class H263Parser {
 				p.hAlternativeINTERVLC = b(hOPPTYPE_footer, 5);
 				p.hModifiedQuantization = b(hOPPTYPE_footer, 4);
 
-				DebugOut.debug_vvv("##### Last four bits are correct ( = 1000)  "
-						+ (b(hOPPTYPE_footer, 3) && !b(hOPPTYPE_footer, 2)
-								&& !b(hOPPTYPE_footer, 1) && !b(
-									hOPPTYPE_footer, 0)));
+//				DebugOut.debug_vvv("##### Last four bits are correct ( = 1000)  "
+//						+ (b(hOPPTYPE_footer, 3) && !b(hOPPTYPE_footer, 2)
+//								&& !b(hOPPTYPE_footer, 1) && !b(
+//									hOPPTYPE_footer, 0)));
 
 				if (!((b(hOPPTYPE_footer, 3) && !b(hOPPTYPE_footer, 2)
 						&& !b(hOPPTYPE_footer, 1) && !b(hOPPTYPE_footer, 0)))) {
@@ -221,37 +219,37 @@ public class H263Parser {
 
 			switch (hMPPTYPE_header) {
 			case 0:
-				DebugOut.debug_vv("Picture Type Code I-picture (INTRA)");
+//				DebugOut.debug_vv("Picture Type Code I-picture (INTRA)");
 				numIframes++;
 				p.hPictureCodingType = H263PCT.INTRA;
 				break;
 			case 1:
-				DebugOut.debug_vv("Picture Type Code P-picture (INTER) /!\\");
+//				DebugOut.debug_vv("Picture Type Code P-picture (INTER) /!\\");
 				numPframes++;
 				p.hPictureCodingType = H263PCT.INTER;
 				break;
 			case 2:
-				DebugOut.debug_vv("Picture Type Code Improved PB-frame");
+//				DebugOut.debug_vv("Picture Type Code Improved PB-frame");
 				p.hPictureCodingType = H263PCT.ImprovedPBFrame;
 				break;
 			case 3:
-				DebugOut.debug_vv("Picture Type Code B-picture");
+//				DebugOut.debug_vv("Picture Type Code B-picture");
 				p.hPictureCodingType = H263PCT.BPicture;
 				break;
 			case 4:
-				DebugOut.debug_vv("Picture Type Code EI-picture");
+//				DebugOut.debug_vv("Picture Type Code EI-picture");
 				p.hPictureCodingType = H263PCT.EIPicture;
 				break;
 			case 5:
-				DebugOut.debug_vv("Picture Type Code EP-picture");
+//				DebugOut.debug_vv("Picture Type Code EP-picture");
 				p.hPictureCodingType = H263PCT.EPPicture;
 				break;
 			case 6:
-				DebugOut.debug_vv("Picture Type Code Reserved");
+//				DebugOut.debug_vv("Picture Type Code Reserved");
 				p.hPictureCodingType = H263PCT.Reserved;
 				break;
 			case 7:
-				DebugOut.debug_vv("Picture Type Code Reserved");
+//				DebugOut.debug_vv("Picture Type Code Reserved");
 				p.hPictureCodingType = H263PCT.Reserved;
 				break;
 			}
@@ -261,25 +259,25 @@ public class H263Parser {
 			p.hReducedResolutionUpdate = b(hMPPTYPE_footer, 4);
 			p.hRoundingType = b(hMPPTYPE_footer, 3);
 
-			DebugOut.debug_vvv("Reference Picture Resampling mode "
-					+ p.hReferencePictureResampling);
-			DebugOut.debug_vvv("Reduced-Resolution Update mode "
-					+ p.hReducedResolutionUpdate);
-			DebugOut.debug_vvv("Rounding Type " + p.hRoundingType);
-
-			DebugOut.debug_vvv("##### Last three bits are correct (= 001) "
-					+ (!b(hMPPTYPE_footer, 2) && !b(hMPPTYPE_footer, 1) && b(
-							hMPPTYPE_footer, 0)));
+//			DebugOut.debug_vvv("Reference Picture Resampling mode "
+//					+ p.hReferencePictureResampling);
+//			DebugOut.debug_vvv("Reduced-Resolution Update mode "
+//					+ p.hReducedResolutionUpdate);
+//			DebugOut.debug_vvv("Rounding Type " + p.hRoundingType);
+//
+//			DebugOut.debug_vvv("##### Last three bits are correct (= 001) "
+//					+ (!b(hMPPTYPE_footer, 2) && !b(hMPPTYPE_footer, 1) && b(
+//							hMPPTYPE_footer, 0)));
 
 			if (!(!b(hMPPTYPE_footer, 2) && !b(hMPPTYPE_footer, 1) && b(
 					hMPPTYPE_footer, 0))) {
-				DebugOut.debug_vv("ÖRKS");
+//				DebugOut.debug_vv("ÖRKS");
 				if (breakOnBitErrors)
 					return null;
 			}
 
 		} else {
-			DebugOut.debug_vvv("Not Detected PlusPTYPE");
+//			DebugOut.debug_vvv("Not Detected PlusPTYPE");
 			// read bits 9 - 13
 			int hPTYPE_noPLUSPTYPE = readBits(5);
 
@@ -290,16 +288,16 @@ public class H263Parser {
 			p.hAdvancedPrediction = b(hPTYPE_noPLUSPTYPE, 1);
 			p.hPBFrames = b(hPTYPE_noPLUSPTYPE, 0);
 
-			DebugOut.debug_vvv("## Picture Type Code: "
-					+ (b(hPTYPE_noPLUSPTYPE, 4) ? "P-picture (INTER)"
-							: "I-picture (INTRA)"));
-			DebugOut.debug_vvv("# Unrestricted Motion Vector Mode "
-					+ p.hUnrestrictedMotionVector);
-			DebugOut.debug_vvv("# Syntax-based Arithmetic Coding "
-					+ p.hSyntaxArithmeticCoding);
-			DebugOut.debug_vvv("# Advanced Prediction mode "
-					+ p.hAdvancedPrediction);
-			DebugOut.debug_vvv("# PB-frames mode " + p.hPBFrames);
+//			DebugOut.debug_vvv("## Picture Type Code: "
+//					+ (b(hPTYPE_noPLUSPTYPE, 4) ? "P-picture (INTER)"
+//							: "I-picture (INTRA)"));
+//			DebugOut.debug_vvv("# Unrestricted Motion Vector Mode "
+//					+ p.hUnrestrictedMotionVector);
+//			DebugOut.debug_vvv("# Syntax-based Arithmetic Coding "
+//					+ p.hSyntaxArithmeticCoding);
+//			DebugOut.debug_vvv("# Advanced Prediction mode "
+//					+ p.hAdvancedPrediction);
+//			DebugOut.debug_vvv("# PB-frames mode " + p.hPBFrames);
 		} // check if PLUSTYPE is present
 
 		// TODO: DO WE NEE ANY FURTHER FIELDS FROM THIS LAYER? YES!!!
@@ -308,7 +306,7 @@ public class H263Parser {
 		if (p.hExtendedPTYPE) {
 			// "If PLUSPTYPE is present, then CPM follows immediately after
 			// PLUSPTYPE in the picture header."
-			DebugOut.debug_vv("READING CPM AT FIRST LOCATION");
+//			DebugOut.debug_vv("READING CPM AT FIRST LOCATION");
 			p.hCPM = readBits(1) == 1;
 			if (p.hCPM) {
 				// "PSBI always follows immediately after CPM (if CPM = "1")"
@@ -343,7 +341,7 @@ public class H263Parser {
 			// Number of pixels per line = (PWI + 1) * 4
 			p.hCPFMTPictureWidthIndication = readBits(9);
 			int mustBeOne = readBits(1); // prevent start code emulation
-			DebugOut.debug_vvv("Must be True: " + (mustBeOne == 1));
+//			DebugOut.debug_vvv("Must be True: " + (mustBeOne == 1));
 
 			if (!(mustBeOne == 1)) {
 				return null;
@@ -476,7 +474,7 @@ public class H263Parser {
 					p.hBackChannelMessageIndication = 2;
 				} else {
 					// Houston we have a problem.
-					DebugOut.debug_vv("Houston we have a problem.");
+//					DebugOut.debug_vv("Houston we have a problem.");
 				}
 			} else {
 				// When set to "1", this signals the presence of the following
@@ -489,7 +487,7 @@ public class H263Parser {
 		if (p.hBackChannelMessageIndication == 1) {
 			// TODO: READ BCM
 			// Let's hope this is not present
-			DebugOut.debug_vv("mega shit crap (hBackChannelMessageIndication)");
+//			DebugOut.debug_vv("mega shit crap (hBackChannelMessageIndication)");
 		}
 
 		if (p.hReferencePictureResampling) {
@@ -497,7 +495,7 @@ public class H263Parser {
 			// Reference Picture Resampling mode bit is set in PLUSPTYPE.
 
 			// Let's hope this is not present
-			DebugOut.debug_vv("mega shit crap (hReferencePictureResampling)");
+//			DebugOut.debug_vv("mega shit crap (hReferencePictureResampling)");
 		}
 
 		p.hQuantizerInformation = readBits(5);
@@ -505,7 +503,7 @@ public class H263Parser {
 		if (!p.hExtendedPTYPE) {
 			// [...] but follows PQUANT in the picture header if PLUSPTYPE is
 			// not present.
-			DebugOut.debug_vv("READING CPM!!!!!!");
+//			DebugOut.debug_vv("READING CPM!!!!!!");
 			p.hCPM = readBits(1) == 1;
 			if (p.hCPM) {
 				// "PSBI always follows immediately after CPM (if CPM = "1")"
@@ -541,7 +539,7 @@ public class H263Parser {
 		p.hExtraInsertionInformation = readBits(1) == 1;
 
 		if (p.hExtraInsertionInformation) {
-			DebugOut.debug_vv("Extra Insertion Information not supported");
+//			DebugOut.debug_vv("Extra Insertion Information not supported");
 			// A codeword of variable length consisting of less than 8
 			// zero-bits. Encoders may insert this codeword directly before an
 			// EOS codeword. Encoders shall insert this codeword as necessary to
@@ -558,34 +556,34 @@ public class H263Parser {
 		
 		// OUTPUT CRAP FROM ABOVE:
 
-		DebugOut.debug_vvv("Temporal Reference = " + p.hTemporalReference);
-
-		DebugOut.debug_vvv("Split Screen mode " + p.hSplitScreen);
-		DebugOut.debug_vvv("Document Camera mode  " + p.hDocumentCamera);
-		DebugOut.debug_vvv("Full Picture Freeze mode "
-				+ p.hFullPictureFreezeRelease);
-
-		DebugOut.debug_vvv("Custom PCF " + p.hCustomPCF);
-		DebugOut.debug_vvv("# Unrestricted Motion Vector mode "
-				+ p.hUnrestrictedMotionVector);
-		DebugOut.debug_vvv("# Syntax-based Arithmetic Coding mode "
-				+ p.hSyntaxArithmeticCoding);
-		DebugOut.debug_vvv("# Advanced Prediction mode " + p.hAdvancedPrediction);
-		DebugOut.debug_vvv("# Advanced INTRA Coding mode " + p.hAdvanceINTRACoding);
-		DebugOut.debug_vvv("Deblocking Filter mode " + p.hDeblockingFilter);
-		DebugOut.debug_vvv("Slice Structured mode " + p.hSliceStructured);
-		DebugOut.debug_vvv("Reference Picture Selection mode "
-				+ p.hReferencePicureSelection);
-		DebugOut.debug_vvv("Independent Segment Decoding mode "
-				+ p.hIndependentSegmentDecoding);
-		DebugOut.debug_vvv("Alternative INTER VLC mode " + p.hAlternativeINTERVLC);
-		DebugOut.debug_vvv("Modified Quantization mode " + p.hModifiedQuantization);
+//		DebugOut.debug_vvv("Temporal Reference = " + p.hTemporalReference);
+//
+//		DebugOut.debug_vvv("Split Screen mode " + p.hSplitScreen);
+//		DebugOut.debug_vvv("Document Camera mode  " + p.hDocumentCamera);
+//		DebugOut.debug_vvv("Full Picture Freeze mode "
+//				+ p.hFullPictureFreezeRelease);
+//
+//		DebugOut.debug_vvv("Custom PCF " + p.hCustomPCF);
+//		DebugOut.debug_vvv("# Unrestricted Motion Vector mode "
+//				+ p.hUnrestrictedMotionVector);
+//		DebugOut.debug_vvv("# Syntax-based Arithmetic Coding mode "
+//				+ p.hSyntaxArithmeticCoding);
+//		DebugOut.debug_vvv("# Advanced Prediction mode " + p.hAdvancedPrediction);
+//		DebugOut.debug_vvv("# Advanced INTRA Coding mode " + p.hAdvanceINTRACoding);
+//		DebugOut.debug_vvv("Deblocking Filter mode " + p.hDeblockingFilter);
+//		DebugOut.debug_vvv("Slice Structured mode " + p.hSliceStructured);
+//		DebugOut.debug_vvv("Reference Picture Selection mode "
+//				+ p.hReferencePicureSelection);
+//		DebugOut.debug_vvv("Independent Segment Decoding mode "
+//				+ p.hIndependentSegmentDecoding);
+//		DebugOut.debug_vvv("Alternative INTER VLC mode " + p.hAlternativeINTERVLC);
+//		DebugOut.debug_vvv("Modified Quantization mode " + p.hModifiedQuantization);
 
 		if (p.hSourceFormat == 6) {
 			width = (p.hCPFMTPictureWidthIndication + 1) * 4;
 			height = (p.hCPFMTPictureHeightIndication * 4);
 
-			DebugOut.debug_vv("Picutre dimensions: " + width + "x" + height);
+//			DebugOut.debug_vv("Picutre dimensions: " + width + "x" + height);
 		}
 		
 		// only decode P frames (INTER). I Frames have no MVD!
@@ -596,7 +594,7 @@ public class H263Parser {
 				blockHeight = (height+15)/16;
 				int numOfMBs = (blockWidth * blockHeight);
 				
-				DebugOut.debug_vv("Decoding " + numOfMBs  + " macroblocks");
+//				DebugOut.debug_vv("Decoding " + numOfMBs  + " macroblocks");
 				// set up some space for mvds
 				// vertical + horizontal
 				// [2] because of value and predictor
@@ -612,14 +610,14 @@ public class H263Parser {
 				decodeGOBS(p);
 			}
 		} else {
-			DebugOut.debug_vv("Deeper parsing disabled or not P-Frame");
+//			DebugOut.debug_vv("Deeper parsing disabled or not P-Frame");
 		}
 		
 		pictureBoxCount++;
-		DebugOut.debug_vv("Picture count: " + pictureBoxCount);
-		DebugOut.debug_vvv("GOB count: " + groupOfBlocksCount);
+//		DebugOut.debug_vv("Picture count: " + pictureBoxCount);
+//		DebugOut.debug_vvv("GOB count: " + groupOfBlocksCount);
 		// DebugOut.debug_v("Macroblock count (TODO): " + macroBlockCount);
-		DebugOut.debug_v("########################################");
+//		DebugOut.debug_v("########################################");
 		
 		if (p.hMVDs != null){
 			
@@ -700,7 +698,7 @@ public class H263Parser {
 				}
 //				DebugOut.debug_v(buf);
 			}
-			DebugOut.debug_v("########################################");
+//			DebugOut.debug_v("########################################");
 			return mvs;
 		} else {
 			return null;
@@ -750,7 +748,7 @@ public class H263Parser {
 			k = 4;
 		}
 		
-		DebugOut.debug_vv("gobs per picture: " + (height / 16) / k);
+//		DebugOut.debug_vv("gobs per picture: " + (height / 16) / k);
 
 		// note: Group Number between 0 and (480/16)/k
 
@@ -810,9 +808,9 @@ public class H263Parser {
 
 		
 		if (hMCOD) {
-			DebugOut.debug_vv("("
-					+ x + "/" + y
-					+ ") INTER macroblock /!\\ MVDS in this macroblock are all zero");
+//			DebugOut.debug_vv("("
+//					+ x + "/" + y
+//					+ ") INTER macroblock /!\\ MVDS in this macroblock are all zero");
 			
 			double[] empty = {0,0};
 			p.hMVDs[x][y][0] = empty;
@@ -841,20 +839,20 @@ public class H263Parser {
 						
 		} else {
 			// coded macroblock
-			DebugOut.debug_vv("(" + x + "/" + y + ") Coded macroblock @ " + fisPtr + "/" + bitPtr);
+//			DebugOut.debug_vv("(" + x + "/" + y + ") Coded macroblock @ " + fisPtr + "/" + bitPtr);
 
 			// only decode normal pictures
 
 			// TODO: parse MCBPC (always present, variable length)
 			// use Table 8
 			int hmMCBPC[] = readMCBPC4PFrames();
-			DebugOut.debug_vv("(" + x + "/" + y + ") Read MCBPC @ " + fisPtr + "/" + bitPtr);
+//			DebugOut.debug_vv("(" + x + "/" + y + ") Read MCBPC @ " + fisPtr + "/" + bitPtr);
 
 			if(hmMCBPC!=null){
-				DebugOut.debug_vv("Macroblock type " + hmMCBPC[0] + " CBPC_0 = " + hmMCBPC[1] + " CBPC_1 = " + hmMCBPC[2]);
+//				DebugOut.debug_vv("Macroblock type " + hmMCBPC[0] + " CBPC_0 = " + hmMCBPC[1] + " CBPC_1 = " + hmMCBPC[2]);
 			
 			} else {
-				DebugOut.debug_vv("MCBPC decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\");
+//				DebugOut.debug_vv("MCBPC decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\");
 			}
 			
 			// TODO: parse CBPY present if MCBPC is not stuffing
@@ -863,25 +861,25 @@ public class H263Parser {
 			int[] hmCBPY = null;
 			if (hmMCBPC != null && hmMCBPC[0] != -1){ // stuffing check
 				hmCBPY = readCBPY();
-				DebugOut.debug_vv("(" + x + "/" + y + ")  Read CBPY @ " + fisPtr + "/" + bitPtr);
+//				DebugOut.debug_vv("(" + x + "/" + y + ")  Read CBPY @ " + fisPtr + "/" + bitPtr);
 				if (hmCBPY != null){
-					DebugOut.debug_vv("CBPY says CBPY_0 = " + hmCBPY[0] + " CBPY_1 = " + hmCBPY[1] + 
-							" CBPY_2 = " + hmCBPY[2] + " CBPY_3 = " + hmCBPY[3]);
+//					DebugOut.debug_vv("CBPY says CBPY_0 = " + hmCBPY[0] + " CBPY_1 = " + hmCBPY[1] + 
+//							" CBPY_2 = " + hmCBPY[2] + " CBPY_3 = " + hmCBPY[3]);
 				} else {
-					DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ CBPY decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! ");
+//					DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ CBPY decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! ");
 				}
 			} else {
 				// TODO: there might be stuffing
-				DebugOut.debug_vv("MCBPC decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! /!!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\");
+//				DebugOut.debug_vv("MCBPC decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! /!!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\");
 			}
 
 			if (!p.hModifiedQuantization && (hmMCBPC[0] == 1 ||hmMCBPC[0] == 4 || hmMCBPC[0] == 5)) {
 				// TODO: parse DQUANT (2bits)
-				DebugOut.debug_vv("Reading hMDQUANT");
+//				DebugOut.debug_vv("Reading hMDQUANT");
 				int hMDQUANT = readBits(2);
 			} else if (p.hModifiedQuantization) {
 				// TODO: THIS MIGHT BE WRONG.
-				DebugOut.debug_vv("FUUUUUUUUUUUUUUUUUU (ModifiedQuantization)");
+//				DebugOut.debug_vv("FUUUUUUUUUUUUUUUUUU (ModifiedQuantization)");
 			}
 
 			// TODO: parse MVD (two Variable Length Codes (VLC)
@@ -891,14 +889,14 @@ public class H263Parser {
 					// horizontal component followed by vertical component
 					double[] mvdHorizontal = readMVDComponent();
 					if (mvdHorizontal == null){
-						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ horiz. MVD  component failed!");
+//						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ horiz. MVD  component failed!");
 					} 
 					double[] mvdVertical = readMVDComponent();
 					if (mvdVertical == null){
-						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ vert. MVD  component failed!");
+//						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ vert. MVD  component failed!");
 					}
 					if (mvdHorizontal!=null && mvdVertical!=null){
-						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ MVD Components: " + mvdHorizontal[0] + "/" + mvdHorizontal[1] + " " + mvdVertical[0] + "/" + mvdVertical[1]);
+//						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ MVD Components: " + mvdHorizontal[0] + "/" + mvdHorizontal[1] + " " + mvdVertical[0] + "/" + mvdVertical[1]);
 						
 						p.hMVDs[x][y][0] = mvdHorizontal;
 						p.hMVDs[x][y][1] = mvdVertical;
@@ -910,7 +908,7 @@ public class H263Parser {
 					
 					if (hmMCBPC[0] == 2 || hmMCBPC[0] == 5){
 						// we have MVD_(2-4) as indicated by MCBPC block types 2 and 5 from table 9
-						DebugOut.debug_vv("Reading further MVDs");
+//						DebugOut.debug_vv("Reading further MVDs");
 						double[] mvdHorizontal2 = readMVDComponent();
 						double[] mvdVertical2 = readMVDComponent();
 						double[] mvdHorizontal3 = readMVDComponent();
@@ -920,16 +918,16 @@ public class H263Parser {
 					}
 				} else {
 					// read MVD component (x2) from Table D.3
-					DebugOut.debug_vv("FUUUUUUUUUUUUUUUUUU (UnrestrictedMotionVector)");
+//					DebugOut.debug_vv("FUUUUUUUUUUUUUUUUUU (UnrestrictedMotionVector)");
 				}
 			} else if(hmMCBPC[0] == 3) {
-				DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ No MVD data, MB type" + hmMCBPC[0]);
+//				DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ No MVD data, MB type" + hmMCBPC[0]);
 				double[] empty = {0,0};
 				p.hMVDs[x][y][0] = empty;
 				p.hMVDs[x][y][1] = empty;
 				
 			} else {
-				DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ MB decoding failed (unimplemented)" + hmMCBPC[0]);
+//				DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ MB decoding failed (unimplemented)" + hmMCBPC[0]);
 			}
 			
 			// TODO: Read 6 blocks
@@ -975,7 +973,7 @@ public class H263Parser {
 		if (intradc) {
 			// read INTRADC
 			int hmINTRADC = readBits(8);
-			DebugOut.debug_vv("[block] hmINTRADC read (" + hmINTRADC +")");
+//			DebugOut.debug_vv("[block] hmINTRADC read (" + hmINTRADC +")");
 		}
 		
 		
@@ -988,14 +986,14 @@ public class H263Parser {
 				//  [block] 1, level 1, last 1
 //				DebugOut.debug_vvv("ret=" + (ret == null));
 				if (ret != null) {
-					DebugOut.debug_vv("[block] " + ret[1] + ", level " + ret[2] +", last " + ret[0]);
-					DebugOut.debug_vvv("ret[0]=" + ret[0]);
+//					DebugOut.debug_vv("[block] " + ret[1] + ", level " + ret[2] +", last " + ret[0]);
+//					DebugOut.debug_vvv("ret[0]=" + ret[0]);
 					if (ret[0] == 1) {
 						tcoef_alive = false;
-						DebugOut.debug_vv("[block] stop");
+//						DebugOut.debug_vv("[block] stop");
 					}
 				} else {
-					DebugOut.debug_vv("[block] failed");
+//					DebugOut.debug_vv("[block] failed");
 				}
 			}
 		}
@@ -1038,8 +1036,8 @@ public class H263Parser {
 //					+ " = " + Integer.toHexString(tmp));
 
 			if (bitCount >= 22 && tmp == 0x20) {
-				DebugOut.debug_vvv("found Picture Start Code @ " + fisPtr + " bit "
-						+ bitPtr);
+//				DebugOut.debug_vvv("found Picture Start Code @ " + fisPtr + " bit "
+//						+ bitPtr);
 				return;
 			}
 		}

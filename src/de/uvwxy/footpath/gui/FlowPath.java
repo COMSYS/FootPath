@@ -413,6 +413,8 @@ public class FlowPath extends Activity {
 //			// Audio/Video (stop capture)
 			avwCapture.stopCapture();
 			avwCapture.unregisterCapture();
+			File f = new File(avwCapture.getFilePath());
+			f.delete();
 //
 //			// Request steps count
 //			AlertDialog.Builder alert = new AlertDialog.Builder(this);
