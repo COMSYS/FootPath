@@ -101,6 +101,17 @@ public class H263Parser {
 		checkForPictureStartCode();
 	}
 
+	
+	// used for MV calculation:
+	double[] empty = { 0.0, 0.0 };
+	double[] mvA, mvB, mvC;
+	double predictorX;
+	double predictorY;
+	double[] horizDiffs;
+	double[] vertDiffs;
+	double tempX;
+	double tempY;
+	
 	private double[][][] decodePicture() throws IOException, EOSException {
 		long timeMillis = System.currentTimeMillis();
 		H263PictureLayer p = new H263PictureLayer();
@@ -586,22 +597,75 @@ public class H263Parser {
 //			DebugOut.debug_vv("Picutre dimensions: " + width + "x" + height);
 		}
 		
+		
+		double[][][] mvs = null;
 		// only decode P frames (INTER). I Frames have no MVD!
 		if (parseGOBs && p.hPictureCodingType == H263PCT.INTER){
 			if(noGSCMode ){
 				// directly parse all macro blocks
 				blockWidth = (width+15)/16;
 				blockHeight = (height+15)/16;
-				int numOfMBs = (blockWidth * blockHeight);
 				
 //				DebugOut.debug_vv("Decoding " + numOfMBs  + " macroblocks");
 				// set up some space for mvds
 				// vertical + horizontal
 				// [2] because of value and predictor
 				p.hMVDs = new double[blockWidth][blockHeight][2][2];
+				mvs = new double[blockWidth][blockHeight][2];
 				for (int y = 0; y < blockHeight; y++) {
 					for (int x = 0; x < blockWidth; x++){
 						decodeMacroBlock(p, x,y);
+						if (p.hMVDs != null){
+							// calculate MV
+							// setting up candidates
+							//     | B | C |
+							//   ----------
+							//   A | X |   |
+							// 
+							if (x == 0) {
+								// fix left side of screen
+								mvA = empty;
+							} else {
+								mvA = mvs[x - 1][y];
+							}
+							if (y == 0) {
+								// fix top side of screen
+								mvB = mvA;
+								mvC = mvA;
+							} else {
+								mvB = mvs[x][y - 1];
+								// fix mvC on right side of screen
+								if (x < blockWidth - 1) {
+									mvC = mvs[x + 1][y - 1];
+								} else {
+									mvC = empty;
+								}
+							}
+	
+							predictorX = mvMedian(false, mvA, mvB, mvC);
+							predictorY = mvMedian(true, mvA, mvB, mvC);
+							horizDiffs = p.hMVDs[x][y][0];
+							vertDiffs = p.hMVDs[x][y][1];
+	
+							tempX = horizDiffs[0] + predictorX;
+	
+							// [-16,15.5] range!
+							if (tempX >= -16.0 && tempX <= 15.5) {
+								// tada
+							} else {
+								tempX = horizDiffs[1] + predictorX;
+							}
+	
+							tempY = vertDiffs[0] + predictorY;
+							if (tempY >= -16.0 && tempY <= 15.5) {
+								// tada
+							} else {
+								tempY = vertDiffs[1] + predictorY;
+							}
+	
+							double[] mv = { tempX, tempY };
+							mvs[x][y] = mv;
+						}
 					}
 					
 				}
@@ -618,98 +682,22 @@ public class H263Parser {
 //		DebugOut.debug_vvv("GOB count: " + groupOfBlocksCount);
 		// DebugOut.debug_v("Macroblock count (TODO): " + macroBlockCount);
 //		DebugOut.debug_v("########################################");
-		
-		if (p.hMVDs != null){
-			
-			//     | B | C |
-			//   ----------
-			//   A | X |   |
-			// 
-			
-			double[][][] mvs = new double[blockWidth][blockHeight][2];
-			double[] empty = { 0.0, 0.0 };
-			double[] mvA, mvB, mvC;
-			double predictorX;
-			double predictorY;
-			double[] horizDiffs;
-			double[] vertDiffs;
-			double tempX;
-			double tempY;
-			for (int y = 0; y < blockHeight; y++) {
-				String buf = "";
-				for (int x = 0; x < blockWidth; x++) {
-
-					// setting up candidates
-
-					if (x == 0) {
-						// fix left side of screen
-						mvA = empty;
-					} else {
-						mvA = mvs[x - 1][y];
-					}
-					if (y == 0) {
-						// fix top side of screen
-						mvB = mvA;
-						mvC = mvA;
-					} else {
-						mvB = mvs[x][y - 1];
-						// fix mvC on right side of screen
-						if (x < blockWidth - 1) {
-							mvC = mvs[x + 1][y - 1];
-						} else {
-							mvC = empty;
-						}
-					}
-
-					predictorX = mvMedian(false, mvA, mvB, mvC);
-					predictorY = mvMedian(true, mvA, mvB, mvC);
-					horizDiffs = p.hMVDs[x][y][0];
-					vertDiffs = p.hMVDs[x][y][1];
-
-					tempX = horizDiffs[0] + predictorX;
-
-					// [-16,15.5] range!
-					if (tempX >= -16.0 && tempX <= 15.5) {
-						// tada
-					} else {
-						tempX = horizDiffs[1] + predictorX;
-					}
-
-					tempY = vertDiffs[0] + predictorY;
-					if (tempY >= -16.0 && tempY <= 15.5) {
-						// tada
-					} else {
-						tempY = vertDiffs[1] + predictorY;
-					}
-
-					double[] mv = { tempX, tempY };
-					mvs[x][y] = mv;
-
-					// print MVs:
-//					if (x == 0) {
-//						buf += "" + mv[0] + "/" + mv[1];
-//					} else {
-//						buf += ", " + mv[0] + "/" + mv[1];
-//					}
-					// print differences, deprecated
-					// buf += ", " + p.hMVDs[x][y][0][0] + "/" +
-					// p.hMVDs[x][y][0][1] +
-					// "|" + p.hMVDs[x][y][1][0] +"/" + p.hMVDs[x][y][1][1];
-				}
-//				DebugOut.debug_v(buf);
-			}
-//			DebugOut.debug_v("########################################");
+		if (p.hMVDs!=null){
 			return mvs;
 		} else {
 			return null;
 		}
 	}
 	
+	
+	private double a;
+	private double b;
+	private double c;
+	private double temp[] = new double[3];
+	
 	private double mvMedian(boolean vertical, double[] mvA, double[] mvB,
 			double[] mvC) {
-		double a;
-		double b;
-		double c;
+		
 		if (vertical) {
 			// return vertical component [1]
 			a = mvA[1];
@@ -722,10 +710,10 @@ public class H263Parser {
 			c = mvC[0];
 		}
 		
-		double[] temp = {a,b,c};
-		
+		temp[0] = a;
+		temp[1] = b;
+		temp[2] = c;
 		Arrays.sort(temp);
-		
 		return temp[1];
 	}
 	
