@@ -2667,10 +2667,13 @@ public class H263Parser {
 		return b;
 	}
 	
+	int oldFramesNum = 0;
 	public String getStats(){
-		return "I Frames: " + numIframes + ", P Frames: " + numPframes +
+		String t = "I Frames: " + numIframes + ", P Frames: " + numPframes + "(+" + (numPframes-oldFramesNum) +")" +
 				"\nGOBs: " + groupOfBlocksCount + ", MBs: " + macroBlockCount +
 				"\nSize: " + width + "x" + height;
+		oldFramesNum = numPframes;
+		return t;
 	}
 	
 	// #########################################################################
