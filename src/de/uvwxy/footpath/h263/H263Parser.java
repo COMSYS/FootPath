@@ -805,14 +805,18 @@ public class H263Parser {
 	
 	private void decodeMacroBlock(H263PictureLayer p, int x, int y) throws IOException{
 		boolean hMCOD = readBits(1) == 1; // false = coded
-
+		double[] empty = {0,0};
+		int hmMCBPC[];
+		int hmCBPY[];
+		int hMDQUANT;
+		double mvdHorizontal[];
+		double mvdVertical[];
 		
 		if (hMCOD) {
 //			DebugOut.debug_vv("("
 //					+ x + "/" + y
 //					+ ") INTER macroblock /!\\ MVDS in this macroblock are all zero");
 			
-			double[] empty = {0,0};
 			p.hMVDs[x][y][0] = empty;
 			p.hMVDs[x][y][1] = empty;
 			
@@ -845,7 +849,7 @@ public class H263Parser {
 
 			// TODO: parse MCBPC (always present, variable length)
 			// use Table 8
-			int hmMCBPC[] = readMCBPC4PFrames();
+			hmMCBPC = readMCBPC4PFrames();
 //			DebugOut.debug_vv("(" + x + "/" + y + ") Read MCBPC @ " + fisPtr + "/" + bitPtr);
 
 			if(hmMCBPC!=null){
@@ -858,7 +862,7 @@ public class H263Parser {
 			// TODO: parse CBPY present if MCBPC is not stuffing
 			// Coded Block Pattern for luminance (CBPY) (Variable
 			// length)
-			int[] hmCBPY = null;
+			hmCBPY = null;
 			if (hmMCBPC != null && hmMCBPC[0] != -1){ // stuffing check
 				hmCBPY = readCBPY();
 //				DebugOut.debug_vv("(" + x + "/" + y + ")  Read CBPY @ " + fisPtr + "/" + bitPtr);
@@ -876,7 +880,7 @@ public class H263Parser {
 			if (!p.hModifiedQuantization && (hmMCBPC[0] == 1 ||hmMCBPC[0] == 4 || hmMCBPC[0] == 5)) {
 				// TODO: parse DQUANT (2bits)
 //				DebugOut.debug_vv("Reading hMDQUANT");
-				int hMDQUANT = readBits(2);
+				hMDQUANT = readBits(2);
 			} else if (p.hModifiedQuantization) {
 				// TODO: THIS MIGHT BE WRONG.
 //				DebugOut.debug_vv("FUUUUUUUUUUUUUUUUUU (ModifiedQuantization)");
@@ -887,11 +891,11 @@ public class H263Parser {
 			if (hmMCBPC[0] != 3 && hmMCBPC[0] != 4 && hmMCBPC[0] != -1){
 				if (!p.hUnrestrictedMotionVector) {
 					// horizontal component followed by vertical component
-					double[] mvdHorizontal = readMVDComponent();
+					mvdHorizontal = readMVDComponent();
 					if (mvdHorizontal == null){
 //						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ horiz. MVD  component failed!");
 					} 
-					double[] mvdVertical = readMVDComponent();
+					mvdVertical = readMVDComponent();
 					if (mvdVertical == null){
 //						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ vert. MVD  component failed!");
 					}
@@ -901,7 +905,7 @@ public class H263Parser {
 						p.hMVDs[x][y][0] = mvdHorizontal;
 						p.hMVDs[x][y][1] = mvdVertical;
 					} else {
-						double[] empty = {0,0};
+						
 						p.hMVDs[x][y][0] = empty;
 						p.hMVDs[x][y][1] = empty;
 					}
@@ -922,7 +926,6 @@ public class H263Parser {
 				}
 			} else if(hmMCBPC[0] == 3) {
 //				DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ No MVD data, MB type" + hmMCBPC[0]);
-				double[] empty = {0,0};
 				p.hMVDs[x][y][0] = empty;
 				p.hMVDs[x][y][1] = empty;
 				
@@ -941,29 +944,50 @@ public class H263Parser {
 			
 			// TCOEF is present if indicated by MCBPC or CBPY
 			
-			
-			// LUMINANCE 0 BLOCK
-//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[0] == 1);
-			decodeBlockLayer(bINTRADC, (hmMCBPC[0] == 3) ? !(hmCBPY!=null && hmCBPY[0] == 1) : (hmCBPY!=null && hmCBPY[0] == 1));
+			if (hmCBPY!=null){
 				
-			// LUMINANCE 1 BLOCK			
-//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[1] == 1);
-			decodeBlockLayer(bINTRADC, (hmMCBPC[0] == 3) ? !(hmCBPY!=null && hmCBPY[1] == 1) : (hmCBPY!=null && hmCBPY[1] == 1));
-
-			// LUMINANCE 2 BLOCK
-//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[2] == 1);
-			decodeBlockLayer(bINTRADC, (hmMCBPC[0] == 3) ? !(hmCBPY!=null && hmCBPY[2] == 1) : (hmCBPY!=null && hmCBPY[2] == 1));
-
-			// LUMINANCE 3 BLOCK
-//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[3] == 1);
-			decodeBlockLayer(bINTRADC, (hmMCBPC[0] == 3) ? !(hmCBPY!=null && hmCBPY[3] == 1) : (hmCBPY!=null && hmCBPY[3] == 1));
+				if(hmMCBPC[0] == 3){
+					// LUMINANCE 0 BLOCK
+		//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[0] == 1);
+					decodeBlockLayer(bINTRADC, !(hmCBPY[0] == 1));
+						
+					// LUMINANCE 1 BLOCK			
+		//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[1] == 1);
+					decodeBlockLayer(bINTRADC, !(hmCBPY[1] == 1));
+		
+					// LUMINANCE 2 BLOCK
+		//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[2] == 1);
+					decodeBlockLayer(bINTRADC, !(hmCBPY[2] == 1));
+		
+					// LUMINANCE 3 BLOCK
+		//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[3] == 1);
+					decodeBlockLayer(bINTRADC, !(hmCBPY[3] == 1));
+				} else {
+		// LUMINANCE 0 BLOCK
+		//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[0] == 1);
+					decodeBlockLayer(bINTRADC, (hmCBPY[0] == 1));
+						
+					// LUMINANCE 1 BLOCK			
+		//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[1] == 1);
+					decodeBlockLayer(bINTRADC, (hmCBPY[1] == 1));
+		
+					// LUMINANCE 2 BLOCK
+		//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[2] == 1);
+					decodeBlockLayer(bINTRADC, (hmCBPY[2] == 1));
+		
+					// LUMINANCE 3 BLOCK
+		//			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmCBPY[3] == 1);
+					decodeBlockLayer(bINTRADC, (hmCBPY[3] == 1));
+				}
+			}
 			
+			if (hmCBPY!=null){
 			// COLOR DIFF 0 BLOCK
-			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmMCBPC[1] == 1);
+			decodeBlockLayer(bINTRADC, hmMCBPC[1] == 1);
 			
 			// COLOR DIFF 1 BLOCK
-			decodeBlockLayer(bINTRADC, hmCBPY!=null && hmMCBPC[2] == 1);
-			
+			decodeBlockLayer(bINTRADC, hmMCBPC[2] == 1);
+			}
 		} // else if (hMCOD)
 	}
 
