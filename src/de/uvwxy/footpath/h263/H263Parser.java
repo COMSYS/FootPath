@@ -2,6 +2,7 @@ package de.uvwxy.footpath.h263;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Warning: this is highly unstable and undocumented code ;)
@@ -640,16 +641,19 @@ public class H263Parser {
 					// setting up candidates
 
 					if (x == 0) {
+						// fix left side of screen
 						mvA = empty;
 					} else {
 						mvA = mvs[x - 1][y];
 					}
 					if (y == 0) {
+						// fix top side of screen
 						mvB = mvA;
-						mvC = mvB;
+						mvC = mvA;
 					} else {
 						mvB = mvs[x][y - 1];
-						if (x != blockWidth - 1) {
+						// fix mvC on right side of screen
+						if (x < blockWidth - 1) {
 							mvC = mvs[x + 1][y - 1];
 						} else {
 							mvC = empty;
@@ -717,22 +721,12 @@ public class H263Parser {
 			b = mvB[0];
 			c = mvC[0];
 		}
-
-		if (a <= b) {
-			// check b <= c
-			if (b <= c) {
-				return b;
-			} else {
-				return c;
-			}
-		} else {
-			// check a < c
-			if (a <= c) {
-				return a;
-			} else {
-				return c;
-			}
-		}
+		
+		double[] temp = {a,b,c};
+		
+		Arrays.sort(temp);
+		
+		return temp[1];
 	}
 	
 	private void decodeGOBS(H263PictureLayer p) throws IOException, EOSException{
