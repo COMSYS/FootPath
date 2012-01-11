@@ -863,6 +863,7 @@ public class H263Parser {
 			} else {
 				// TODO: there might be stuffing
 //				DebugOut.debug_vv("MCBPC decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! /!!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\");
+				throw new IOException("hMCBPC failed");
 			}
 
 			if (!p.hModifiedQuantization && (hmMCBPC[0] == 1 ||hmMCBPC[0] == 4 || hmMCBPC[0] == 5)) {

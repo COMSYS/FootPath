@@ -78,7 +78,7 @@ public class FlowPathParsingThread extends Thread{
 					}
 				
 				} else {
-					Log.i("FLOWPATH", "skipping frame");
+//					Log.i("FLOWPATH", "skipping frame");
 					parser.skipH263Frame();
 				}
 			} catch (IOException e) {
