@@ -861,6 +861,9 @@ public class H263Parser {
 //					DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ CBPY decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! ");
 				}
 			} else {
+				if (hmMCBPC != null && hmMCBPC[0] == -1) {
+					throw new IOException("hMCBPC stuffing");
+				}
 				// TODO: there might be stuffing
 //				DebugOut.debug_vv("MCBPC decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! /!!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\");
 				throw new IOException("hMCBPC failed");
@@ -2651,7 +2654,7 @@ public class H263Parser {
 		this.currentByte = b;
 	}
 
-	private int byteBufferSize = 3072; // ~3kb
+	private int byteBufferSize = 10000; // ~10kb
 	private byte[] byteBuffer = new byte[byteBufferSize];
 	private int byteBufferPointer = -1;
 	
@@ -2660,6 +2663,15 @@ public class H263Parser {
 			// update buffer
 			int x = fis.read(byteBuffer);
 			byteBufferPointer = 0;
+			Log.i("FLOWPATH","read " + byteBufferSize + " bytes into buffer (" + x +")");
+			if (x == -1){
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		int b = byteBuffer[byteBufferPointer];

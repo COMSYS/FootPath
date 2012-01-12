@@ -414,7 +414,7 @@ public class FlowPath extends Activity {
 			avwCapture.stopCapture();
 			avwCapture.unregisterCapture();
 			File f = new File(avwCapture.getFilePath());
-			f.delete();
+			//f.delete();
 //
 //			// Request steps count
 //			AlertDialog.Builder alert = new AlertDialog.Builder(this);

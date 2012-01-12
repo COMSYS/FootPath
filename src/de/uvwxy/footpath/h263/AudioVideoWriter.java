@@ -53,10 +53,11 @@ public class AudioVideoWriter {
 		recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
 		recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+		recorder.setVideoFrameRate(10);
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
-		recorder.setVideoFrameRate(24);
-		recorder.setVideoSize(128, 96);
+		
+		recorder.setVideoSize(176, 144);
 		// Note: Camera orientation can only be changed since API level 8 (2.2/Froyo)
 //		recorder.setOrientationHint(270);
 		recorder.setOutputFile(filePath);
