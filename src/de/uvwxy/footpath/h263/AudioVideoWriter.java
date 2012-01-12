@@ -1,12 +1,17 @@
 package de.uvwxy.footpath.h263;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
-
-import de.uvwxy.footpath.gui.FlowPath;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import android.media.MediaRecorder;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
+import android.util.Log;
+import de.uvwxy.footpath.gui.FlowPath;
 
 /**
  * A class for recording of an audio/video file, with input from the
@@ -21,6 +26,24 @@ public class AudioVideoWriter {
 	// Capture object
 	MediaRecorder recorder;
 
+	
+	// Socket + Functions:
+	private Socket sckCltSend = null;
+	
+	private void startClient(String hostname, int port){
+		try {
+			sckCltSend = new Socket(InetAddress.getByName(hostname), port);
+		} catch (UnknownHostException e2) {
+			e2.printStackTrace();
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
+	}
+	
+	private FileDescriptor getFileDescriptorFromClientSocket(){
+		return ParcelFileDescriptor.fromSocket(sckCltSend).getFileDescriptor();
+	}
+	
 	// File string
 	String filePath;
 	
@@ -57,10 +80,14 @@ public class AudioVideoWriter {
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
 		
-		recorder.setVideoSize(176, 144);
+		recorder.setVideoSize(176, 144); // is ignored after SetEncoder. crashes if set correctly
 		// Note: Camera orientation can only be changed since API level 8 (2.2/Froyo)
 //		recorder.setOrientationHint(270);
-		recorder.setOutputFile(filePath);
+
+//		recorder.setOutputFile(filePath);
+		startClient("127.0.0.1", 1337);
+		Log.i("FLOWPATH", "Client started");
+		recorder.setOutputFile(getFileDescriptorFromClientSocket());		
 		recorder.setPreviewDisplay(FlowPath.sh01.getSurface());
 		recorder.prepare();
 	}

@@ -1,7 +1,7 @@
 package de.uvwxy.footpath.h263;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 import android.util.Log;
@@ -13,7 +13,7 @@ import android.util.Log;
  *
  */
 public class H263Parser {
-	private FileInputStream fis = null;
+	private InputStream fis = null;
 	private int lastFisPtr = 0;
 	private int fisPtr = 0; // points to the next unread byte
 	private int bitPtr = 7; // points to the current bit of the last byte read
@@ -56,7 +56,7 @@ public class H263Parser {
 	 * @param fis
 	 * @param ptrOffset
 	 */
-	public H263Parser(FileInputStream fis, int ptrOffset, boolean parsePs, boolean parseGOBs, boolean parseMBs, boolean parseBs, boolean blocking) {
+	public H263Parser(InputStream fis, int ptrOffset, boolean parsePs, boolean parseGOBs, boolean parseMBs, boolean parseBs, boolean blocking) {
 		this.fis = fis;
 		this.fisPtr = ptrOffset;
 		this.parsePs = parsePs;

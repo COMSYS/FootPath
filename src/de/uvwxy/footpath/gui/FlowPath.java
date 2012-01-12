@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.List;
 
 import android.app.Activity;
@@ -131,6 +134,42 @@ public class FlowPath extends Activity {
 		mHandler.removeCallbacks(mUpdateTimeTask);
 		mHandler.postDelayed(mUpdateTimeTask, delayMillis);
 	}		
+	
+	
+	// server socket + functions:
+		private ServerSocket sckSrvListen = null;
+		private Socket sckSrvCon = null;
+		private boolean bWaitForConnection = true;
+
+		private ServerThread st = new ServerThread();
+
+		private class ServerThread extends Thread {
+			public void run() {
+				accept();
+			}
+		}
+
+		private void accept() {
+			try {
+				sckSrvCon = sckSrvListen.accept();
+				bWaitForConnection = false;
+				Log.i("FLOWPATH", "Server connected");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		private void startServer(int port) {
+			try {
+				sckSrvListen = new ServerSocket(port);
+				st.start();
+				Log.i("FLOWPATH", "Server started");
+			} catch (IOException e3) {
+				e3.printStackTrace();
+			}
+		}
+	
+	
 	
 	/*
 	 * needed for: test if video stream readable BufferedReader inBuffer;
@@ -283,8 +322,14 @@ public class FlowPath extends Activity {
 	 * @return true if everything starts OK.
 	 */
 	private boolean startLogging() {
+				
+	
+
+		
 		Log.i(LOG_ID, "##### Starting");
 		tsNow = System.currentTimeMillis();
+		
+		startServer(1337);
 
 		Log.i(LOG_ID, "##### creacting avwCapture");
 		// Audio (create audio writer + start)
@@ -376,7 +421,22 @@ public class FlowPath extends Activity {
 		 */
 		
 		
-		parsingThread = new FlowPathParsingThread(avwCapture.getFilePath(), svMVs);
+		while(sckSrvCon == null){
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		InputStream in = null;
+		try {
+			in = sckSrvCon.getInputStream();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		parsingThread = new FlowPathParsingThread(avwCapture.getFilePath(), svMVs, in);
 		parsingThread.setRunning(true);
 		parsingThread.start();
 		unPauseHandler();
