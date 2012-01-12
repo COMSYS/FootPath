@@ -115,17 +115,16 @@ public class H263Parser {
 	double tempY;
 	
 	private double[][][] decodePicture() throws IOException, EOSException {
-		long timeMillis = System.currentTimeMillis();
 		H263PictureLayer p = new H263PictureLayer();
 
 		checkForPictureStartCode();
 		
-		DebugOut.debug_v("Found PSC @ " + fisPtr + "/" + bitPtr + " diff: " + (fisPtr - lastFisPtr) +  " bytes");
+//		DebugOut.debug_v("Found PSC @ " + fisPtr + "/" + bitPtr + " diff: " + (fisPtr - lastFisPtr) +  " bytes");
 		
 		// ugly hack to prevent crashing at end of file
 		if ((fisPtr - lastFisPtr) < MINIMUM_BYTES_BETWEEN_PICTURES 
 				&& pictureBoxCount > 2 ){
-			DebugOut.debug_v("We assume " + (fisPtr - lastFisPtr) +  " bytes are not enough to be a picture, skipping...");
+//			DebugOut.debug_v("We assume " + (fisPtr - lastFisPtr) +  " bytes are not enough to be a picture, skipping...");
 			lastFisPtr = fisPtr;
 			return null;
 		}
@@ -137,8 +136,8 @@ public class H263Parser {
 		int hPTYPE = readBits(5);
 
 		// Integrity Bits
-		DebugOut.debug_vvv("PTYPE bit_1 is 1 " + b(hPTYPE, 4));
-		DebugOut.debug_vvv("PTYPE bit_2 is 0 " + !b(hPTYPE, 3));
+//		DebugOut.debug_vvv("PTYPE bit_1 is 1 " + b(hPTYPE, 4));
+//		DebugOut.debug_vvv("PTYPE bit_2 is 0 " + !b(hPTYPE, 3));
 		if (!(b(hPTYPE, 4) && !b(hPTYPE, 3))) {
 			// break here if something goes wrong!
 			if (breakOnBitErrors)
@@ -154,7 +153,7 @@ public class H263Parser {
 		// Check if last 3 bits equal 111
 		if (b(p.hSourceFormat, 2) && b(p.hSourceFormat, 1)
 				&& b(p.hSourceFormat, 0)) {
-			DebugOut.debug_vv("Detected PlusPTYPE bits");
+//			DebugOut.debug_vv("Detected PlusPTYPE bits");
 			p.hExtendedPTYPE = true;
 			p.hUFEP = readBits(3);
 
@@ -164,34 +163,34 @@ public class H263Parser {
 				// fields are included in the current picture header. If the
 				// picture type is INTRA or EI, this field shall be set to
 				// "001".
-				DebugOut.debug_vv("Detected PlusPTYPE.OPPTYPE bits");
+//				DebugOut.debug_vv("Detected PlusPTYPE.OPPTYPE bits");
 				p.hOptionalPTYPE = true;
 
 				p.hSourceFormat = readBits(3);
 				switch (p.hSourceFormat) {
 				case 0:
-					DebugOut.debug_vvv("Source Format reserved");
+//					DebugOut.debug_vvv("Source Format reserved");
 					break;
 				case 1:
-					DebugOut.debug_vvv("Source Format sub-QCIF");
+//					DebugOut.debug_vvv("Source Format sub-QCIF");
 					break;
 				case 2:
-					DebugOut.debug_vvv("Source Format QCIF");
+//					DebugOut.debug_vvv("Source Format QCIF");
 					break;
 				case 3:
-					DebugOut.debug_vvv("Source Format CIF");
+//					DebugOut.debug_vvv("Source Format CIF");
 					break;
 				case 4:
-					DebugOut.debug_vvv("Source Format 4CIF");
+//					DebugOut.debug_vvv("Source Format 4CIF");
 					break;
 				case 5:
-					DebugOut.debug_vvv("Source Format 16CIF");
+//					DebugOut.debug_vvv("Source Format 16CIF");
 					break;
 				case 6:
-					DebugOut.debug_vvv("Source Format custom source format");
+//					DebugOut.debug_vvv("Source Format custom source format");
 					break;
 				case 7:
-					DebugOut.debug_vvv("Source Format reserved");
+//					DebugOut.debug_vvv("Source Format reserved");
 					break;
 				}
 				int hOPPTYPE_footer = readBits(15);
@@ -219,7 +218,7 @@ public class H263Parser {
 				}
 
 			} else {
-				DebugOut.debug_vvv("No PlusPTYPE.OPPTYPE bits!!!");
+//				DebugOut.debug_vvv("No PlusPTYPE.OPPTYPE bits!!!");
 				// When set to "000", it indicates that only those extended
 				// PTYPE fields which need to be signalled in every picture
 				// header (MPPTYPE) are included in the current picture header.

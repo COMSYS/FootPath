@@ -77,7 +77,7 @@ public class AudioVideoWriter {
 		recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 		recorder.setVideoFrameRate(FlowPath.PIC_FPS);
-		recorder.setVideoSize(FlowPath.PIC_SIZE_WIDTH, FlowPath.PIC_SIZE_HEIGHT); // is ignored after SetEncoder. crashes if set correctly
+		recorder.setVideoSize(FlowPath.PIC_SIZE_WIDTH, FlowPath.PIC_SIZE_HEIGHT);
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
 		

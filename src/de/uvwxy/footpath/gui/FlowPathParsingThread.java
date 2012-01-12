@@ -72,7 +72,7 @@ public class FlowPathParsingThread extends Thread {
 						log.debug_v("read " + mvs.length * mvs[0].length
 								+ " vectors");
 						if (pbMVs != null) {
-							pbMVs.updateMVs(mvs);
+//							pbMVs.updateMVs(mvs);
 						}
 					}
 

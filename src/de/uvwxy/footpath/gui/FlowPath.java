@@ -108,9 +108,10 @@ public class FlowPath extends Activity {
 	private double lastDirection = 0.0;
 
 	// Stream parsing
-	public static final int PIC_SIZE_WIDTH = 640;
-	public static final int PIC_SIZE_HEIGHT = 480;
-	public static final int PIC_FPS = 5;
+	// 256 x 192 no.
+	public static final int PIC_SIZE_WIDTH = 320;
+	public static final int PIC_SIZE_HEIGHT = 240;
+	public static final int PIC_FPS = 8;
 	
 	private FlowPathParsingThread parsingThread = null;
 	
