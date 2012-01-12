@@ -29,25 +29,25 @@ public class PaintBoxMVs extends PaintBox {
 			canvas.drawText("NO MVDS!", getWidth()/2, getHeight()/2, p);
 		} else {
 		
-			int x_len = mvs.length;
-			int y_len = mvs[0].length;
-
-			double mvx = 0;
-			double mvy = 0;
-			
-			canvas.drawText("C: " + mvCount , 512, 512, p);
-			
-			for (int x = 0; x < x_len; x++) {
-				for (int y = 0; y < y_len; y++) {
-					mvx = mvs[x][y][0];
-					mvy = mvs[x][y][1];
-
-					canvas.drawLine((float) (x * 16) + 16.0f,
-							(float) (y * 16) + 16.0f,
-							(float) (x * 16 + mvx) + 16.0f,
-							(float) (y * 16 + mvy) + 16.0f, p);
-				}
-			}
+//			int x_len = mvs.length;
+//			int y_len = mvs[0].length;
+//
+//			double mvx = 0;
+//			double mvy = 0;
+//			
+//			canvas.drawText("C: " + mvCount , 512, 512, p);
+//			
+//			for (int x = 0; x < x_len; x++) {
+//				for (int y = 0; y < y_len; y++) {
+//					mvx = mvs[x][y][0];
+//					mvy = mvs[x][y][1];
+//
+//					canvas.drawLine((float) (x * 16) + 16.0f,
+//							(float) (y * 16) + 16.0f,
+//							(float) (x * 16 + mvx) + 16.0f,
+//							(float) (y * 16 + mvy) + 16.0f, p);
+//				}
+//			}
 
 		}
 	}

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import de.uvwxy.footpath.gui.FlowPath;
+
 import android.util.Log;
 
 /**
@@ -31,8 +33,8 @@ public class H263Parser {
 	int k = 2;
 	
 	// resolution from nexus s is
-	int width = 640;
-	int height = 480;
+	int width = FlowPath.PIC_SIZE_WIDTH;
+	int height = FlowPath.PIC_SIZE_HEIGHT;
 	int blockWidth = 0;
 	int blockHeight = 0;
 
@@ -2654,7 +2656,7 @@ public class H263Parser {
 		this.currentByte = b;
 	}
 
-	private int byteBufferSize = 10000; // ~10kb
+	private int byteBufferSize = 50000; // ~10kb
 	private byte[] byteBuffer = new byte[byteBufferSize];
 	private int byteBufferPointer = -1;
 	
