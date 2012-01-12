@@ -35,8 +35,8 @@ public class H263Parser {
 	// resolution from nexus s is
 	int width = FlowPath.PIC_SIZE_WIDTH;
 	int height = FlowPath.PIC_SIZE_HEIGHT;
-	int blockWidth = 0;
-	int blockHeight = 0;
+	int blockWidth = (width+15)/16;
+	int blockHeight = (height+15)/16;
 
 	boolean parsePs = false; // parse picture layer
 	boolean parseGOBs = false; // parse Group of Blocks layer
@@ -114,10 +114,16 @@ public class H263Parser {
 	double tempX;
 	double tempY;
 	
-	private double[][][] decodePicture() throws IOException, EOSException {
-		H263PictureLayer p = new H263PictureLayer();
+	H263PictureLayer p = new H263PictureLayer();
+	double[][][] mvs = null;
 
-		checkForPictureStartCode();
+	
+	
+	private double[][][] decodePicture() throws IOException, EOSException {
+		
+
+//		checkForPictureStartCode();
+		checkForPictureStartCodeFaster();
 		
 //		DebugOut.debug_v("Found PSC @ " + fisPtr + "/" + bitPtr + " diff: " + (fisPtr - lastFisPtr) +  " bytes");
 		
@@ -599,23 +605,28 @@ public class H263Parser {
 		}
 		
 		
-		double[][][] mvs = null;
+		
 		// only decode P frames (INTER). I Frames have no MVD!
 		if (parseGOBs && p.hPictureCodingType == H263PCT.INTER){
 			if(noGSCMode ){
 				// directly parse all macro blocks
-				blockWidth = (width+15)/16;
-				blockHeight = (height+15)/16;
 				
 //				DebugOut.debug_vv("Decoding " + numOfMBs  + " macroblocks");
 				// set up some space for mvds
 				// vertical + horizontal
 				// [2] because of value and predictor
+				
+				p.hMVDs = null;
+				mvs = null;
+				
 				p.hMVDs = new double[blockWidth][blockHeight][2][2];
 				mvs = new double[blockWidth][blockHeight][2];
+				
 				for (int y = 0; y < blockHeight; y++) {
 					for (int x = 0; x < blockWidth; x++){
+						
 						decodeMacroBlock(p, x,y);
+						
 						if (p.hMVDs != null){
 							// calculate MV
 							// setting up candidates
@@ -666,8 +677,11 @@ public class H263Parser {
 	
 							double[] mv = { tempX, tempY };
 							mvs[x][y] = mv;
+							
 						}
+						
 					}
+				
 					
 				}
 			} else {
@@ -792,14 +806,16 @@ public class H263Parser {
 	}
 	
 	
+	boolean hMCOD;
+//	double[] empty = {0,0};
+	int hmMCBPC[];
+	int hmCBPY[];
+	int hMDQUANT;
+	double mvdHorizontal[];
+	double mvdVertical[];
+	
 	private void decodeMacroBlock(H263PictureLayer p, int x, int y) throws IOException{
-		boolean hMCOD = readBits(1) == 1; // false = coded
-		double[] empty = {0,0};
-		int hmMCBPC[];
-		int hmCBPY[];
-		int hMDQUANT;
-		double mvdHorizontal[];
-		double mvdVertical[];
+		hMCOD = readBits(1) == 1; // false = coded
 		
 		if (hMCOD) {
 //			DebugOut.debug_vv("("
@@ -851,20 +867,17 @@ public class H263Parser {
 			// TODO: parse CBPY present if MCBPC is not stuffing
 			// Coded Block Pattern for luminance (CBPY) (Variable
 			// length)
-			hmCBPY = null;
+			
 			if (hmMCBPC != null && hmMCBPC[0] != -1){ // stuffing check
 				hmCBPY = readCBPY();
 //				DebugOut.debug_vv("(" + x + "/" + y + ")  Read CBPY @ " + fisPtr + "/" + bitPtr);
-				if (hmCBPY != null){
-//					DebugOut.debug_vv("CBPY says CBPY_0 = " + hmCBPY[0] + " CBPY_1 = " + hmCBPY[1] + 
-//							" CBPY_2 = " + hmCBPY[2] + " CBPY_3 = " + hmCBPY[3]);
-				} else {
-//					DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ CBPY decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! ");
-				}
+//				if (hmCBPY != null){
+////					DebugOut.debug_vv("CBPY says CBPY_0 = " + hmCBPY[0] + " CBPY_1 = " + hmCBPY[1] + 
+////							" CBPY_2 = " + hmCBPY[2] + " CBPY_3 = " + hmCBPY[3]);
+//				} else {
+////					DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ CBPY decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! ");
+//				}
 			} else {
-				if (hmMCBPC != null && hmMCBPC[0] == -1) {
-					throw new IOException("hMCBPC stuffing");
-				}
 				// TODO: there might be stuffing
 //				DebugOut.debug_vv("MCBPC decoding failed!!!!!!!!!!!!!!!!!!!!!!!!!! /!!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\");
 				throw new IOException("hMCBPC failed");
@@ -885,13 +898,13 @@ public class H263Parser {
 				if (!p.hUnrestrictedMotionVector) {
 					// horizontal component followed by vertical component
 					mvdHorizontal = readMVDComponent();
-					if (mvdHorizontal == null){
-//						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ horiz. MVD  component failed!");
-					} 
+//					if (mvdHorizontal == null){
+////						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ horiz. MVD  component failed!");
+//					} 
 					mvdVertical = readMVDComponent();
-					if (mvdVertical == null){
-//						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ vert. MVD  component failed!");
-					}
+//					if (mvdVertical == null){
+////						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ vert. MVD  component failed!");
+//					}
 					if (mvdHorizontal!=null && mvdVertical!=null){
 //						DebugOut.debug_vv("/!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ /!\\ MVD Components: " + mvdHorizontal[0] + "/" + mvdHorizontal[1] + " " + mvdVertical[0] + "/" + mvdVertical[1]);
 						
@@ -903,16 +916,17 @@ public class H263Parser {
 						p.hMVDs[x][y][1] = empty;
 					}
 					
-					if (hmMCBPC[0] == 2 || hmMCBPC[0] == 5){
-						// we have MVD_(2-4) as indicated by MCBPC block types 2 and 5 from table 9
-//						DebugOut.debug_vv("Reading further MVDs");
-						double[] mvdHorizontal2 = readMVDComponent();
-						double[] mvdVertical2 = readMVDComponent();
-						double[] mvdHorizontal3 = readMVDComponent();
-						double[] mvdVertical3 = readMVDComponent();
-						double[] mvdHorizontal4 = readMVDComponent();
-						double[] mvdVertical4 = readMVDComponent();
-					}
+					// is commented because we will never read files like this
+//					if (hmMCBPC[0] == 2 || hmMCBPC[0] == 5){
+//						// we have MVD_(2-4) as indicated by MCBPC block types 2 and 5 from table 9
+////						DebugOut.debug_vv("Reading further MVDs");
+//						double[] mvdHorizontal2 = readMVDComponent();
+//						double[] mvdVertical2 = readMVDComponent();
+//						double[] mvdHorizontal3 = readMVDComponent();
+//						double[] mvdVertical3 = readMVDComponent();
+//						double[] mvdHorizontal4 = readMVDComponent();
+//						double[] mvdVertical4 = readMVDComponent();
+//					}
 				} else {
 					// read MVD component (x2) from Table D.3
 //					DebugOut.debug_vv("FUUUUUUUUUUUUUUUUUU (UnrestrictedMotionVector)");
@@ -989,7 +1003,7 @@ public class H263Parser {
 	private void decodeBlockLayer(boolean intradc, boolean tcoef) throws IOException{
 		if (intradc) {
 			// read INTRADC
-			int hmINTRADC = readBits(8);
+			readBits(8);
 //			DebugOut.debug_vv("[block] hmINTRADC read (" + hmINTRADC +")");
 		}
 		
@@ -1031,7 +1045,8 @@ public class H263Parser {
 
 		// "0000 0000 0011 1111 1111 1111 1111 1111" "clear mask";
 		// 0x 0 0 3 f f f f f"
-
+		long ts = System.currentTimeMillis();
+		
 		int bitsBufPSC = 0;
 		int bitCount = 0;
 		while (true) {
@@ -1055,9 +1070,49 @@ public class H263Parser {
 			if (bitCount >= 22 && tmp == 0x20) {
 //				DebugOut.debug_vvv("found Picture Start Code @ " + fisPtr + " bit "
 //						+ bitPtr);
+				Log.i("FLOWPATH", "time for PSC after " + (System.currentTimeMillis()-ts) + " @ " + fisPtr + " bit "
+						+ bitPtr);
 				return;
 			}
 		}
+	}
+	
+	private void checkForPictureStartCodeFaster() throws IOException, EOSException {
+		// We assume PSC is byte aligned, thus only check for trailing 10 0000
+		
+		long ts = System.currentTimeMillis();
+		
+		int bitsBufPSC = 0;
+		int bitCount = 0;
+		
+		int state = -1;
+		while (true) {
+			if (fis.available() == 0) {
+				if (blocking) {
+					throw new EOSException("EOS");
+				}
+			}
+
+			if (readNextByte() == 0) {
+				state++;
+
+				if (state > 0) {
+					// We have at least two consecutive zeros, check tail:
+					if (readBits(6) == 32) {
+
+						Log.i("FLOWPATH",
+								"time for PSC after "
+										+ (System.currentTimeMillis() - ts)
+										+ " @ " + fisPtr + " bit " + bitPtr);
+						return;
+					}
+
+				}
+			} else {
+				state = -1;
+			}
+		}
+		
 	}
 
 	private void checkForGOBStartCode() throws IOException, EOSException {
@@ -2606,8 +2661,7 @@ public class H263Parser {
 	 * @return if bit i in integer data is set to 1
 	 */
 	private boolean b(int data, int i) {
-		int mask = (1 << i);
-		return (data & mask) << (31 - i) == -2147483648;
+		return (data & (1 << i)) << (31 - i) == -2147483648;
 
 		// Java is kind of 'weird' here:
 		// if we shift (1 << 31> (0b10....) to the right java introduces new
@@ -2628,63 +2682,62 @@ public class H263Parser {
 
 		return res;
 	}
+	private int byteBufferSize = 50000; // ~10kb
+	private byte[] byteBuffer = new byte[byteBufferSize];
+	private int byteBufferPointer = -1;
+	
+	private int readNextByte() throws IOException {
+		if ( byteBufferPointer == -1 || byteBufferPointer == byteBufferSize){
+			// update buffer
+			fis.read(byteBuffer);
+			byteBufferPointer = 0;
+//			Log.i("FLOWPATH","read " + byteBufferSize + " bytes into buffer (" + x +")");
+		}
+		
+		
+		
+		int res = byteBuffer[byteBufferPointer];
 
+//		DebugOut.debug_vvv("read bit = " + Integer.toBinaryString(res));
+
+
+			bitPtr = 7;
+
+			byteBufferPointer++;
+			fisPtr++;
+
+		return res;
+	}
+	
 	private int readNextBit() throws IOException {
-		int res = (currentByte & (0x01 << bitPtr)) >> bitPtr;
+		if ( byteBufferPointer == -1 || byteBufferPointer == byteBufferSize){
+			// update buffer
+			fis.read(byteBuffer);
+			byteBufferPointer = 0;
+//			Log.i("FLOWPATH","read " + byteBufferSize + " bytes into buffer (" + x +")");
+		}
+		
+		
+		
+		int res = (byteBuffer[byteBufferPointer] & (0x01 << bitPtr)) >> bitPtr;
 
 //		DebugOut.debug_vvv("read bit = " + Integer.toBinaryString(res));
 
 		bitPtr--;
 		if (bitPtr < 0) {
 			bitPtr = 7;
-			readNextByte();
+//			readNextByte();
+			byteBufferPointer++;
+			fisPtr++;
 		}
 		return res;
 	}
 
-	private boolean useByteBuffer = true;
-	private void readNextByte() throws IOException {
-		fisPtr++;
-		int b;
-		if (useByteBuffer){
-			b = byteBufferNextByte();
-		} else {
-			b = fis.read();
-		}
-//		DebugOut.debug_vvv("read b = " + Integer.toBinaryString(b));
-		this.currentByte = b;
-	}
-
-	private int byteBufferSize = 50000; // ~10kb
-	private byte[] byteBuffer = new byte[byteBufferSize];
-	private int byteBufferPointer = -1;
 	
-	private int byteBufferNextByte() throws IOException{
-		if ( byteBufferPointer == -1 || byteBufferPointer == byteBufferSize){
-			// update buffer
-			int x = fis.read(byteBuffer);
-			byteBufferPointer = 0;
-			Log.i("FLOWPATH","read " + byteBufferSize + " bytes into buffer (" + x +")");
-			if (x == -1){
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		int b = byteBuffer[byteBufferPointer];
-		
-		byteBufferPointer++;		
-		return b;
-	}
 	
 	int oldFramesNum = 0;
 	public String getStats(){
 		String t = "I Frames: " + numIframes + ", P Frames: " + numPframes + "(+" + (numPframes-oldFramesNum) +")" +
-				"\nGOBs: " + groupOfBlocksCount + ", MBs: " + macroBlockCount +
 				"\nSize: " + width + "x" + height;
 		oldFramesNum = numPframes;
 		return t;
