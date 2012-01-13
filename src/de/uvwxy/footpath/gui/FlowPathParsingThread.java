@@ -45,7 +45,7 @@ public class FlowPathParsingThread extends Thread {
 	}
 
 	int frame_count = 0;
-	int periodicity = 1;
+	int periodicity = 2;
 	long timeMillis = 0;
 
 	@Override

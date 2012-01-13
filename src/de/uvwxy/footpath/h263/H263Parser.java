@@ -999,6 +999,8 @@ public class H263Parser {
 	}
 
 
+	boolean tcoef_alive = true;
+	int ret = -1;
 	
 	private void decodeBlockLayer(boolean intradc, boolean tcoef) throws IOException{
 		if (intradc) {
@@ -1010,9 +1012,9 @@ public class H263Parser {
 		
 		
 		if(tcoef){
-			boolean tcoef_alive = true;
+			tcoef_alive = true;
 			while(tcoef_alive){
-				int ret = consumeTCOEFF();
+				ret = consumeTCOEFF();
 				// ret contains last0 run1 and level2
 				//  [block] 1, level 1, last 1
 //				DebugOut.debug_vvv("ret=" + (ret == null));
@@ -1436,6 +1438,25 @@ public class H263Parser {
 		}
 		return null;
 	}
+	
+	final float[][] hMVDComponents = { { 0, Float.NaN }, { -0.5f, 31.5f },
+			{ 0.5f, -31.5f }, { -1, 31 }, { 1, -31 }, { -1.5f, 30.5f },
+			{ 1.5f, -30.5f }, { -2, 30 }, { 2, -30 }, { -3.5f, 28.5f },
+			{ -3, 29 }, { -2.5f, 29.5f }, { 2.5f, -29.5f }, { 3, -29 },
+			{ 3.5f, -28.5f }, { -5, 27 }, { -4.5f, 27.5f }, { -4, 28 },
+			{ 4, -28 }, { 4.5f, -27.5f }, { 5, -27 }, { -12, 20 },
+			{ -11.5f, 20.5f }, { -11, 21 }, { -10.5f, 21.5f }, { -10, 22 },
+			{ -9.5f, 22.5f }, { -9, 23 }, { -8.5f, 23.5f }, { -8, 24 },
+			{ -7.5f, 24.5f }, { -7, 25 }, { -6.5f, 25.5f }, { -6, 26 },
+			{ -5.5f, 26.5f }, { 5.5f, -26.5f }, { 6, -26 }, { 6.5f, -25.5f },
+			{ 7, -25 }, { 7.5f, -24.5f }, { 8, -24 }, { 8.5f, -23.5f },
+			{ 9, -23 }, { 9.5f, -22.5f }, { 10, -22 }, { 10.5f, -21.5f },
+			{ 11, -21 }, { 11.5f, -20.5f }, { 12, -20 }, { -15, 17 },
+			{ -14.5f, 17.5f }, { -14, 18 }, { -13.5f, 18.5f }, { -13, 19 },
+			{ -12, 5f, 19.5f }, { 12.5f, -19.5f }, { 13, -19 },
+			{ 13.5f, -18.5f }, { 14, -18 }, { 14.5f, -17.5f }, { 15, -17 },
+			{ -16, 16 }, { -15.5f, 16.5f }, { 15.5f, -16.5f } };
+	
 
 	private float[] readMVDComponent() throws IOException{
 		// Table 14/H.263 – VLC table for MVD
@@ -1443,8 +1464,7 @@ public class H263Parser {
 		int tempBits = evalNext(0, 1, 0x1, 1);
 		// 32 0 	-		1 1
 		if (tempBits == -1){
-			float[] res = {0, Float.NaN};
-			return res;
+			return hMVDComponents[0];
 		}
 		
 		
@@ -1452,39 +1472,33 @@ public class H263Parser {
 		// 33 0.5 	–31.5 	3 010
 		tempBits = evalNext(tempBits, 2, 0x3, 3);
 		if (tempBits == -1){
-			float[] res = {-0.5f, 31.5f};
-			return res;
+			return hMVDComponents[1];
 		}
 		tempBits = evalNext(tempBits, 0, 0x2, 3);
 		if (tempBits == -1){
-			float[] res = {0.5f, -31.5f};
-			return res;
+			return hMVDComponents[2];
 		}
 		
 		// 30 –1 	31 		4 0011
 		// 34 1 	–31 	4 0010
 		tempBits = evalNext(tempBits, 1, 0x3, 4);
 		if (tempBits == -1){
-			float[] res = {-1, 31};
-			return res;
+			return hMVDComponents[3];
 		}
 		tempBits = evalNext(tempBits, 0, 0x2, 4);
 		if (tempBits == -1){
-			float[] res = {1, -31};
-			return res;
+			return hMVDComponents[4];
 		}
 		
 		// 29 –1.5 	30.5 	5 0001 1
 		// 35 1.5 	–30.5 	5 0001 0
 		tempBits = evalNext(tempBits, 1, 0x3, 5);
 		if (tempBits == -1){
-			float[] res = {-1.5f, 30.5f};
-			return res;
+			return hMVDComponents[5];
 		}
 		tempBits = evalNext(tempBits, 0, 0x2, 5);
 		if (tempBits == -1){
-			float[] res = {1.5f, -30.5f};
-			return res;
+			return hMVDComponents[6];
 		}
 		
 		
@@ -1492,13 +1506,11 @@ public class H263Parser {
 		// 36 2 	–30 	7 0000 110
 		tempBits = evalNext(tempBits, 2, 0x7, 7);
 		if (tempBits == -1){
-			float[] res = {-2, 30};
-			return res;
+			return hMVDComponents[7];
 		}
 		tempBits = evalNext(tempBits, 0, 0x6, 7);
 		if (tempBits == -1){
-			float[] res = {2, -30};
-			return res;
+			return hMVDComponents[8];
 		}
 		
 		// 25 –3.5 	28.5 	8 0000 0111
@@ -1509,35 +1521,29 @@ public class H263Parser {
 		// 39 3.5 	–28.5 	8 0000 0110
 		tempBits = evalNext(tempBits, 1, 0x7, 8);
 		if (tempBits == -1){
-			float[] res = {-3.5f, 28.5f};
-			return res;
+			return hMVDComponents[9];
 		}
 		tempBits = evalNext(tempBits, 0, 0x9, 8);
 		if (tempBits == -1){
-			float[] res = {-3, 29};
-			return res;
+			return hMVDComponents[10];
 		}
 		tempBits = evalNext(tempBits, 0, 0xB, 8);
 		if (tempBits == -1){
-			float[] res = {-2.5f, 29.5f};
-			return res;
+			return hMVDComponents[11];
 		}
 		tempBits = evalNext(tempBits, 0, 0xA, 8);
 		if (tempBits == -1){
-			float[] res = {2.5f, -29.5f};
-			return res;
+			return hMVDComponents[12];
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x8, 8);
 		if (tempBits == -1){
-			float[] res = {3, -29};
-			return res;
+			return hMVDComponents[13];
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x6, 8);
 		if (tempBits == -1){
-			float[] res = {3.5f, -28.5f};
-			return res;
+			return hMVDComponents[14];
 		}
 		
 		
@@ -1551,35 +1557,29 @@ public class H263Parser {
 		// 42 5 	–27 	10 0000 0100 10
 		tempBits = evalNext(tempBits, 2, 0x13, 10);
 		if (tempBits == -1){
-			float[] res = {-5, 27};
-			return res;
+			return hMVDComponents[15];
 		}
 		tempBits = evalNext(tempBits, 0, 0x15, 10);
 		if (tempBits == -1){
-			float[] res = {-4.5f, 27.5f};
-			return res;
+			return hMVDComponents[16];
 		}
 		tempBits = evalNext(tempBits, 0, 0x17, 10);
 		if (tempBits == -1){
-			float[] res = {-4, 28};
-			return res;
+			return hMVDComponents[17];
 		}
 		tempBits = evalNext(tempBits, 0, 0x16, 10);
 		if (tempBits == -1){
-			float[] res = {4, -28};
-			return res;
+			return hMVDComponents[18];
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x14, 10);
 		if (tempBits == -1){
-			float[] res = {4.5f, -27.5f};
-			return res;
+			return hMVDComponents[19];
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x12, 10);
 		if (tempBits == -1){
-			float[] res = {5, -27};
-			return res;
+			return hMVDComponents[20];
 		}
 		
 		
@@ -1591,35 +1591,29 @@ public class H263Parser {
 		// 13 –9.5 	22.5 	11 0000 0010 011
 		tempBits = evalNext(tempBits, 1, 0x09, 11);
 		if (tempBits == -1){
-			float[] res = {-12, 20};
-			return res;
+			return hMVDComponents[21];
 		}
 		tempBits = evalNext(tempBits, 0, 0x0B, 11);
 		if (tempBits == -1){
-			float[] res = {-11.5f, 20.5f};
-			return res;
+			return hMVDComponents[22];
 		}
 		tempBits = evalNext(tempBits, 0, 0x0D, 11);
 		if (tempBits == -1){
-			float[] res = {-11, 21};
-			return res;
+			return hMVDComponents[23];
 		}
 		tempBits = evalNext(tempBits, 0, 0x0F, 11);
 		if (tempBits == -1){
-			float[] res = {-10.5f, 21.5f};
-			return res;
+			return hMVDComponents[24];
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x11, 11);
 		if (tempBits == -1){
-			float[] res = {-10, 22};
-			return res;
+			return hMVDComponents[25];
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x13, 11);
 		if (tempBits == -1){
-			float[] res = {-9.5f, 22.5f};
-			return res;
+			return hMVDComponents[26];
 		}
 		
 		// 14 –9 	23 		11 0000 0010 101
@@ -1630,33 +1624,27 @@ public class H263Parser {
 		// 19 –6.5 	25.5 	11 0000 0011 111
 		tempBits = evalNext(tempBits, 0, 0x15, 11);
 		if (tempBits == -1){
-			float[] res = {-9, 23};
-			return res;
+			return hMVDComponents[27];
 		}
 		tempBits = evalNext(tempBits, 0, 0x17, 11);
 		if (tempBits == -1){
-			float[] res = {-8.5f, 23.5f};
-			return res;
+			return hMVDComponents[28];
 		}
 		tempBits = evalNext(tempBits, 0, 0x19, 11);
 		if (tempBits == -1){
-			float[] res = {-8, 24};
-			return res;
+			return hMVDComponents[29];
 		}
 		tempBits = evalNext(tempBits, 0, 0x1B, 11);
 		if (tempBits == -1){
-			float[] res = {-7.5f, 24.5f};
-			return res;
+			return hMVDComponents[30];
 		}
 		tempBits = evalNext(tempBits, 0, 0x1D, 11);
 		if (tempBits == -1){
-			float[] res = {-7, 25};
-			return res;
+			return hMVDComponents[31];
 		}
 		tempBits = evalNext(tempBits, 0, 0x1F, 11);
 		if (tempBits == -1){
-			float[] res = {-6.5f, 25.5f};
-			return res;
+			return hMVDComponents[32];
 		}
 		
 		
@@ -1668,33 +1656,27 @@ public class H263Parser {
 		// 46 7 	–25 	11 0000 0011 100
 		tempBits = evalNext(tempBits, 0, 0x21, 11);
 		if (tempBits == -1){
-			float[] res = {-6, 26};
-			return res;
+			return hMVDComponents[33];
 		}
 		tempBits = evalNext(tempBits, 0, 0x23, 11);
 		if (tempBits == -1){
-			float[] res = {-5.5f, 26.5f};
-			return res;
+			return hMVDComponents[34];
 		}
 		tempBits = evalNext(tempBits, 0, 0x22, 11); // fixed 0x24 to 0x22
 		if (tempBits == -1){
-			float[] res = {5.5f, -26.5f};
-			return res;
+			return hMVDComponents[35];
 		}
 		tempBits = evalNext(tempBits, 0, 0x20, 11);
 		if (tempBits == -1){
-			float[] res = {6, -26};
-			return res;
+			return hMVDComponents[36];
 		}
 		tempBits = evalNext(tempBits, 0, 0x1E, 11);
 		if (tempBits == -1){
-			float[] res = {6.5f, -25.5f};
-			return res;
+			return hMVDComponents[37];
 		}
 		tempBits = evalNext(tempBits, 0, 0x1C, 11);
 		if (tempBits == -1){
-			float[] res = {7, -25};
-			return res;
+			return hMVDComponents[38];
 		}
 		
 		// 47 7.5 	–24.5 	11 0000 0011 010
@@ -1705,33 +1687,27 @@ public class H263Parser {
 		// 52 10 	–22 	11 0000 0010 000
 		tempBits = evalNext(tempBits, 0, 0x1A, 11);
 		if (tempBits == -1){
-			float[] res = {7.5f, -24.5f};
-			return res;
+			return hMVDComponents[39];
 		}
 		tempBits = evalNext(tempBits, 0, 0x18, 11);
 		if (tempBits == -1){
-			float[] res = {8, -24};
-			return res;
+			return hMVDComponents[40];
 		}
 		tempBits = evalNext(tempBits, 0, 0x16, 11);
 		if (tempBits == -1){
-			float[] res = {8.5f, -23.5f};
-			return res;
+			return hMVDComponents[41];
 		}
 		tempBits = evalNext(tempBits, 0, 0x14, 11);
 		if (tempBits == -1){
-			float[] res = {9, -23};
-			return res;
+			return hMVDComponents[42];
 		}
 		tempBits = evalNext(tempBits, 0, 0x12, 11);
 		if (tempBits == -1){
-			float[] res = {9.5f, -22.5f};
-			return res;
+			return hMVDComponents[43];
 		}
 		tempBits = evalNext(tempBits, 0, 0x10, 11);
 		if (tempBits == -1){
-			float[] res = {10, -22};
-			return res;
+			return hMVDComponents[44];
 		}
 		
 		
@@ -1741,23 +1717,19 @@ public class H263Parser {
 		// 56 12 	–20 	11 0000 0001 000
 		tempBits = evalNext(tempBits, 0, 0x0E, 11);
 		if (tempBits == -1){
-			float[] res = {10.5f, -21.5f};
-			return res;
+			return hMVDComponents[45];
 		}
 		tempBits = evalNext(tempBits, 0, 0x0C, 11);
 		if (tempBits == -1){
-			float[] res = {11, -21};
-			return res;
+			return hMVDComponents[46];
 		}
 		tempBits = evalNext(tempBits, 0, 0x0A, 11);
 		if (tempBits == -1){
-			float[] res = {11.5f, -20.5f};
-			return res;
+			return hMVDComponents[47];
 		}
 		tempBits = evalNext(tempBits, 0, 0x08, 11);
 		if (tempBits == -1){
-			float[] res = {12, -20};
-			return res;
+			return hMVDComponents[48];
 		}
 		
 		
@@ -1770,33 +1742,27 @@ public class H263Parser {
 		// 7 –12.5 	19.5 	12 0000 0000 1111
 		tempBits = evalNext(tempBits, 1, 0x05, 12);
 		if (tempBits == -1){
-			float[] res = {-15, 17};
-			return res;
+			return hMVDComponents[49];
 		}
 		tempBits = evalNext(tempBits, 0, 0x07, 12);
 		if (tempBits == -1){
-			float[] res = {-14.5f, 17.5f};
-			return res;
+			return hMVDComponents[50];
 		}
 		tempBits = evalNext(tempBits, 0, 0x09, 12);
 		if (tempBits == -1){
-			float[] res = {-14, 18};
-			return res;
+			return hMVDComponents[51];
 		}
 		tempBits = evalNext(tempBits, 0, 0x0B, 12);
 		if (tempBits == -1){
-			float[] res = {-13.5f, 18.5f};
-			return res;
+			return hMVDComponents[52];
 		}
 		tempBits = evalNext(tempBits, 0, 0x0D, 12);
 		if (tempBits == -1){
-			float[] res = {-13, 19};
-			return res;
+			return hMVDComponents[53];
 		}
 		tempBits = evalNext(tempBits, 0, 0x0F, 12);
 		if (tempBits == -1){
-			float[] res = {-12,5f, 19.5f};
-			return res;
+			return hMVDComponents[54];
 		}
 		
 		// 57 12.5 	–19.5 	12 0000 0000 1110
@@ -1807,33 +1773,27 @@ public class H263Parser {
 		// 62 15 	–17 	12 0000 0000 0100
 		tempBits = evalNext(tempBits, 0, 0x0E, 12);
 		if (tempBits == -1){
-			float[] res = {12.5f, -19.5f};
-			return res;
+			return hMVDComponents[55];
 		}
 		tempBits = evalNext(tempBits, 0, 0x0C, 12);
 		if (tempBits == -1){
-			float[] res = {13, -19};
-			return res;
+			return hMVDComponents[56];
 		}
 		tempBits = evalNext(tempBits, 0, 0x0A, 12);
 		if (tempBits == -1){
-			float[] res = {13.5f, -18.5f};
-			return res;
+			return hMVDComponents[57];
 		}
 		tempBits = evalNext(tempBits, 0, 0x08, 12);
 		if (tempBits == -1){
-			float[] res = {14, -18};
-			return res;
+			return hMVDComponents[58];
 		}
 		tempBits = evalNext(tempBits, 0, 0x06, 12);
 		if (tempBits == -1){
-			float[] res = {14.5f, -17.5f};
-			return res;
+			return hMVDComponents[59];
 		}
 		tempBits = evalNext(tempBits, 0, 0x04, 12);
 		if (tempBits == -1){
-			float[] res = {15, -17};
-			return res;
+			return hMVDComponents[60];
 		}
 		
 		// 0 –16 	16 		13 0000 0000 0010 1
@@ -1841,18 +1801,15 @@ public class H263Parser {
 		// 63 15.5 	–16.5 	13 0000 0000 0011 0
 		tempBits = evalNext(tempBits, 1, 0x05, 13);
 		if (tempBits == -1){
-			float[] res = {-16, 16};
-			return res;
+			return hMVDComponents[61];
 		}
 		tempBits = evalNext(tempBits, 0, 0x07, 13);
 		if (tempBits == -1){
-			float[] res = {-15.5f, 16.5f};
-			return res;
+			return hMVDComponents[62];
 		}
 		tempBits = evalNext(tempBits, 0, 0x06, 13);
 		if (tempBits == -1){
-			float[] res = {15.5f, -16.5f};
-			return res;
+			return hMVDComponents[63];
 		}
 
 		
