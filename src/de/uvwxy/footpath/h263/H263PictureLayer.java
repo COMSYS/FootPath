@@ -71,7 +71,7 @@ public class H263PictureLayer {
 	// EII == true indicates the following two fields
 	public int hSupplementalEnhancmentInformation = -1;
 	
-	public double[][][][] hMVDs = null;
+	public float[][][][] hMVDs = null;
 	
 	
 }

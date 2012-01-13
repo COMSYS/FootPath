@@ -87,7 +87,7 @@ public class H263Parser {
 		DebugOut.debug_v("Found " + numIframes + " I-Frames, " + numPframes + " P-Frames");
 	}
 	
-	public double[][][] parseH263Frame() throws IOException {
+	public float[][][] parseH263Frame() throws IOException {
 		DebugOut.debug_vv("Parsing H263 video data beginning from " + fisPtr);
 
 		try {
@@ -100,26 +100,26 @@ public class H263Parser {
 	}
 	
 	public void skipH263Frame() throws IOException, EOSException {
-		checkForPictureStartCode();
+		checkForPictureStartCodeFaster();
 	}
 
 	
 	// used for MV calculation:
-	double[] empty = { 0.0, 0.0 };
-	double[] mvA, mvB, mvC;
-	double predictorX;
-	double predictorY;
-	double[] horizDiffs;
-	double[] vertDiffs;
-	double tempX;
-	double tempY;
+	float[] empty = { 0.0f, 0.0f };
+	float[] mvA, mvB, mvC;
+	float predictorX;
+	float predictorY;
+	float[] horizDiffs;
+	float[] vertDiffs;
+	float tempX;
+	float tempY;
 	
 	H263PictureLayer p = new H263PictureLayer();
-	double[][][] mvs = null;
+	float[][][] mvs = null;
 
 	
 	
-	private double[][][] decodePicture() throws IOException, EOSException {
+	private float[][][] decodePicture() throws IOException, EOSException {
 		
 
 //		checkForPictureStartCode();
@@ -619,8 +619,8 @@ public class H263Parser {
 				p.hMVDs = null;
 				mvs = null;
 				
-				p.hMVDs = new double[blockWidth][blockHeight][2][2];
-				mvs = new double[blockWidth][blockHeight][2];
+				p.hMVDs = new float[blockWidth][blockHeight][2][2];
+				mvs = new float[blockWidth][blockHeight][2];
 				
 				for (int y = 0; y < blockHeight; y++) {
 					for (int x = 0; x < blockWidth; x++){
@@ -675,7 +675,7 @@ public class H263Parser {
 								tempY = vertDiffs[1] + predictorY;
 							}
 	
-							double[] mv = { tempX, tempY };
+							float[] mv = { tempX, tempY };
 							mvs[x][y] = mv;
 							
 						}
@@ -705,13 +705,13 @@ public class H263Parser {
 	}
 	
 	
-	private double a;
-	private double b;
-	private double c;
-	private double temp[] = new double[3];
+	private float a;
+	private float b;
+	private float c;
+	private float temp[] = new float[3];
 	
-	private double mvMedian(boolean vertical, double[] mvA, double[] mvB,
-			double[] mvC) {
+	private float mvMedian(boolean vertical, float[] mvA, float[] mvB,
+			float[] mvC) {
 		
 		if (vertical) {
 			// return vertical component [1]
@@ -811,8 +811,8 @@ public class H263Parser {
 	int hmMCBPC[];
 	int hmCBPY[];
 	int hMDQUANT;
-	double mvdHorizontal[];
-	double mvdVertical[];
+	float mvdHorizontal[];
+	float mvdVertical[];
 	
 	private void decodeMacroBlock(H263PictureLayer p, int x, int y) throws IOException{
 		hMCOD = readBits(1) == 1; // false = coded
@@ -1100,10 +1100,10 @@ public class H263Parser {
 					// We have at least two consecutive zeros, check tail:
 					if (readBits(6) == 32) {
 
-						Log.i("FLOWPATH",
-								"time for PSC after "
-										+ (System.currentTimeMillis() - ts)
-										+ " @ " + fisPtr + " bit " + bitPtr);
+//						Log.i("FLOWPATH",
+//								"time for PSC after "
+//										+ (System.currentTimeMillis() - ts)
+//										+ " @ " + fisPtr + " bit " + bitPtr);
 						return;
 					}
 
@@ -1465,13 +1465,13 @@ public class H263Parser {
 		return null;
 	}
 
-	private double[] readMVDComponent() throws IOException{
+	private float[] readMVDComponent() throws IOException{
 		// Table 14/H.263 – VLC table for MVD
 		
 		int tempBits = evalNext(0, 1, 0x1, 1);
 		// 32 0 	-		1 1
 		if (tempBits == -1){
-			double[] res = {0, Double.NaN};
+			float[] res = {0, Float.NaN};
 			return res;
 		}
 		
@@ -1480,12 +1480,12 @@ public class H263Parser {
 		// 33 0.5 	–31.5 	3 010
 		tempBits = evalNext(tempBits, 2, 0x3, 3);
 		if (tempBits == -1){
-			double[] res = {-0.5, 31.5};
+			float[] res = {-0.5f, 31.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x2, 3);
 		if (tempBits == -1){
-			double[] res = {0.5, -31.5};
+			float[] res = {0.5f, -31.5f};
 			return res;
 		}
 		
@@ -1493,12 +1493,12 @@ public class H263Parser {
 		// 34 1 	–31 	4 0010
 		tempBits = evalNext(tempBits, 1, 0x3, 4);
 		if (tempBits == -1){
-			double[] res = {-1, 31};
+			float[] res = {-1, 31};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x2, 4);
 		if (tempBits == -1){
-			double[] res = {1, -31};
+			float[] res = {1, -31};
 			return res;
 		}
 		
@@ -1506,12 +1506,12 @@ public class H263Parser {
 		// 35 1.5 	–30.5 	5 0001 0
 		tempBits = evalNext(tempBits, 1, 0x3, 5);
 		if (tempBits == -1){
-			double[] res = {-1.5, 30.5};
+			float[] res = {-1.5f, 30.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x2, 5);
 		if (tempBits == -1){
-			double[] res = {1.5, -30.5};
+			float[] res = {1.5f, -30.5f};
 			return res;
 		}
 		
@@ -1520,12 +1520,12 @@ public class H263Parser {
 		// 36 2 	–30 	7 0000 110
 		tempBits = evalNext(tempBits, 2, 0x7, 7);
 		if (tempBits == -1){
-			double[] res = {-2, 30};
+			float[] res = {-2, 30};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x6, 7);
 		if (tempBits == -1){
-			double[] res = {2, -30};
+			float[] res = {2, -30};
 			return res;
 		}
 		
@@ -1537,34 +1537,34 @@ public class H263Parser {
 		// 39 3.5 	–28.5 	8 0000 0110
 		tempBits = evalNext(tempBits, 1, 0x7, 8);
 		if (tempBits == -1){
-			double[] res = {-3.5, 28.5};
+			float[] res = {-3.5f, 28.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x9, 8);
 		if (tempBits == -1){
-			double[] res = {-3, 29};
+			float[] res = {-3, 29};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0xB, 8);
 		if (tempBits == -1){
-			double[] res = {-2.5, 29.5};
+			float[] res = {-2.5f, 29.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0xA, 8);
 		if (tempBits == -1){
-			double[] res = {2.5, -29.5};
+			float[] res = {2.5f, -29.5f};
 			return res;
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x8, 8);
 		if (tempBits == -1){
-			double[] res = {3, -29};
+			float[] res = {3, -29};
 			return res;
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x6, 8);
 		if (tempBits == -1){
-			double[] res = {3.5, -28.5};
+			float[] res = {3.5f, -28.5f};
 			return res;
 		}
 		
@@ -1579,34 +1579,34 @@ public class H263Parser {
 		// 42 5 	–27 	10 0000 0100 10
 		tempBits = evalNext(tempBits, 2, 0x13, 10);
 		if (tempBits == -1){
-			double[] res = {-5, 27};
+			float[] res = {-5, 27};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x15, 10);
 		if (tempBits == -1){
-			double[] res = {-4.5, 27.5};
+			float[] res = {-4.5f, 27.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x17, 10);
 		if (tempBits == -1){
-			double[] res = {-4, 28};
+			float[] res = {-4, 28};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x16, 10);
 		if (tempBits == -1){
-			double[] res = {4, -28};
+			float[] res = {4, -28};
 			return res;
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x14, 10);
 		if (tempBits == -1){
-			double[] res = {4.5, -27.5};
+			float[] res = {4.5f, -27.5f};
 			return res;
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x12, 10);
 		if (tempBits == -1){
-			double[] res = {5, -27};
+			float[] res = {5, -27};
 			return res;
 		}
 		
@@ -1619,34 +1619,34 @@ public class H263Parser {
 		// 13 –9.5 	22.5 	11 0000 0010 011
 		tempBits = evalNext(tempBits, 1, 0x09, 11);
 		if (tempBits == -1){
-			double[] res = {-12, 20};
+			float[] res = {-12, 20};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x0B, 11);
 		if (tempBits == -1){
-			double[] res = {-11.5, 20.5};
+			float[] res = {-11.5f, 20.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x0D, 11);
 		if (tempBits == -1){
-			double[] res = {-11, 21};
+			float[] res = {-11, 21};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x0F, 11);
 		if (tempBits == -1){
-			double[] res = {-10.5, 21.5};
+			float[] res = {-10.5f, 21.5f};
 			return res;
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x11, 11);
 		if (tempBits == -1){
-			double[] res = {-10, 22};
+			float[] res = {-10, 22};
 			return res;
 		}
 		
 		tempBits = evalNext(tempBits, 0, 0x13, 11);
 		if (tempBits == -1){
-			double[] res = {-9.5, 22.5};
+			float[] res = {-9.5f, 22.5f};
 			return res;
 		}
 		
@@ -1658,32 +1658,32 @@ public class H263Parser {
 		// 19 –6.5 	25.5 	11 0000 0011 111
 		tempBits = evalNext(tempBits, 0, 0x15, 11);
 		if (tempBits == -1){
-			double[] res = {-9, 23};
+			float[] res = {-9, 23};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x17, 11);
 		if (tempBits == -1){
-			double[] res = {-8.5, 23.5};
+			float[] res = {-8.5f, 23.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x19, 11);
 		if (tempBits == -1){
-			double[] res = {-8, 24};
+			float[] res = {-8, 24};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x1B, 11);
 		if (tempBits == -1){
-			double[] res = {-7.5, 24.5};
+			float[] res = {-7.5f, 24.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x1D, 11);
 		if (tempBits == -1){
-			double[] res = {-7, 25};
+			float[] res = {-7, 25};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x1F, 11);
 		if (tempBits == -1){
-			double[] res = {-6.5, 25.5};
+			float[] res = {-6.5f, 25.5f};
 			return res;
 		}
 		
@@ -1696,32 +1696,32 @@ public class H263Parser {
 		// 46 7 	–25 	11 0000 0011 100
 		tempBits = evalNext(tempBits, 0, 0x21, 11);
 		if (tempBits == -1){
-			double[] res = {-6, 26};
+			float[] res = {-6, 26};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x23, 11);
 		if (tempBits == -1){
-			double[] res = {-5.5, 26.5};
+			float[] res = {-5.5f, 26.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x22, 11); // fixed 0x24 to 0x22
 		if (tempBits == -1){
-			double[] res = {5.5, -26.5};
+			float[] res = {5.5f, -26.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x20, 11);
 		if (tempBits == -1){
-			double[] res = {6, -26};
+			float[] res = {6, -26};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x1E, 11);
 		if (tempBits == -1){
-			double[] res = {6.5, -25.5};
+			float[] res = {6.5f, -25.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x1C, 11);
 		if (tempBits == -1){
-			double[] res = {7, -25};
+			float[] res = {7, -25};
 			return res;
 		}
 		
@@ -1733,32 +1733,32 @@ public class H263Parser {
 		// 52 10 	–22 	11 0000 0010 000
 		tempBits = evalNext(tempBits, 0, 0x1A, 11);
 		if (tempBits == -1){
-			double[] res = {7.5, -24.5};
+			float[] res = {7.5f, -24.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x18, 11);
 		if (tempBits == -1){
-			double[] res = {8, -24};
+			float[] res = {8, -24};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x16, 11);
 		if (tempBits == -1){
-			double[] res = {8.5, -23.5};
+			float[] res = {8.5f, -23.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x14, 11);
 		if (tempBits == -1){
-			double[] res = {9, -23};
+			float[] res = {9, -23};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x12, 11);
 		if (tempBits == -1){
-			double[] res = {9.5, -22.5};
+			float[] res = {9.5f, -22.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x10, 11);
 		if (tempBits == -1){
-			double[] res = {10, -22};
+			float[] res = {10, -22};
 			return res;
 		}
 		
@@ -1769,22 +1769,22 @@ public class H263Parser {
 		// 56 12 	–20 	11 0000 0001 000
 		tempBits = evalNext(tempBits, 0, 0x0E, 11);
 		if (tempBits == -1){
-			double[] res = {10.5, -21.5};
+			float[] res = {10.5f, -21.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x0C, 11);
 		if (tempBits == -1){
-			double[] res = {11, -21};
+			float[] res = {11, -21};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x0A, 11);
 		if (tempBits == -1){
-			double[] res = {11.5, -20.5};
+			float[] res = {11.5f, -20.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x08, 11);
 		if (tempBits == -1){
-			double[] res = {12, -20};
+			float[] res = {12, -20};
 			return res;
 		}
 		
@@ -1798,32 +1798,32 @@ public class H263Parser {
 		// 7 –12.5 	19.5 	12 0000 0000 1111
 		tempBits = evalNext(tempBits, 1, 0x05, 12);
 		if (tempBits == -1){
-			double[] res = {-15, 17};
+			float[] res = {-15, 17};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x07, 12);
 		if (tempBits == -1){
-			double[] res = {-14.5, 17.5};
+			float[] res = {-14.5f, 17.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x09, 12);
 		if (tempBits == -1){
-			double[] res = {-14, 18};
+			float[] res = {-14, 18};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x0B, 12);
 		if (tempBits == -1){
-			double[] res = {-13.5, 18.5};
+			float[] res = {-13.5f, 18.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x0D, 12);
 		if (tempBits == -1){
-			double[] res = {-13, 19};
+			float[] res = {-13, 19};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x0F, 12);
 		if (tempBits == -1){
-			double[] res = {-12,5, 19.5};
+			float[] res = {-12,5f, 19.5f};
 			return res;
 		}
 		
@@ -1835,32 +1835,32 @@ public class H263Parser {
 		// 62 15 	–17 	12 0000 0000 0100
 		tempBits = evalNext(tempBits, 0, 0x0E, 12);
 		if (tempBits == -1){
-			double[] res = {12.5, -19.5};
+			float[] res = {12.5f, -19.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x0C, 12);
 		if (tempBits == -1){
-			double[] res = {13, -19};
+			float[] res = {13, -19};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x0A, 12);
 		if (tempBits == -1){
-			double[] res = {13.5, -18.5};
+			float[] res = {13.5f, -18.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x08, 12);
 		if (tempBits == -1){
-			double[] res = {14, -18};
+			float[] res = {14, -18};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x06, 12);
 		if (tempBits == -1){
-			double[] res = {14.5, -17.5};
+			float[] res = {14.5f, -17.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x04, 12);
 		if (tempBits == -1){
-			double[] res = {15, -17};
+			float[] res = {15, -17};
 			return res;
 		}
 		
@@ -1869,17 +1869,17 @@ public class H263Parser {
 		// 63 15.5 	–16.5 	13 0000 0000 0011 0
 		tempBits = evalNext(tempBits, 1, 0x05, 13);
 		if (tempBits == -1){
-			double[] res = {-16, 16};
+			float[] res = {-16, 16};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x07, 13);
 		if (tempBits == -1){
-			double[] res = {-15.5, 16.5};
+			float[] res = {-15.5f, 16.5f};
 			return res;
 		}
 		tempBits = evalNext(tempBits, 0, 0x06, 13);
 		if (tempBits == -1){
-			double[] res = {15.5, -16.5};
+			float[] res = {15.5f, -16.5f};
 			return res;
 		}
 

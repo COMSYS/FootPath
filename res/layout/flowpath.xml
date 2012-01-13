@@ -1,58 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<RelativeLayout android:id="@+id/RelativeLayout01" 
-				android:layout_width="fill_parent" 
-				android:layout_height="fill_parent" 
-				xmlns:android="http://schemas.android.com/apk/res/android" android:keepScreenOn="true">
-	
-
-<EditText android:layout_width="wrap_content" 
-android:layout_height="wrap_content" 
-android:id="@+id/txt01" 
-android:layout_toRightOf="@+id/btn02" 
-android:layout_below="@+id/lbl01" android:text="h263" android:width="96dp"></EditText>
-<Button android:layout_width="wrap_content" 
-android:layout_height="wrap_content" 
-android:layout_toRightOf="@+id/txt01" 
-android:text="Start" 
-android:layout_below="@+id/lbl01" 
-android:id="@+id/btn01" 
-android:textSize="24px"></Button>
-<TextView android:layout_below="@+id/Button01" 
-android:layout_height="wrap_content" 
-android:layout_width="wrap_content" 
-android:id="@+id/lbl01" 
-android:text="Please enter your name" 
-android:textSize="24px"></TextView>
-<TextView android:layout_width="wrap_content" 
-android:layout_height="wrap_content" 
-android:id="@+id/lbl02" 
-android:layout_below="@+id/btn01" 
-android:textSize="24px" 
-android:textColor="#ff0000" android:text="Please try to count your steps! (Logging will stop if window gets hidden behind things ;) )"></TextView>
-
-<SurfaceView
-    android:id="@+id/sv01"
-    android:layout_width="320px"
-    android:layout_height="240px"
-    android:layout_below="@+id/lbl02"
-    android:layout_centerHorizontal="true" >
-
-</SurfaceView>
-
-<TextView
-    android:id="@+id/lblParserInfo"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignBottom="@+id/btn01"
-    android:layout_alignParentRight="true"
-    android:text="N/A"/>
-
-<SurfaceView
-    android:id="@+id/svMVPaint"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout01"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:layout_below="@+id/sv01"
-    android:layout_centerHorizontal="true" />
+    android:keepScreenOn="true" >
+
+    <EditText
+        android:id="@+id/txt01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lbl01"
+        android:layout_toRightOf="@+id/btn02"
+        android:text="h263"
+        android:width="96dp" >
+    </EditText>
+
+    <Button
+        android:id="@+id/btn01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lbl01"
+        android:layout_toRightOf="@+id/txt01"
+        android:text="Start"
+        android:textSize="24px" >
+    </Button>
+
+    <TextView
+        android:id="@+id/lbl01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/Button01"
+        android:text="Please enter your name"
+        android:textSize="24px" >
+    </TextView>
+
+    <TextView
+        android:id="@+id/lbl02"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn01"
+        android:text="Please try to count your steps! (Logging will stop if window gets hidden behind things ;) )"
+        android:textColor="#ff0000"
+        android:textSize="24px" >
+    </TextView>
+
+    <TextView
+        android:id="@+id/lblParserInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/btn01"
+        android:layout_alignParentRight="true"
+        android:text="N/A" />
+
+    <SurfaceView
+        android:id="@+id/svMVPaint"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/sv01"
+        android:layout_marginLeft="66dp"
+        android:layout_toRightOf="@+id/lbl01" />
+
+    <SurfaceView
+        android:id="@+id/sv01"
+        android:layout_width="320px"
+        android:layout_height="240px"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/lbl02" />
 
 </RelativeLayout>

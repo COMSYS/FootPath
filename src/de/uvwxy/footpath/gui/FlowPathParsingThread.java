@@ -50,7 +50,7 @@ public class FlowPathParsingThread extends Thread {
 
 	@Override
 	public void run() {
-		double[][][] mvs = null;
+		float[][][] mvs = null;
 		timeMillis = System.currentTimeMillis();
 
 		log.debug_v("parsing started");
