@@ -1178,6 +1178,11 @@ public class H263Parser {
 		return 0;
 	}
 
+	final int[][] hMCBPC4PFrames = {{0,0,0},{1,0,0},{2,0,0},{0,0,1},{0,1,0},{3,0,0}, {0,1,1},{4,0,0},
+			{1,0,1},{1,1,0},{3,1,1},{2,0,1},{2,1,0},{2,1,1},
+			{3,0,1},{3,1,0},{4,0,1},{4,1,0},{4,1,1},{1,1,1},
+			{-1,-1,-1},{5,0,0},{5,0,1},{5,1,0}, {5,1,1}};
+	
 	/**
 	 * This functions parses the MCBPC field for P-frames. It returns an integer
 	 * array with the MBType, and the split CBPC field.
@@ -1196,51 +1201,43 @@ public class H263Parser {
 		int tempBits = evalNext(0, 1, 1, 1);
 		// 0 {0, 0,0, 1, 1}
 		if (tempBits == -1){
-			int[] res = {0,0,0};
-			return res;
+			return hMCBPC4PFrames[0];
 		}
 		// 4 {1, 0,0, 3, 011}
 		// 8 {2, 0,0, 3, 010}
 		tempBits = evalNext(tempBits,2,0x3,3);
 		if (tempBits == -1){
-			int[] res = {1,0,0};
-			return res;
+			return hMCBPC4PFrames[1];
 		}
 		tempBits = evalNext(tempBits,0,0x2,3);
 		if (tempBits == -1){
-			int[] res = {2,0,0};
-			return res;
+			return hMCBPC4PFrames[2];
 		}
 		// 1 {0, 0,1, 4, 0011}
 		// 2 {0, 1,0, 4, 0010}
 		tempBits = evalNext(tempBits,1,0x3,4);
 		if (tempBits == -1){
-			int[] res = {0,0,1};
-			return res;
+			return hMCBPC4PFrames[3];
 		}
 		tempBits = evalNext(tempBits,0,0x2,4);
 		if (tempBits == -1){
-			int[] res = {0,1,0};
-			return res;
+			return hMCBPC4PFrames[4];
 		}
 		
 		// 12 {3, 0,0, 5, 0001 1}
 		tempBits = evalNext(tempBits,1,0x3,5);
 		if (tempBits == -1){
-			int[] res = {3,0,0};
-			return res;
+			return hMCBPC4PFrames[5];
 		}
 		// 3 {0, 1,1, 6, 0001 01}
 		// 16 {4, 0,0, 6, 0001 00}
 		tempBits = evalNext(tempBits,1,0x5,6);
 		if (tempBits == -1){
-			int[] res = {0,1,1};
-			return res;
+			return hMCBPC4PFrames[6];
 		}
 		tempBits = evalNext(tempBits,0,0x4,6);
 		if (tempBits == -1){
-			int[] res = {4,0,0};
-			return res;
+			return hMCBPC4PFrames[7];
 		}
 		
 		
@@ -1251,28 +1248,23 @@ public class H263Parser {
 		// 10 {2, 1,0, 7, 0000 100}
 		tempBits = evalNext(tempBits,1,0x7,7);
 		if (tempBits == -1){
-			int[] res = {1,0,1};
-			return res;
+			return hMCBPC4PFrames[8];
 		}
 		tempBits = evalNext(tempBits,0,0x6,7);
 		if (tempBits == -1){
-			int[] res = {1,1,0};
-			return res;
+			return hMCBPC4PFrames[9];
 		}
 		tempBits = evalNext(tempBits,0,0x3,7);
 		if (tempBits == -1){
-			int[] res = {3,1,1};
-			return res;
+			return hMCBPC4PFrames[10];
 		}
 		tempBits = evalNext(tempBits,0,0x5,7);
 		if (tempBits == -1){
-			int[] res = {2,0,1};
-			return res;
+			return hMCBPC4PFrames[11];
 		}
 		tempBits = evalNext(tempBits,0,0x4,7);
 		if (tempBits == -1){
-			int[] res = {2,1,0};
-			return res;
+			return hMCBPC4PFrames[12];
 		}
 		
 		
@@ -1281,18 +1273,15 @@ public class H263Parser {
 		// 14 {3, 1,0, 8, 0000 0011}
 		tempBits = evalNext(tempBits,1,0x5,8);
 		if (tempBits == -1){
-			int[] res = {2,1,1};
-			return res;
+			return hMCBPC4PFrames[13];
 		}
 		tempBits = evalNext(tempBits,0,0x4,8);
 		if (tempBits == -1){
-			int[] res = {3,0,1};
-			return res;
+			return hMCBPC4PFrames[14];
 		}
 		tempBits = evalNext(tempBits,0,0x3,8);
 		if (tempBits == -1){
-			int[] res = {3,1,0};
-			return res;
+			return hMCBPC4PFrames[15];
 		}
 		
 		// 17 {4, 0,1, 9, 0000 0010 0}
@@ -1302,36 +1291,30 @@ public class H263Parser {
 		// 20 {-1, -1,-1, 9, 0000 0000 1}
 		tempBits = evalNext(tempBits,1,0x4,9);
 		if (tempBits == -1){
-			int[] res = {4,0,1};
-			return res;
+			return hMCBPC4PFrames[16];
 		}
 		tempBits = evalNext(tempBits,0,0x3,9);
 		if (tempBits == -1){
-			int[] res = {4,1,0};
-			return res;
+			return hMCBPC4PFrames[17];
 		}
 		tempBits = evalNext(tempBits,0,0x2,9);
 		if (tempBits == -1){
-			int[] res = {4,1,1};
-			return res;
+			return hMCBPC4PFrames[18];
 		}
 		tempBits = evalNext(tempBits,0,0x5,9);
 		if (tempBits == -1){
-			int[] res = {1,1,1};
-			return res;
+			return hMCBPC4PFrames[19];
 		}
 		tempBits = evalNext(tempBits,0,0x1,9);
 		if (tempBits == -1){
-			int[] res = {-1,-1,-1};
-			return res;
+			return hMCBPC4PFrames[20];
 		}
 		
 		
 		// 21 {5, 0,0, 11, 0000 0000 010}
 		tempBits = evalNext(tempBits,2,0x2,11);
 		if (tempBits == -1){
-			int[] res = {5,0,0};
-			return res;
+			return hMCBPC4PFrames[21];
 		}
 		
 		// 22 {5, 0,1, 13, 0000 0000 0110 0}
@@ -1339,22 +1322,27 @@ public class H263Parser {
 		// 24 {5, 1,1, 13, 0000 0000 0111 1}
 		tempBits = evalNext(tempBits,2,0xC,13);
 		if (tempBits == -1){
-			int[] res = {5,0,1};
-			return res;
+			return hMCBPC4PFrames[22];
 		}
 		tempBits = evalNext(tempBits,0,0xE,13);
 		if (tempBits == -1){
-			int[] res = {5,1,0};
-			return res;
+			return hMCBPC4PFrames[23];
 		}
 		tempBits = evalNext(tempBits,0,0xF,13);
 		if (tempBits == -1){
-			int[] res = {5,1,1};
-			return res;
+			return hMCBPC4PFrames[24];
 		}
 		
 		return null;
 	}
+	
+	final int[][] hCBPYTable = { { 0, 0, 0, 0 }, { 1, 1, 1, 1 }, { 0, 0, 1, 1 },
+			{ 0, 1, 0, 1 }, { 0, 0, 0, 1 }, { 1, 0, 1, 0 }, { 0, 0, 1, 0 },
+			{ 1, 1, 0, 0 }, { 0, 1, 0, 0 }, { 1, 0, 0, 0 }, { 0, 1, 1, 1 },
+			{ 1, 0, 1, 1 }, { 1, 1, 0, 1 }, { 1, 1, 1, 0 }, { 1, 0, 0, 1 },
+			{ 0, 1, 1, 0 }
+
+	};
 
 	private int[] readCBPY() throws IOException {
 		// Table 12/H.263 – VLC table for CBPY
@@ -1366,8 +1354,7 @@ public class H263Parser {
 		
 		// 15 00 00 2 11
 		if (tempBits == -1){
-			int[] res = {0,0,0,0};
-			return res;
+			return hCBPYTable[0];
 		}
 		
 		// 0  11 11 4 0011
@@ -1381,48 +1368,39 @@ public class H263Parser {
 		// 7  10 00 4 1011
 		tempBits = evalNext(tempBits, 2, 0x3, 4);
 		if (tempBits == -1){
-			int[] res = {1,1,1,1};
-			return res;
+			return hCBPYTable[1];
 		}
 		tempBits = evalNext(tempBits, 0, 0x4, 4);
 		if (tempBits == -1){
-			int[] res = {0,0,1,1};
-			return res;
+			return hCBPYTable[2];
 		}
 		tempBits = evalNext(tempBits, 0, 0x5, 4);
 		if (tempBits == -1){
-			int[] res = {0,1,0,1};
-			return res;
+			return hCBPYTable[3];
 		}
 		tempBits = evalNext(tempBits, 0, 0x6, 4);
 		if (tempBits == -1){
-			int[] res = {0,0,0,1};
-			return res;
+			return hCBPYTable[4];
 		}
 		tempBits = evalNext(tempBits, 0, 0x7, 4);
 		if (tempBits == -1){
-			int[] res = {1,0,1,0};
-			return res;
+			return hCBPYTable[5];
 		}
 		tempBits = evalNext(tempBits, 0, 0x8, 4);
 		if (tempBits == -1){
-			int[] res = {0,0,1,0};
-			return res;
+			return hCBPYTable[6];
 		}
 		tempBits = evalNext(tempBits, 0, 0x9, 4);
 		if (tempBits == -1){
-			int[] res = {1,1,0,0};
-			return res;
+			return hCBPYTable[7];
 		}
 		tempBits = evalNext(tempBits, 0, 0xA, 4);
 		if (tempBits == -1){
-			int[] res = {0,1,0,0};
-			return res;
+			return hCBPYTable[8];
 		}
 		tempBits = evalNext(tempBits, 0, 0xB, 4);
 		if (tempBits == -1){
-			int[] res = {1,0,0,0};
-			return res;
+			return hCBPYTable[9];
 		}
 		
 		// 8  01 11 5 0001 0
@@ -1431,36 +1409,30 @@ public class H263Parser {
 		// 1  11 10 5 0010 1
 		tempBits = evalNext(tempBits, 1, 0x2, 5);
 		if (tempBits == -1){
-			int[] res = {0,1,1,1};
-			return res;
+			return hCBPYTable[10];
 		}	
 		tempBits = evalNext(tempBits, 0, 0x3, 5);
 		if (tempBits == -1){
-			int[] res = {1,0,1,1};
-			return res;
+			return hCBPYTable[11];
 		}
 		tempBits = evalNext(tempBits, 0, 0x4, 5);
 		if (tempBits == -1){
-			int[] res = {1,1,0,1};
-			return res;
+			return hCBPYTable[12];
 		}
 		tempBits = evalNext(tempBits, 0, 0x5, 5);
 		if (tempBits == -1){
-			int[] res = {1,1,1,0};
-			return res;
+			return hCBPYTable[13];
 		}
 		
 		// 6  10 01 6 0000 10
 		// 9  01 10 6 0000 11
 		tempBits = evalNext(tempBits, 1, 0x2, 6);
 		if (tempBits == -1){
-			int[] res = {1,0,0,1};
-			return res;
+			return hCBPYTable[14];
 		}
 		tempBits = evalNext(tempBits, 0, 0x3, 6);
 		if (tempBits == -1){
-			int[] res = {0,1,1,0};
-			return res;
+			return hCBPYTable[15];
 		}
 		return null;
 	}
