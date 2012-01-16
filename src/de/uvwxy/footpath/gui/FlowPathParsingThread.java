@@ -45,7 +45,7 @@ public class FlowPathParsingThread extends Thread {
 	}
 
 	int frame_count = 0;
-	int periodicity = 2;
+	int periodicity = 1;
 	long timeMillis = 0;
 
 	@Override
@@ -58,6 +58,16 @@ public class FlowPathParsingThread extends Thread {
 			// ISOBoxParser boxParser = new ISOBoxParser(in);
 			try {
 				log.debug_v("parsing next frame");
+				int pause = 1000/FlowPath.PIC_FPS;
+//				if (pause > 0){
+				try {
+					Thread.sleep(pause);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+//				}
+					
+				}
 				frame_count++;
 				if (frame_count % periodicity == 0) {
 					Log.i("FLOWPATH",

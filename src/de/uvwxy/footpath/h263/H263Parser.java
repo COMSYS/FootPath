@@ -3052,7 +3052,7 @@ public class H263Parser {
 		}
 	
 		if ((tempBits & getBitMask(refLen)) == ref) {
-			DebugOut.debug_vv("Matched " + refLen + " bits and found " + Integer.toBinaryString(ref) +" @ " + fisPtr + "/" + bitPtr);
+//			DebugOut.debug_vv("Matched " + refLen + " bits and found " + Integer.toBinaryString(ref) +" @ " + fisPtr + "/" + bitPtr);
 			return -1;
 		}
 	
@@ -3078,7 +3078,7 @@ public class H263Parser {
 	
 		// by right shifting we ignore le right most bit!
 		if (((tempBits>>1) & getBitMask(refLen)) == ref) {
-			DebugOut.debug_vv("Matched_ " + refLen + " bits and found " + Integer.toBinaryString(ref) +" @ " + fisPtr + "/" + bitPtr);
+//			DebugOut.debug_vv("Matched_ " + refLen + " bits and found " + Integer.toBinaryString(ref) +" @ " + fisPtr + "/" + bitPtr);
 			return -1;
 		}
 	
@@ -3123,8 +3123,8 @@ public class H263Parser {
 //					+ " = " + Integer.toHexString(tmp));
 
 			if (bitCount >= 22 && tmp == 0x3f) {
-				DebugOut.debug_vv("found End Of Sequence Code @ " + fisPtr
-						+ " bit " + bitPtr);
+//				DebugOut.debug_vv("found End Of Sequence Code @ " + fisPtr
+//						+ " bit " + bitPtr);
 				return;
 			}
 		}
