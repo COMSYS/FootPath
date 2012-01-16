@@ -58,7 +58,9 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	private long tsLast = 0;
-
+	
+	int movingfactor = 0;
+	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		long tsDiff = System.currentTimeMillis() - tsLast;
@@ -76,7 +78,11 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 
 			int x_len = mvs.length;
 			int y_len = mvs[0].length;
-
+			
+			float divisor = x_len*y_len;
+			float x_sum = 0.0f;
+			float y_sum = 0.0f;
+			
 			float mvx = 0;
 			float mvy = 0;
 
@@ -87,11 +93,31 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 				for (int y = 0; y < y_len; y++) {
 					mvx = mvs[x][y][0];
 					mvy = mvs[x][y][1];
-
-					canvas.drawLine(x * 16 + 16.0f, 16 + y * 16 + 16.0f, x * 16
-							+ mvx + 16.0f, 16 + y * 16 + mvy + 16.0f, p);
+					x_sum += mvx;
+					y_sum += mvy;
+					if (mvy<0){
+						p.setColor(Color.GREEN);
+					} else {
+						p.setColor(Color.GRAY);
+					}
+					canvas.drawLine(x * 16.0f + 16.0f, 16 + y * 16.0f + 16.0f, x * 16
+							+ mvx + 16.0f, 16.0f + y * 16.0f + mvy + 16.0f, p);
 				}
 			}
+			
+			x_sum/=divisor;
+			y_sum/=divisor;
+			if (y_sum<0){
+				p.setColor(Color.GREEN);
+				movingfactor++;
+				canvas.drawText("MOVING " + movingfactor, 256, 16, p);
+			} else {
+				p.setColor(Color.RED);
+				movingfactor--;
+				canvas.drawText("NOT MOVING " + movingfactor, 256, 16, p);
+			}
+			canvas.drawLine(x_len * 8 + 16.0f, 16 + y_len * 8 + 16.0f, x_len * 8
+					+ x_sum*16 + 16.0f, 16 + y_len * 8 + y_sum*16 + 16.0f, p);
 
 		}
 		tsLast = System.currentTimeMillis();

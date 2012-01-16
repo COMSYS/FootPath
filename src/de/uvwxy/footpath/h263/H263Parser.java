@@ -117,8 +117,7 @@ public class H263Parser {
 	H263PictureLayer p = new H263PictureLayer(blockWidth,blockHeight);
 	float[][][] mvs = new float[blockWidth][blockHeight][2];
 
-//	p.hMVDs = new float[blockWidth][blockHeight][2][2];
-//	mvs = ;
+
 	
 	private float[][][] decodePicture() throws IOException, EOSException {
 		
@@ -617,9 +616,10 @@ public class H263Parser {
 				// vertical + horizontal
 				// [2] because of value and predictor
 				
-//				p.hMVDs = null;
-//				mvs = null;
-				
+				p.hMVDs = null;
+				mvs = null;
+				p.hMVDs = new float[blockWidth][blockHeight][2][2];
+				mvs =  new float[blockWidth][blockHeight][2];
 	
 				
 				for (int y = 0; y < blockHeight; y++) {
