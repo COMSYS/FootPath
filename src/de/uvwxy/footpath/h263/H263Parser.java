@@ -114,10 +114,11 @@ public class H263Parser {
 	float tempX;
 	float tempY;
 	
-	H263PictureLayer p = new H263PictureLayer();
-	float[][][] mvs = null;
+	H263PictureLayer p = new H263PictureLayer(blockWidth,blockHeight);
+	float[][][] mvs = new float[blockWidth][blockHeight][2];
 
-	
+//	p.hMVDs = new float[blockWidth][blockHeight][2][2];
+//	mvs = ;
 	
 	private float[][][] decodePicture() throws IOException, EOSException {
 		
@@ -616,11 +617,10 @@ public class H263Parser {
 				// vertical + horizontal
 				// [2] because of value and predictor
 				
-				p.hMVDs = null;
-				mvs = null;
+//				p.hMVDs = null;
+//				mvs = null;
 				
-				p.hMVDs = new float[blockWidth][blockHeight][2][2];
-				mvs = new float[blockWidth][blockHeight][2];
+	
 				
 				for (int y = 0; y < blockHeight; y++) {
 					for (int x = 0; x < blockWidth; x++){
@@ -1439,7 +1439,7 @@ public class H263Parser {
 		return null;
 	}
 	
-	final float[][] hMVDComponents = { { 0, Float.NaN }, { -0.5f, 31.5f },
+	private final float[][] hMVDComponents = { { 0, Float.NaN }, { -0.5f, 31.5f },
 			{ 0.5f, -31.5f }, { -1, 31 }, { 1, -31 }, { -1.5f, 30.5f },
 			{ 1.5f, -30.5f }, { -2, 30 }, { 2, -30 }, { -3.5f, 28.5f },
 			{ -3, 29 }, { -2.5f, 29.5f }, { 2.5f, -29.5f }, { 3, -29 },
@@ -3165,7 +3165,7 @@ public class H263Parser {
 
 		return res;
 	}
-	private int byteBufferSize = 50000; // ~10kb
+	private int byteBufferSize = 1024; // ~10kb
 	private byte[] byteBuffer = new byte[byteBufferSize];
 	private int byteBufferPointer = -1;
 	
@@ -3179,7 +3179,7 @@ public class H263Parser {
 		
 		
 		
-		int res = byteBuffer[byteBufferPointer];
+//		int res = byteBuffer[byteBufferPointer];
 
 //		DebugOut.debug_vvv("read bit = " + Integer.toBinaryString(res));
 
@@ -3189,7 +3189,7 @@ public class H263Parser {
 			byteBufferPointer++;
 			fisPtr++;
 
-		return res;
+		return byteBuffer[byteBufferPointer-1];
 	}
 	
 	private int readNextBit() throws IOException {

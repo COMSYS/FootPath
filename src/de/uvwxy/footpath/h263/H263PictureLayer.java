@@ -73,5 +73,8 @@ public class H263PictureLayer {
 	
 	public float[][][][] hMVDs = null;
 	
+	public H263PictureLayer (int blockWidth, int blockHeight){
+		hMVDs = new float[blockWidth][blockHeight][2][2];
+	}
 	
 }
