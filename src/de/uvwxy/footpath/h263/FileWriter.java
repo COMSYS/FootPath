@@ -38,9 +38,12 @@ public class FileWriter {
 	 */
 	public void createFileOnCard() throws FileNotFoundException {
 		File dir = new File(Environment.getExternalStorageDirectory(),
-				de.uvwxy.footpath.gui.FlowPath.LOG_DIR + "/" + folder);
+				de.uvwxy.footpath.gui.FlowPath.LOG_DIR);
 		dir.mkdir();
-		p = new PrintWriter(new File(dir, fileName));
+		File logdir = new File(Environment.getExternalStorageDirectory(),
+				de.uvwxy.footpath.gui.FlowPath.LOG_DIR + "/" + folder);
+		logdir.mkdir();
+		p = new PrintWriter(new File(logdir, fileName));
 	}
 
 	/**

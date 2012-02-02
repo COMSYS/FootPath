@@ -63,7 +63,7 @@ public class FlowPath extends Activity {
 	// CONSTANTS:
 	public static final String LOG_DIR = "flowpath_logs";
 	public static final String LOG_ID = "FLOWPATH";
-
+	private static final char DELIM = ',';
 	// GUI
 	Button btn01;
 	TextView lbl01;
@@ -78,10 +78,12 @@ public class FlowPath extends Activity {
 	private static SensorManager sm;
 	List<Sensor> lSensor;
 
-	// Logging
+	// Logging I
 	static long tsNow = 0;
 	FileWriter fwCompass;
 	FileWriter fwAccelerometer;
+	FileWriter fwBarometer;
+	FileWriter fwGyrometer;
 	FileWriter fwWifi;
 	FileWriter fwGPS;
 	boolean logging = false;
@@ -244,8 +246,12 @@ public class FlowPath extends Activity {
 		// Sensors
 		for (int i = 0; i < lSensor.size(); i++) {
 			// Register only compass and accelerometer
-			if (lSensor.get(i).getType() == Sensor.TYPE_ACCELEROMETER
-					|| lSensor.get(i).getType() == Sensor.TYPE_ORIENTATION) {
+			
+			switch(lSensor.get(i).getType()){
+			case Sensor.TYPE_ACCELEROMETER:
+			case Sensor.TYPE_ORIENTATION:
+			case Sensor.TYPE_GYROSCOPE:
+			case Sensor.TYPE_PRESSURE:
 				sm.registerListener(mySensorEventListener, lSensor.get(i),
 						SensorManager.SENSOR_DELAY_GAME);
 				Log.i(LOG_ID, "Registered " + lSensor.get(i).getName());
@@ -340,12 +346,19 @@ public class FlowPath extends Activity {
 			return false;
 		}
 
+		// Logging II
 		fwCompass = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
 				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
-				"comp.csv");
+				"compass.csv");
 		fwAccelerometer = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
 				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
-				"acc.csv");
+				"accelerometer.csv");
+		fwBarometer = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
+				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
+				"barometer.csv");
+		fwGyrometer = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
+				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
+				"gyroscope.csv");
 		fwWifi = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
 				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
 				"wifi.txt");
@@ -353,9 +366,13 @@ public class FlowPath extends Activity {
 				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
 				"GPS.csv");
 
+		;
+
 		try {
 			fwCompass.createFileOnCard();
 			fwAccelerometer.createFileOnCard();
+			fwBarometer.createFileOnCard();
+			fwGyrometer.createFileOnCard();
 			fwWifi.createFileOnCard();
 			fwGPS.createFileOnCard();
 		} catch (FileNotFoundException e) {
@@ -366,14 +383,20 @@ public class FlowPath extends Activity {
 
 		avwCapture.startCapture();
 
-		// write headers to files
-		String data = "time(ms);azimuth;pitch;roll";
+		// Logging III
+		String data = "time(millis)"+DELIM+"azimuth"+DELIM+"pitch"+DELIM+"roll";
 		fwCompass.appendLineToFile(data);
 
-		data = "time(ms);x;y;z";
+		data = "time(millis)"+DELIM+"x"+DELIM+"y"+DELIM+"z";
 		fwAccelerometer.appendLineToFile(data);
 
-		data = "time(ms);lat;long;alti";
+		data = "time(millis)"+DELIM+"pressure";
+		fwBarometer.appendLineToFile(data);
+		
+		data = "time(millis)"+DELIM+"x"+DELIM+"y"+DELIM+"z";
+		fwGyrometer.appendLineToFile(data);
+		
+		data = "time(millis)"+DELIM+"lat"+DELIM+"long"+DELIM+"alti";
 		fwGPS.appendLineToFile(data);
 
 		// Wifi
@@ -414,9 +437,11 @@ public class FlowPath extends Activity {
 		if (logging) {
 			logging = false;
 
-			// close files
+			// Logging IV
 			fwCompass.closeFileOnCard();
 			fwAccelerometer.closeFileOnCard();
+			fwBarometer.closeFileOnCard();
+			fwGyrometer.closeFileOnCard();
 			fwWifi.closeFileOnCard();
 			fwGPS.closeFileOnCard();
 
@@ -443,18 +468,24 @@ public class FlowPath extends Activity {
 				switch (event.sensor.getType()) {
 				case Sensor.TYPE_ACCELEROMETER:
 					// relative time stamp; x; y; z
-					data = ("" + ts + "; " + event.values[0] + "; "
-							+ event.values[1] + "; " + event.values[2])
-							.replace('.', ',');
+					data = "" + ts + DELIM + event.values[0] + DELIM
+							+ event.values[1] + DELIM + event.values[2];
 					fwAccelerometer.appendLineToFile(data);
 					break;
 				case Sensor.TYPE_ORIENTATION:
 					// relative time stamp; azimuth; pitch; roll
-					data = ("" + ts + "; " + event.values[0] + "; "
-							+ event.values[1] + "; " + event.values[2])
-							.replace(".", ",");
+					data = "" + ts + DELIM + event.values[0] + DELIM
+							+ event.values[1] + DELIM + event.values[2];
 					fwCompass.appendLineToFile(data);
 					break;
+				case Sensor.TYPE_PRESSURE:
+					data = "" + ts + DELIM + event.values[0];
+					fwBarometer.appendLineToFile(data);
+					break;
+				case Sensor.TYPE_GYROSCOPE:
+					data = "" + ts + DELIM + event.values[0] + DELIM
+							+ event.values[1] + DELIM + event.values[2];
+					fwGyrometer.appendLineToFile(data);
 				default:
 				}
 			}
