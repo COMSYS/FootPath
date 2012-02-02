@@ -1,8 +1,6 @@
 package de.uvwxy.footpath.gui;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
@@ -10,23 +8,9 @@ import java.net.Socket;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -36,7 +20,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import de.uvwxy.footpath.R;
@@ -120,7 +103,7 @@ public class FlowPath extends Activity {
 	//DCIF	528 × 384
 	public static final int PIC_SIZE_WIDTH = 320;
 	public static final int PIC_SIZE_HEIGHT = 240;
-	public static final int PIC_FPS = 30;
+	public static final int PIC_FPS = 60;
 	
 	private FlowPathParsingThread parsingThread = null;
 	
