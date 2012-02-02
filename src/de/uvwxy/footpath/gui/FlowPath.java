@@ -38,18 +38,12 @@ import de.uvwxy.footpath.h263.FileWriter;
 import de.uvwxy.footpath.h263.SocketAudioVideoWriter;
 
 /**
- * This activity gives the user the possiblity of recording sensor,wifi and
- * audio/video data. The data will be dumped onto the sdcard. There is the
- * possiblity of entering a username, and a manually counted amount of steps.
- * Timestamps are used for identifying different runs.
+ * This activity gives the user the possibility of recording sensor, WIFI and
+ * audio/video data. The data will be dumped onto the sd card. There is the
+ * possibility of entering a user name, and a manually counted amount of steps.
+ * Time stamps are used for identifying different runs.
  * 
- * A possible output:
- * 
- * /sdcard/footsteps_logs/1287315334162_Paul.mp4
- * /sdcard/footsteps_logs/1287315334162_Paul_accelerometer.csv
- * /sdcard/footsteps_logs/1287315334162_Paul_compass.csv
- * /sdcard/footsteps_logs/1287315334162_Paul_steps.txt
- * /sdcard/footsteps_logs/1287315334162_Paul_wifi.txt
+ * Output is in a directory, e.g. 1328199328345_320_240_60_h263
  * 
  * @author Paul
  * 
