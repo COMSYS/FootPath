@@ -6,6 +6,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
 import android.media.MediaRecorder;
 import android.os.ParcelFileDescriptor;
 import de.uvwxy.footpath.gui.FlowPath;
@@ -51,6 +53,9 @@ public class SocketAudioVideoWriter {
 	 */
 	public void registerCapture() throws IllegalStateException, IOException {
 		recorder = new MediaRecorder();
+		
+		
+		
 		recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
 		recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
@@ -65,12 +70,14 @@ public class SocketAudioVideoWriter {
 		recorder.setPreviewDisplay(FlowPath.sh01.getSurface());
 		recorder.prepare();
 	}
+	
+	
 
 	/**
 	 * Starts the capture
 	 */
 	public void startCapture() {
-		recorder.start();
+	    recorder.start();		
 	}
 
 	/**
@@ -79,6 +86,14 @@ public class SocketAudioVideoWriter {
 	public void stopCapture() {
 		recorder.stop();
 		recorder.reset();
+		Camera mCamera = Camera.open();
+		if( mCamera != null){
+            Parameters mParams = mCamera.getParameters();
+            mParams.setFlashMode( Parameters.FLASH_MODE_OFF );
+            mCamera.setParameters( mParams );
+	    
+	    }
+		mCamera.release();
 	}
 
 	/**
