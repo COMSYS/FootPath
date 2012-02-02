@@ -1,6 +1,5 @@
 package de.uvwxy.footpath.h263;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -8,9 +7,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import android.media.MediaRecorder;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 import de.uvwxy.footpath.gui.FlowPath;
 
 /**

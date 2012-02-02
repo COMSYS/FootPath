@@ -1,7 +1,5 @@
 package de.uvwxy.footpath.gui;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,10 +8,8 @@ import java.net.Socket;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.Sensor;
@@ -26,7 +22,6 @@ import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -39,8 +34,8 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath.h263.SocketAudioVideoWriter;
 import de.uvwxy.footpath.h263.FileWriter;
+import de.uvwxy.footpath.h263.SocketAudioVideoWriter;
 
 /**
  * This activity gives the user the possiblity of recording sensor,wifi and

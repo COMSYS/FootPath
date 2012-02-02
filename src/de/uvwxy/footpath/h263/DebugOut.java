@@ -14,19 +14,16 @@ public class DebugOut {
 	private static boolean vv = false;
 	private static boolean vvv = false;
 	
-	/**
-	 * We have all learned that this should be a singleton object. But as we just
-	 * want to have things working right _now_ it aint ;)
-	 * @param v
-	 * @param vv
-	 * @param vvv
-	 */
-	public DebugOut(boolean v, boolean vv, boolean vvv) {
-		super();
-		DebugOut.v = v;
-		DebugOut.vv = vv;
-		DebugOut.vvv = vvv;
+	public static void setV(boolean flag){
+		v = flag;
 	}
+	public static void setVV(boolean flag){
+		vv = flag;
+	}
+	public static void setVVV(boolean flag){
+		vvv = flag;
+	}
+	
 
 	public static void debug_v(String s) {
 		if (v)
