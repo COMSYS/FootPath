@@ -19,13 +19,11 @@ import de.uvwxy.footpath.h263.H263Parser;
 public class FlowPathParsingThread extends Thread {
 	private boolean bRunning = false;
 	private H263Parser parser = null;
-	private String filePath = null;
 	private DebugOut log = null;
 	private PaintBoxMVs pbMVs = null;
 
-	public FlowPathParsingThread(String filePath, PaintBoxMVs pbMVs,
+	public FlowPathParsingThread(PaintBoxMVs pbMVs,
 			InputStream in) {
-		this.filePath = filePath;
 		this.pbMVs = pbMVs;
 
 		log = new DebugOut(false, false, false);
@@ -53,7 +51,6 @@ public class FlowPathParsingThread extends Thread {
 		float[][][] mvs = null;
 		timeMillis = System.currentTimeMillis();
 
-		log.debug_v("parsing started");
 		while (bRunning) {
 			// ISOBoxParser boxParser = new ISOBoxParser(in);
 			try {

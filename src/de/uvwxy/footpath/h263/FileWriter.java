@@ -16,6 +16,7 @@ import android.os.Environment;
  */
 public class FileWriter {
 	PrintWriter p;
+	String folder;
 	String fileName;
 
 	/**
@@ -24,7 +25,8 @@ public class FileWriter {
 	 * @param fileName
 	 *            the file name
 	 */
-	public FileWriter(String fileName) {
+	public FileWriter(String folder, String fileName) {
+		this.folder = folder;
 		this.fileName = fileName;
 	}
 
@@ -36,7 +38,7 @@ public class FileWriter {
 	 */
 	public void createFileOnCard() throws FileNotFoundException {
 		File dir = new File(Environment.getExternalStorageDirectory(),
-				de.uvwxy.footpath.gui.FlowPath.LOG_DIR);
+				de.uvwxy.footpath.gui.FlowPath.LOG_DIR + "/" + folder);
 		dir.mkdir();
 		p = new PrintWriter(new File(dir, fileName));
 	}
