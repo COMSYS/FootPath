@@ -768,8 +768,10 @@ public class H263Parser {
 				p.hMVDs[x][y][0] = empty;
 				p.hMVDs[x][y][1] = empty;
 
-			} else if (hMCBPC[0] == 4){
+			} else if (hmMCBPC[0] == 4){
 				// TODO: BLOCK TYPE 4 IS NOT HANDLED!!!!!! (found 03.02.2012)
+				p.hMVDs[x][y][0] = empty;
+				p.hMVDs[x][y][1] = empty;
 			} else {
 				// TODO: MCPBC decoding failed (something is unimplemented here)
 				numBrokenFrames++;
