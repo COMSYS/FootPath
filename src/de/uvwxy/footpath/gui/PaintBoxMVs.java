@@ -12,7 +12,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 	private int mvCount = 0;
 
 	private boolean surface_ok = false;
-	private boolean paintMVs = false;
+	private boolean paintMVs = true;
 	
 	private final int FRAME_NUM = 5;
 	

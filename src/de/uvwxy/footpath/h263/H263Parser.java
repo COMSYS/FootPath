@@ -1145,7 +1145,7 @@ public class H263Parser {
 		if (tempBits == -1) {
 			return hMCBPC4PFrames[24];
 		}
-
+		Log.i("FLOWPATH", "MCBPC component not found with " + Integer.toBinaryString(tempBits));
 		return null;
 	}
 
@@ -1247,6 +1247,8 @@ public class H263Parser {
 		if (tempBits == -1) {
 			return hCBPYTable[15];
 		}
+		
+		Log.i("FLOWPATH", "CBPY component not found with " + Integer.toBinaryString(tempBits));
 		return null;
 	}
 
