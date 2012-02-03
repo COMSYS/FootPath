@@ -23,6 +23,7 @@ public class H263Parser {
 
 	private int numIframes = 0;
 	private int numPframes = 0;
+	private int numBrokenFrames = 0;
 	private int pictureBoxCount = 0;
 	private int groupOfBlocksCount = 0;
 	private int macroBlockCount = 0;
@@ -710,11 +711,13 @@ public class H263Parser {
 			if (hmMCBPC != null && hmMCBPC[0] != -1) { // stuffing check
 				hmCBPY = readCBPY();
 				if (hmCBPY == null) {
-					throw new IOException("hCBPY failed");
+					numBrokenFrames++;
+					throw new IOException("hCBPY failed, " + x + ", " + y);
 				}
 			} else {
 				// TODO: there might be stuffing
-				throw new IOException("hMCBPC failed");
+				numBrokenFrames++;
+				throw new IOException("hMCBPC failed, " + x + ", " + y);
 			}
 
 			if (!p.hModifiedQuantization
@@ -2991,7 +2994,7 @@ public class H263Parser {
 	public String getStats() {
 		String t = "I Frames: " + numIframes + ", P Frames: " + numPframes
 				+ "(+" + (numPframes - oldFramesNum) + ")" + "\nSize: " + width
-				+ "x" + height;
+				+ "x" + height + "\nBrokenFrames: " + numBrokenFrames;
 		oldFramesNum = numPframes;
 		return t;
 	}
