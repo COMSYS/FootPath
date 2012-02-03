@@ -3,6 +3,7 @@ package de.uvwxy.footpath.h263;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.concurrent.BrokenBarrierException;
 
 import de.uvwxy.footpath.gui.FlowPath;
 
@@ -726,6 +727,7 @@ public class H263Parser {
 				hMDQUANT = readBits(2);
 			} else if (p.hModifiedQuantization) {
 				// TODO: modified quantization not implemented
+				Log.i("FLOWPATH", "modified quantization not implemented");
 			}
 
 			// TODO: parse MVD (two Variable Length Codes (VLC)
@@ -759,14 +761,19 @@ public class H263Parser {
 				} else {
 					// read MVD component (x2) from Table D.3
 					// TODO: unrestricted vector mode is not implemented
+					Log.i("FLOWPATH", "unrestricted vector mode is not implemented");
 				}
 			} else if (hmMCBPC[0] == 3) {
 				// no MVD data
 				p.hMVDs[x][y][0] = empty;
 				p.hMVDs[x][y][1] = empty;
 
+			} else if (hMCBPC[0] == 4){
+				// TODO: BLOCK TYPE 4 IS NOT HANDLED!!!!!! (found 03.02.2012)
 			} else {
 				// TODO: MCPBC decoding failed (something is unimplemented here)
+				numBrokenFrames++;
+				Log.i("FLOWPATH", "MCPBC decoding failed (something is unimplemented here, block type" + hmMCBPC[0] +")");
 			}
 
 			// TODO: Read 6 blocks
