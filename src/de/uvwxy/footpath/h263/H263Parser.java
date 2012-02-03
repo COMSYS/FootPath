@@ -1603,6 +1603,7 @@ public class H263Parser {
 			return hMVDComponents[63];
 		}
 
+		Log.i("FLOWPATH", "MVD component not found with " + Integer.toBinaryString(tempBits));
 		return null;
 	}
 
@@ -2817,6 +2818,7 @@ public class H263Parser {
 			return 1;
 		}
 
+		Log.i("FLOWPATH", "TCOEFF not found with " + Integer.toBinaryString(tempBits));
 		return -1;
 	}
 
@@ -2989,7 +2991,7 @@ public class H263Parser {
 		return res;
 	}
 
-	int oldFramesNum = 0;
+	private int oldFramesNum = 0;
 
 	public String getStats() {
 		String t = "I Frames: " + numIframes + ", P Frames: " + numPframes
