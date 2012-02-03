@@ -3,7 +3,6 @@ package de.uvwxy.footpath.gui;
 import java.io.IOException;
 import java.io.InputStream;
 
-import de.uvwxy.footpath.h263.DebugOut;
 import de.uvwxy.footpath.h263.EOSException;
 import de.uvwxy.footpath.h263.H263Parser;
 
@@ -20,10 +19,6 @@ public class FlowPathParsingThread extends Thread {
 	public FlowPathParsingThread(PaintBoxMVs pbMVs,
 			InputStream in) {
 		this.pbMVs = pbMVs;
-
-		DebugOut.setV(false);
-		DebugOut.setVV(false);
-		DebugOut.setVVV(false);
 		
 		// int newPtr = boxParser.jumpIntoMDATBox();
 		boolean parsePs = true; // parse picture layer
@@ -64,10 +59,8 @@ public class FlowPathParsingThread extends Thread {
 					parser.skipH263Frame();
 				}
 			} catch (IOException e) {
-				DebugOut.debug_v("error parsing H263 " + e.getLocalizedMessage());
 				e.printStackTrace();
 			} catch (EOSException e) {
-				DebugOut.debug_v("error parsing H263 " + e.getLocalizedMessage());
 				e.printStackTrace();
 			}
 

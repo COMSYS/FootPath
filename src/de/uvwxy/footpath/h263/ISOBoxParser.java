@@ -39,8 +39,6 @@ public class ISOBoxParser {
 			
 			String type = readBoxType();
 
-			DebugOut.debug_vv("found type " + type + ", len " + len + " bytes, @" + fisPtr);
-
 			// Only skip this box if it has no sub boxes
 			if (type.equals("moov")) {
 				boxBytes += len;
@@ -72,8 +70,6 @@ public class ISOBoxParser {
 			}
 
 		} // while (fis.available() > 0)
-		
-		DebugOut.debug_vv("total file (derived from boxes) size: " + (boxBytes) + " bytes"); // = filesize
 	}
 
 	/**
@@ -90,8 +86,7 @@ public class ISOBoxParser {
 			String type = readBoxType();
 
 			if (type.equals("mdat")) {
-				DebugOut.debug_vv("found type " + type + ", len " + len + " @"
-						+ fisPtr);
+
 				// TODO write code to dumphere
 				FileOutputStream out = new FileOutputStream(outFile);
 
@@ -125,7 +120,6 @@ public class ISOBoxParser {
 			} else {
 				skipInFrontOfNextHeader(len);
 			} // if (type.equals("mdat"))
-			DebugOut.debug_vv("found type " + type + ", len " + len + " @" + fisPtr);
 		}
 	}
 	
@@ -137,15 +131,11 @@ public class ISOBoxParser {
 			String type = readBoxType();
 
 			if (type.equals("mdat")) {
-				DebugOut.debug_vv("found " + type + " box, len " + len);
-				DebugOut.debug_vv("returning fisPtr: " + fisPtr);
 				return fisPtr;
 			} else {
 				skipInFrontOfNextHeader(len);
 			} // if (type.equals("mdat"))
 		}
-		DebugOut.debug_vv("mdat not found");
-		DebugOut.debug_vv("returning -1");
 		return -1;
 	}
 
