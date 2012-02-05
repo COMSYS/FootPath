@@ -161,6 +161,7 @@ public class FlowPath extends Activity {
 	private void startServer(int port) {
 		try {
 			sckSrvListen = new ServerSocket(port);
+			sckSrvListen.setReceiveBufferSize(80000);
 			st.start();
 		} catch (IOException e3) {
 			e3.printStackTrace();

@@ -32,7 +32,7 @@ public class SocketAudioVideoWriter {
 	private void startClient(String hostname, int port){
 		try {
 			sckCltSend = new Socket(InetAddress.getByName(hostname), port);
-			sckCltSend.setTcpNoDelay(true);
+			sckCltSend.setTcpNoDelay(false);
 		} catch (UnknownHostException e2) {
 			e2.printStackTrace();
 		} catch (IOException e2) {
