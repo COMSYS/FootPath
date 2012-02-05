@@ -3052,19 +3052,19 @@ public class H263Parser {
 			break;
 		}
 		
-		String bits = "Bits: ";
-		String ints = "Ints: ";
+		String bits = "";
+		String ints = "";
 		for (int i = 0; i < t_tempSize; i++){
-			bits += byteToBin(t_temp[(t_tempPtr+i)%t_tempSize])+ " ";
-			ints += "" + t_temp[(t_tempPtr+i)%t_tempSize] + " ";
+			bits = byteToBin(t_temp[(t_tempPtr-i)%t_tempSize])+ " " + bits;
+			ints = "" + t_temp[(t_tempPtr-i)%t_tempSize] + " " + ints;
 		}
 		
 		Log.i("FLOWPATH",
 //				"FrameType: " + type 
 				"\n>>>>\n" + decTry + " " + s
 				+ "\n" + bitPtr
-				+ "\n" + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
-				+ "\n" + ints + " | " + byteBuffer[byteBufferPointer]
+				+ "\nBits: " + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
+				+ "\nInts:" + ints + " | " + byteBuffer[byteBufferPointer]
 				+ "\n<<<<"
 //				+ "\nUMV:" +  p.hUnrestrictedMotionVector
 				);
