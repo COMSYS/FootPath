@@ -1158,7 +1158,7 @@ public class H263Parser {
 		if (tempBits == -1) {
 			return hMCBPC4PFrames[24];
 		}
-		printAndroidLogError("MCBPC component not found with (13bits) " + Integer.toBinaryString(tempBits));
+//		printAndroidLogError("MCBPC component not found with (13bits) " + Integer.toBinaryString(tempBits));
 		return null;
 	}
 
@@ -1261,7 +1261,7 @@ public class H263Parser {
 			return hCBPYTable[15];
 		}
 		
-		printAndroidLogError("CBPY component not found with (6bits) " + Integer.toBinaryString(tempBits));
+//		printAndroidLogError("CBPY component not found with (6bits) " + Integer.toBinaryString(tempBits));
 		return null;
 	}
 
@@ -3070,10 +3070,10 @@ public class H263Parser {
 		Log.i("FLOWPATH",
 //				"FrameType: " + type 
 				"\n>>>>\n" + decTry + " " + s
-				+ "\n" + bitPtr
-				+ "\nBits:\n" + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
+//				+ "\n" + bitPtr
+//				+ "\nBits:\n" + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
 //				+ "\nInts:\n" + ints + " | " + byteBuffer[byteBufferPointer]
-				+ "\n<<<<"
+//				+ "\n<<<<"
 //				+ "\nUMV:" +  p.hUnrestrictedMotionVector
 				);
 	}
