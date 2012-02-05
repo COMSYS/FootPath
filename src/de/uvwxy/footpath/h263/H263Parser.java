@@ -48,10 +48,14 @@ public class H263Parser {
 	private boolean breakOnBitErrors = true;
 	private boolean noGSCMode = true;
 
-	// I herby assume that there will be no frame smaller than 128 bytes
-	// this is supposed to stop the parser wandering off into areas at the
-	// end of the file where PSC are detected but no pictures are to befound
-	private static int MINIMUM_BYTES_BETWEEN_PICTURES = 128;
+//	01 01110010 00011100 11100000 00000001 00000100 00010000 10010011 11100011 11001111 
+//	   00111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 
+//	   11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 
+//     11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 
+//     11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111100
+	// = 10 + 10 + 10 + 9 + 8 = 47
+	// The smallest frame ist a total black picture consisting of 47 bytes.
+	private static int MINIMUM_BYTES_BETWEEN_PICTURES = 46;
 
 	/**
 	 * TODO: write this.
@@ -742,8 +746,13 @@ public class H263Parser {
 				if (!p.hUnrestrictedMotionVector) {
 					// horizontal component followed by vertical component
 					mvdHorizontal = readMVDComponent();
+					if (mvdHorizontal == null){
+						printAndroidLogError("mvdHorizontal failed " + x + ", " + y);
+					}
 					mvdVertical = readMVDComponent();
-
+					if (mvdVertical == null){
+						printAndroidLogError("mvdVertical failed " + x + ", " + y);
+					}
 					if (mvdHorizontal != null && mvdVertical != null) {
 						p.hMVDs[x][y][0] = mvdHorizontal;
 						p.hMVDs[x][y][1] = mvdVertical;
@@ -781,7 +790,7 @@ public class H263Parser {
 			} else {
 				// TODO: MCPBC decoding failed (something is unimplemented here)
 				numBrokenFrames++;
-				printAndroidLogError("MCPBC decoding failed (something is unimplemented here, block type" + hmMCBPC[0] +")");
+				printAndroidLogError("MCPBC decoding failed (something is unimplemented here, block type" + hmMCBPC[0] +") " + x + ", " + y);
 			}
 
 			// TODO: Read 6 blocks
@@ -1618,7 +1627,6 @@ public class H263Parser {
 			return hMVDComponents[63];
 		}
 
-		printAndroidLogError("MVD component not found with " + Integer.toBinaryString(tempBits));
 		return null;
 	}
 
@@ -2833,7 +2841,7 @@ public class H263Parser {
 			return 1;
 		}
 
-		printAndroidLogError("TCOEFF not found with " + Integer.toBinaryString(tempBits));
+//		printAndroidLogError("TCOEFF not found with " + Integer.toBinaryString(tempBits));
 		return -1;
 	}
 
@@ -3019,11 +3027,11 @@ public class H263Parser {
 		return t;
 	}
 	
-	int t_tempSize = 10;
+	int t_tempSize = 80;
 	byte[] t_temp = new byte[t_tempSize];
 	int t_tempPtr = 0;
 	
-	private void printAndroidLogError(String s) throws IOException{
+	private void printAndroidLogError(String s){
 		String type = "";
 		switch (p.hPictureCodingType){
 		case INTRA:
@@ -3055,20 +3063,19 @@ public class H263Parser {
 		String bits = "";
 		String ints = "";
 		for (int i = 0; i < t_tempSize; i++){
-			bits = byteToBin(t_temp[(t_tempPtr-i)%t_tempSize])+ " " + bits;
-			ints = "" + t_temp[(t_tempPtr-i)%t_tempSize] + " " + ints;
+			bits = (((i+1)%10==0) ? "\n" : "") + byteToBin(t_temp[(t_tempPtr-i)%t_tempSize])+ " " + bits;
+			ints = (((i+1)%10==0) ? "\n" : "") + t_temp[(t_tempPtr-i)%t_tempSize] + " " + ints;
 		}
 		
 		Log.i("FLOWPATH",
 //				"FrameType: " + type 
 				"\n>>>>\n" + decTry + " " + s
 				+ "\n" + bitPtr
-				+ "\nBits: " + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
-				+ "\nInts:" + ints + " | " + byteBuffer[byteBufferPointer]
+				+ "\nBits:\n" + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
+//				+ "\nInts:\n" + ints + " | " + byteBuffer[byteBufferPointer]
 				+ "\n<<<<"
 //				+ "\nUMV:" +  p.hUnrestrictedMotionVector
 				);
-		throw new IOException("err");
 	}
 	
 	private String byteToBin(byte b){
