@@ -120,6 +120,9 @@ public class H263Parser {
 	private int decTry = 0;
 	
 	private float[][][] decodePicture() throws IOException, EOSException {
+		p = new H263PictureLayer(blockWidth, blockHeight);
+//		mvs = new float[blockWidth][blockHeight][2];
+		
 		decTry++;
 		// checkForPictureStartCode();
 		checkForPictureStartCodeFaster();
@@ -545,7 +548,7 @@ public class H263Parser {
 							predictorY = mvMedian(true, mvA, mvB, mvC);
 							horizDiffs = p.hMVDs[x][y][0];
 							vertDiffs = p.hMVDs[x][y][1];
-
+							
 							tempX = horizDiffs[0] + predictorX;
 
 							// [-16,15.5] range!
@@ -707,6 +710,8 @@ public class H263Parser {
 			// no MVD data for this block
 			p.hMVDs[x][y][0] = empty;
 			p.hMVDs[x][y][1] = empty;
+			
+//			printAndroidLogError("PING " + x + ", " + y);
 		} else {
 			// coded macroblock
 
@@ -716,25 +721,39 @@ public class H263Parser {
 			// TODO: parse CBPY present if MCBPC is not stuffing
 			// Coded Block Pattern for luminance (CBPY) (Variable
 			// length)
+			
+			while (hmMCBPC != null && hmMCBPC[0] == -1) {
+				// reread hmMCBPC while we have stuffing
+				printAndroidLogError("STUFFING REMOVED");
+				hmMCBPC = readMCBPC4PFrames();
+			}
 
 			if (hmMCBPC != null && hmMCBPC[0] != -1) { // stuffing check
 				hmCBPY = readCBPY();
 				if (hmCBPY == null) {
 					numBrokenFrames++;
-					printAndroidLogError("hCBPY failed, " + x + ", " + y);
+					printAndroidLogError("hCBPY failed, " + x + ", " + y + ",  " 
+					+ p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
+					+ p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1] +  " mbg: " + hmMCBPC[0] + ", " + hmMCBPC[1] + ", " + hmMCBPC[2]);
+//							+ "\n" + lastTCOEFF[0] + ", " + lastTCOEFF[1] + ", " + lastTCOEFF[2] + ", " + lastTCOEFF[3]);
 					throw new IOException("hCBPY failed, " + x + ", " + y);
 				}
 			} else {
-				// TODO: there might be stuffing
+				// here we have hMCBPC == null so we are borked
 				numBrokenFrames++;
-				printAndroidLogError("hMCBPC failed, " + x + ", " + y);
+				printAndroidLogError("hMCBPC failed, " + x + ", " + y + ", " 
+						+ p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
+						+ p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1]);
 				throw new IOException("hMCBPC failed, " + x + ", " + y);
 			}
+			
+			
 
 			if (!p.hModifiedQuantization
 					&& (hmMCBPC[0] == 1 || hmMCBPC[0] == 4 || hmMCBPC[0] == 5)) {
-				// TODO: parse DQUANT (2bits)
+				// parse DQUANT (2bits)
 				hMDQUANT = readBits(2);
+//				printAndroidLogError("DQUANT");
 			} else if (p.hModifiedQuantization) {
 				// TODO: modified quantization not implemented
 				printAndroidLogError("modified quantization not implemented");
@@ -783,16 +802,25 @@ public class H263Parser {
 				p.hMVDs[x][y][0] = empty;
 				p.hMVDs[x][y][1] = empty;
 
+//				printAndroidLogError("PoOoNG");
+				// TODO CONTINUE HERE?
 			} else if (hmMCBPC[0] == 4){
 				// TODO: BLOCK TYPE 4 IS NOT HANDLED!!!!!! (found 03.02.2012)
 				p.hMVDs[x][y][0] = empty;
 				p.hMVDs[x][y][1] = empty;
+				
+//				printAndroidLogError("PING " + x + ", " + y);
+				// TODO CONTINUE HERE?
 			} else {
 				// TODO: MCPBC decoding failed (something is unimplemented here)
 				numBrokenFrames++;
 				printAndroidLogError("MCPBC decoding failed (something is unimplemented here, block type" + hmMCBPC[0] +") " + x + ", " + y);
 			}
 
+//			Log.i("FLOWPATH", "MVS @ " + x + ", " + y + ", " 
+//						+ p.hMVDs[x][y][0][0] + "|" + p.hMVDs[x][y][0][1] + "  "
+//						+ p.hMVDs[x][y][1][0] + "|" + p.hMVDs[x][y][1][1]);
+			
 			// TODO: Read 6 blocks
 			// 4 Luminance blocks
 			// 2 color difference blocks
@@ -845,20 +873,25 @@ public class H263Parser {
 
 	private boolean tcoef_alive = true;
 	private int ret = -1;
-
+	private int[] lastTCOEFF = null;
 	private void decodeBlockLayer(boolean intradc, boolean tcoef)
 			throws IOException {
 		if (intradc) {
 			// read INTRADC
 			readBits(8);
+//			Log.i("FLOWPATH", "INTRADC: " + readBits(8));
+			
 		}
 
 		if (tcoef) {
 			tcoef_alive = true;
 			while (tcoef_alive) {
 				ret = consumeTCOEFF();
+				
 				// [block] 1, level 1, last 1
 				if (ret != -1) {
+//					Log.i("FLOWPATH", "lastTCOEFF: " + "; " + lastTCOEFF[0] + "; " + lastTCOEFF[1] + "; " + lastTCOEFF[2] + "; " + lastTCOEFF[3]);
+//					ret = lastTCOEFF[0];
 					if (ret == 1) {
 						// block decoded
 						tcoef_alive = false;
@@ -869,7 +902,6 @@ public class H263Parser {
 				}
 			}
 		}
-
 	}
 
 	private void dumpNextByteToOut() throws IOException {
@@ -3001,6 +3033,8 @@ public class H263Parser {
 		if (byteBufferPointer == -1 || byteBufferPointer == byteBufferSize) {
 			// update buffer
 			int res = fis.read(byteBuffer);
+			byteBufferSize = res;
+			Log.i("FLOWPATH", "bytes " + res);
 			byteBufferPointer = 0;
 		}
 
@@ -3070,8 +3104,8 @@ public class H263Parser {
 		Log.i("FLOWPATH",
 //				"FrameType: " + type 
 				"\n>>>>\n" + decTry + " " + s
-//				+ "\n" + bitPtr
-//				+ "\nBits:\n" + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
+				+ "\n@" + (bitPtr+1)
+				+ "\nBits:\n" + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
 //				+ "\nInts:\n" + ints + " | " + byteBuffer[byteBufferPointer]
 //				+ "\n<<<<"
 //				+ "\nUMV:" +  p.hUnrestrictedMotionVector
