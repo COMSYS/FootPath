@@ -55,7 +55,7 @@ public class H263Parser {
 //     11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111100
 	// = 10 + 10 + 10 + 9 + 8 = 47
 	// The smallest frame ist a total black picture consisting of 47 bytes.
-	private static int MINIMUM_BYTES_BETWEEN_PICTURES = 46;
+	private static int MINIMUM_BYTES_BETWEEN_PICTURES = 4;
 
 	/**
 	 * TODO: write this.
@@ -949,11 +949,11 @@ public class H263Parser {
 	private void checkForPictureStartCodeFaster() throws IOException,
 			EOSException {
 		// We assume PSC is byte aligned, thus only check for trailing 10 0000
-
-		long ts = System.currentTimeMillis();
-
-		int bitsBufPSC = 0;
-		int bitCount = 0;
+//
+//		long ts = System.currentTimeMillis();
+//
+//		int bitsBufPSC = 0;
+//		int bitCount = 0;
 
 		int state = -1;
 		while (true) {
@@ -2979,7 +2979,7 @@ public class H263Parser {
 			}
 		}
 	}
-
+	
 	// #########################################################################
 	// ########################### bit stream access ###########################
 	// #########################################################################
@@ -3015,65 +3015,107 @@ public class H263Parser {
 		return res;
 	}
 
-	private int byteBufferSize = 1; // ~10kb
-	private byte[] byteBuffer = new byte[byteBufferSize];
-	private int byteBufferPointer = -1;
-	private int lastNumOfBytes = -1;
+//	private int byteBufferSize = 1; // ~10kb
+//	private byte[] byteBuffer = new byte[byteBufferSize];
+//	private int byteBufferPointer = -1;
+//	private int lastNumOfBytes = -1;
 
-	private int readNextByte() throws IOException {
-//		printAndroidLogError("#######111#####bytes " + lastNumOfBytes);
-		if (byteBufferPointer == -1 || byteBufferPointer >= (lastNumOfBytes)){
-			do {
-				// update buffer
-				lastNumOfBytes = fis.read(byteBuffer);
-				
-				byteBufferPointer = 0;
-				// as long as 0 > -1, i.e. nothing read
-			} while (lastNumOfBytes == -1 || byteBufferPointer >= (lastNumOfBytes));
-//			fisPtr+=lastNumOfBytes;
-			if (lastNumOfBytes != byteBufferSize){
-				printAndroidLogError("#######000#####bytes " + lastNumOfBytes);
-			}
-		}
 	
-		if(byteBufferPointer>=lastNumOfBytes){
-			printAndroidLogError("######################### WHY????");
+	private int readNextByte() throws IOException {
+		int ret = -1;
+		
+//		printAndroidLogError("loop start");
+		do {
+			ret = fis.read();
+		} while (ret == -1);
+//		printAndroidLogError("loop end");
+		
+		// reset bit reader
+		bitPtr = 7;
+		lastByte = -1;
+
+		return ret;
+	}
+	
+	private int lastByte = -1;
+	/**
+	 * lastByte == -1 -> lastByte is not set yet.
+	 * @return
+	 * @throws IOException 
+	 */
+	private int readNextBit() throws IOException {
+		while (lastByte == -1){
+			lastByte = fis.read();
 		}
 		
-		bitPtr = 7;
-		byteBufferPointer++;
-		fisPtr++;
-//		t_temp[(++t_tempPtr)%t_tempSize]=byteBuffer[byteBufferPointer -1];
-		return byteBuffer[byteBufferPointer - 1];
-	}
-
-	private int readNextBit() throws IOException {
-
-		if (byteBufferPointer == -1 || byteBufferPointer >= (lastNumOfBytes)){
-			do {
-				// update buffer
-				lastNumOfBytes = fis.read(byteBuffer);
-//				fisPtr+=lastNumOfBytes;
-				
-				byteBufferPointer = 0;
-			} while (lastNumOfBytes == -1 || byteBufferPointer >= (lastNumOfBytes));
-			fisPtr+=lastNumOfBytes;
-			if (lastNumOfBytes != byteBufferSize){
-				printAndroidLogError("##############bytes " + lastNumOfBytes);
-			}
-		}
-	
-		int res = (byteBuffer[byteBufferPointer] & (0x01 << bitPtr)) >> bitPtr;
+		int ret = (lastByte & (0x01 << bitPtr)) >> bitPtr;
 		
 		bitPtr--;
 		if (bitPtr < 0) {
 			bitPtr = 7;
-//			t_temp[(++t_tempPtr)%t_tempSize]=byteBuffer[byteBufferPointer];
-			byteBufferPointer++;
 			fisPtr++;
+			// reset lastByte, such that we know we have to read a new bite
+			// to read bits from
+			lastByte = -1;
 		}
-		return res;
+		
+		return ret;
 	}
+	
+//	private int readNextByte() throws IOException {
+////		printAndroidLogError("#######111#####bytes " + lastNumOfBytes);
+//		if (byteBufferPointer == -1 || byteBufferPointer >= (lastNumOfBytes)){
+//			do {
+//				// update buffer
+//				lastNumOfBytes = fis.read(byteBuffer);
+//				
+//				byteBufferPointer = 0;
+//				// as long as 0 > -1, i.e. nothing read
+//			} while (lastNumOfBytes == -1 || byteBufferPointer >= (lastNumOfBytes));
+////			fisPtr+=lastNumOfBytes;
+//			if (lastNumOfBytes != byteBufferSize){
+//				printAndroidLogError("#######000#####bytes " + lastNumOfBytes);
+//			}
+//		}
+//	
+//		if(byteBufferPointer>=lastNumOfBytes){
+//			printAndroidLogError("######################### WHY????");
+//		}
+//		
+//		bitPtr = 7;
+//		byteBufferPointer++;
+//		fisPtr++;
+////		t_temp[(++t_tempPtr)%t_tempSize]=byteBuffer[byteBufferPointer -1];
+//		return byteBuffer[byteBufferPointer - 1];
+//	}
+//
+//	private int readNextBit() throws IOException {
+//
+//		if (byteBufferPointer == -1 || byteBufferPointer >= (lastNumOfBytes)){
+//			do {
+//				// update buffer
+//				lastNumOfBytes = fis.read(byteBuffer);
+////				fisPtr+=lastNumOfBytes;
+//				
+//				byteBufferPointer = 0;
+//			} while (lastNumOfBytes == -1 || byteBufferPointer >= (lastNumOfBytes));
+//			fisPtr+=lastNumOfBytes;
+//			if (lastNumOfBytes != byteBufferSize){
+//				printAndroidLogError("##############bytes " + lastNumOfBytes);
+//			}
+//		}
+//	
+//		int res = (byteBuffer[byteBufferPointer] & (0x01 << bitPtr)) >> bitPtr;
+//		
+//		bitPtr--;
+//		if (bitPtr < 0) {
+//			bitPtr = 7;
+////			t_temp[(++t_tempPtr)%t_tempSize]=byteBuffer[byteBufferPointer];
+//			byteBufferPointer++;
+//			fisPtr++;
+//		}
+//		return res;
+//	}
 
 	private int oldFramesNum = 0;
 
@@ -3128,7 +3170,7 @@ public class H263Parser {
 		Log.i("FLOWPATH",
 //				"FrameType: " + type 
 				"\n>>>>\n" + decTry + " " + s
-				+ "\nnum of bytes: " + lastNumOfBytes + ", pointer: " + byteBufferPointer
+//				+ "\nnum of bytes: " + lastNumOfBytes + ", pointer: " + byteBufferPointer
 				+ "\n@" + (fisPtr+1)
 //				+ "\nBits:\n" + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
 //				+ "\nInts:\n" + ints + " | " + byteBuffer[byteBufferPointer]
