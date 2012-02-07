@@ -5,8 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-
-
 public class ISOBoxParser {
 
 	private FileInputStream fis = null;
@@ -32,24 +30,19 @@ public class ISOBoxParser {
 	 */
 	public void printBoxTypes() throws IOException {
 		// pointer is 0
-		int boxBytes = 0;
+
 		
 		while (fis.available() > 0) {
 			int len = readBoxLen();
-			
 			String type = readBoxType();
 
 			// Only skip this box if it has no sub boxes
 			if (type.equals("moov")) {
-				boxBytes += len;
 			} else if (type.equals("ftyp")) {
-				boxBytes += len;
 				skipInFrontOfNextHeader(len);
 			}else if (type.equals("free")) {
-				boxBytes += len;
 				skipInFrontOfNextHeader(len);
 			} else if (type.equals("mdat")) {
-				boxBytes += len;
 				skipInFrontOfNextHeader(len);
 			} else if (type.equals("udta")) {
 
@@ -91,7 +84,6 @@ public class ISOBoxParser {
 				FileOutputStream out = new FileOutputStream(outFile);
 
 				int lenLeft = len - 8; // header + type already read
-				int fileSizeInBytes = lenLeft;
 				while (lenLeft > 0) {
 					if (lenLeft > 1024) {
 						byte[] b = new byte[1024];
