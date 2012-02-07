@@ -15,8 +15,8 @@ import de.uvwxy.footpath.gui.FlowPath;
  * 
  */
 public class H263Parser {
-	private BufferedInputStream fis = null;
-	private int lastFisPtr = 0;
+	private InputStream fis = null;
+	private int lastFisPtr = 0; // used to calculate PSC bit pos diff
 	private int fisPtr = 0; // points to the next unread byte
 	private int bitPtr = 7; // points to the current bit of the last byte read
 	
@@ -47,14 +47,8 @@ public class H263Parser {
 	private boolean breakOnBitErrors = true;
 	private boolean noGSCMode = true;
 
-//	01 01110010 00011100 11100000 00000001 00000100 00010000 10010011 11100011 11001111 
-//	   00111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 
-//	   11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 
-//     11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111 
-//     11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111100
-	// = 10 + 10 + 10 + 9 + 8 = 47
-	// The smallest frame ist a total black picture consisting of 47 bytes.
-	// there are even smaller frames -> 24
+
+	// there are even small frames -> 24 (as seen with 320x240@30fps)
 	private static int MINIMUM_BYTES_BETWEEN_PICTURES = 24;
 
 	/**
@@ -66,7 +60,7 @@ public class H263Parser {
 	public H263Parser(InputStream fis, int ptrOffset, boolean parsePs,
 			boolean parseGOBs, boolean parseMBs, boolean parseBs,
 			boolean blocking) {
-		this.fis = new BufferedInputStream(fis);
+		this.fis = fis;
 		this.fisPtr = ptrOffset;
 		this.parsePs = parsePs;
 		this.parseGOBs = parseGOBs;
@@ -305,7 +299,7 @@ public class H263Parser {
 			// A fixed length codeword of 2 bits which is present only if a
 			// custom picture clock frequency is in use (regardless of the
 			// value of UFEP).
-
+			printAndroidLogError("custom picture clock frequency");
 			p.hExtendedTemporalReference = readBits(2);
 		}
 
@@ -313,7 +307,7 @@ public class H263Parser {
 			// A variable length codeword of 1 or 2 bits that is present only
 			// if the optional Unrestricted Motion Vector mode is indicated in
 			// PLUSPTYPE and UFEP is 001.
-
+			printAndroidLogError("unrestricted motion vectors");
 			int bit_1 = readBits(1);
 			if (bit_1 == 0) {
 				int bit_2 = readBits(1);
@@ -335,7 +329,7 @@ public class H263Parser {
 			// A fixed length codeword of 2 bits which is present only if the
 			// optional Slice Structured mode (see Annex K) is indicated in
 			// PLUSPTYPE and UFEP is 001.
-
+			printAndroidLogError("slice structure mode");
 			p.hSliceStructuredSubmodeBits = readBits(2);
 		}
 
@@ -347,21 +341,10 @@ public class H263Parser {
 			// (regardless of the value of UFEP).
 
 			// FROM ANNEX 0, i.e. B-, EI- and EP-Pictures
-
+			printAndroidLogError("B || EI || EP Picture used");
 			p.hEnhancementLayerNumber = readBits(4);
 		}
 
-		if (p.hPictureCodingType == H263PCT.BPicture
-				|| p.hPictureCodingType == H263PCT.EIPicture
-				|| p.hPictureCodingType == H263PCT.EPPicture) {
-			// A fixed length codeword of 4 bits which is present only if the
-			// optional Temporal, SNR, and Spatial Scalability mode is in use
-			// (regardless of the value of UFEP).
-
-			// FROM ANNEX 0, i.e. B-, EI- and EP-Pictures
-
-			p.hReferenceLayerNumber = readBits(4);
-		}
 
 		if (p.hReferencePicureSelection && p.hUFEP == 1) {
 			// A fixed length codeword of 3 bits that is present only if the
@@ -374,6 +357,7 @@ public class H263Parser {
 			// A fixed length codeword of 1 bit that is present only if the
 			// optional Reference Picture Selection mode is in use (regardless
 			// of the value of UFEP).
+			printAndroidLogError("reference picture selection is in use");
 
 			p.hTemporalReferenceForPredictionIndication = readBits(1) == 1;
 
@@ -404,7 +388,7 @@ public class H263Parser {
 				} else {
 					// TODO: this is not implemented
 					// Houston we have a problem.
-//					printAndroidLogError("something with reference picture selection not implemented");
+					printAndroidLogError("something with reference picture selection not implemented");
 				}
 			} else {
 				// When set to "1", this signals the presence of the following
@@ -417,7 +401,7 @@ public class H263Parser {
 		if (p.hBackChannelMessageIndication == 1) {
 			// TODO: this is not implemented
 			// Let's hope this is not present
-//			printAndroidLogError("back channel maessage indication not implemented");
+			printAndroidLogError("back channel maessage indication not implemented");
 		}
 
 		if (p.hReferencePictureResampling) {
@@ -426,7 +410,7 @@ public class H263Parser {
 			// Reference Picture Resampling mode bit is set in PLUSPTYPE.
 
 			// Let's hope this is not present
-//			printAndroidLogError("reference picture resampling not implemented");
+			printAndroidLogError("reference picture resampling not implemented");
 		}
 
 		p.hQuantizerInformation = readBits(5);
@@ -448,6 +432,7 @@ public class H263Parser {
 			// It is 3 bits long for standard CIF picture clock frequency and
 			// is extended to 5 bits when a custom picture clock frequency is
 			// in use.
+			printAndroidLogError("improved PB frames");
 
 			if (p.hCustomPCF) {
 				// custom
@@ -480,7 +465,7 @@ public class H263Parser {
 			// the EOS or EOSBS codeword is byte aligned. Decoders shall be
 			// designed to discard ESTUF. See Annex C for a description of
 			// EOSBS and its use.
-//			printAndroidLogError("extra instertion information not implemented");
+			printAndroidLogError("extra instertion information not implemented");
 		}
 
 		// TODO: Remove Stuffing here for byte alignment?
@@ -689,13 +674,13 @@ public class H263Parser {
 
 	}
 
-	boolean hMCOD;
+	private boolean hMCOD;
 	// double[] empty = {0,0};
-	int hmMCBPC[];
-	int hmCBPY[];
-	int hMDQUANT;
-	float mvdHorizontal[];
-	float mvdVertical[];
+	private int hmMCBPC[];
+	private int hmCBPY[];
+	private int hMDQUANT;
+	private float mvdHorizontal[];
+	private float mvdVertical[];
 
 	private void decodeMacroBlock(H263PictureLayer p, int x, int y)
 			throws IOException {
