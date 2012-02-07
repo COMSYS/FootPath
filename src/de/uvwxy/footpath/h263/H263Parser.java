@@ -1,6 +1,5 @@
 package de.uvwxy.footpath.h263;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -43,6 +42,8 @@ public class H263Parser {
 	private boolean parseBs = false; // parse Block layer
 
 	private boolean blocking = false;
+	
+	private boolean detailedError = false;
 
 	private boolean breakOnBitErrors = true;
 	private boolean noGSCMode = true;
@@ -182,6 +183,7 @@ public class H263Parser {
 				// When set to "000", it indicates that only those extended
 				// PTYPE fields which need to be signalled in every picture
 				// header (MPPTYPE) are included in the current picture header.
+				printAndroidLogError("dafuq happened here?");
 			} // check if Optionlal Part of PlusTYPE is present
 
 			// Regardless of the value of UFEP, the following 9 bits are also
@@ -491,12 +493,18 @@ public class H263Parser {
 				p.hMVDs = new float[blockWidth][blockHeight][2][2];
 				mvs = new float[blockWidth][blockHeight][2];
 
+				boolean mbAreOk = true;
 				for (int y = 0; y < blockHeight; y++) {
 					for (int x = 0; x < blockWidth; x++) {
 
-						decodeMacroBlock(p, x, y);
+						try {
+							decodeMacroBlock(p, x, y);
+						} catch (H263MBException e) {
+							mbAreOk = false;
+							e.printStackTrace();
+						}
 
-						if (p.hMVDs != null) {
+						if (p.hMVDs != null && mbAreOk) {
 							// calculate MV
 							// setting up candidates
 							// | B | C |
@@ -547,6 +555,8 @@ public class H263Parser {
 							float[] mv = { tempX, tempY };
 							mvs[x][y] = mv;
 
+						} else if (p.hMVDs != null && !mbAreOk){
+							mvs[x][y] = empty;
 						}
 
 					}
@@ -683,7 +693,7 @@ public class H263Parser {
 	private float mvdVertical[];
 
 	private void decodeMacroBlock(H263PictureLayer p, int x, int y)
-			throws IOException {
+			throws IOException, H263MBException {
 		hMCOD = readBits(1) == 1; // false = coded
 
 		if (hMCOD) {
@@ -716,8 +726,7 @@ public class H263Parser {
 					+ p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
 					+ p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1] +  " mbg: " + hmMCBPC[0] + ", " + hmMCBPC[1] + ", " + hmMCBPC[2]);
 //							+ "\n" + lastTCOEFF[0] + ", " + lastTCOEFF[1] + ", " + lastTCOEFF[2] + ", " + lastTCOEFF[3]);
-//					throw new IOException("hCBPY failed, " + x + ", " + y);
-					return;
+					throw new H263MBException("hCBPY failed, " + x + ", " + y);
 				}
 			} else {
 				// here we have hMCBPC == null so we are borked
@@ -725,8 +734,8 @@ public class H263Parser {
 				printAndroidLogError("hMCBPC failed, " + x + ", " + y + ", " 
 						+ p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
 						+ p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1]);
-//				throw new IOException("hMCBPC failed, " + x + ", " + y);
-				return;
+				throw new H263MBException("hMCBPC failed, " + x + ", " + y);
+
 			}
 			
 			
@@ -791,7 +800,7 @@ public class H263Parser {
 				// TODO: MCPBC decoding failed (something is unimplemented here)
 				numBrokenFrames++;
 				printAndroidLogError("MCPBC decoding failed (something is unimplemented here, block type" + hmMCBPC[0] +") " + x + ", " + y);
-				return;
+				throw new H263MBException("MCBPC failed, " + x + ", " + y);
 			}
 
 //			Log.i("FLOWPATH", "MVS @ " + x + ", " + y + ", " 
@@ -852,7 +861,7 @@ public class H263Parser {
 	private int ret = -1;
 	private int[] lastTCOEFF = null;
 	private void decodeBlockLayer(boolean intradc, boolean tcoef)
-			throws IOException {
+			throws IOException, H263MBException {
 		if (intradc) {
 			// read INTRADC
 			readBits(8);
@@ -876,7 +885,7 @@ public class H263Parser {
 				} else {
 					// block decoding failed
 					printAndroidLogError("block decoding failed: ret == -1");
-					return;
+					throw new H263MBException("block decoding failed: ret == -1");
 				}
 			}
 		}
@@ -2990,6 +2999,8 @@ public class H263Parser {
 			ret = fis.read();
 		} while (ret == -1);
 		
+		errBuf[errBufPtr++%errBufSize] = ret;
+		
 		// reset bit reader
 		bitPtr = 7;
 		lastByte = -1;
@@ -3014,6 +3025,8 @@ public class H263Parser {
 		if (bitPtr < 0) {
 			bitPtr = 7;
 			fisPtr++;
+			
+			errBuf[errBufPtr++%errBufSize] = lastByte;
 			// reset lastByte, such that we know we have to read a new bite
 			// to read bits from
 			lastByte = -1;
@@ -3033,10 +3046,25 @@ public class H263Parser {
 		return t;
 	}
 	
-
+	private int errBufSize = 80;
+	private int[] errBuf = new int[errBufSize];
+	private int errBufPtr = 0;
 	
 	private void printAndroidLogError(String s){
 		Log.i("FLOWPATH", "\n>>>>\n" + decTry + " " + s + "\n@" + (fisPtr+1));
+		if (detailedError){
+			String bits = "";
+			
+			for (int i = 1; i <= errBufSize; i++){
+				bits+=byteToBin((byte)errBuf[(errBufPtr+i)%errBufSize]) + " ";
+				if (i%10==0){
+					bits+="\n        ";
+				}
+			}
+			
+			Log.i("FLOWPATH", "\n## Bits " + bits);
+			Log.i("FLOWPATH", "\n## PSC is " + (fisPtr-lastFisPtr) + " bytes old");
+		}
 	}
 
 	private String byteToBin(byte b){
