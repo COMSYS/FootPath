@@ -556,7 +556,8 @@ public class H263Parser {
 							mvs[x][y] = mv;
 
 						} else if (p.hMVDs != null && !mbAreOk){
-							mvs[x][y] = empty;
+							float[] b = { 0.0f, 0.0f };
+							mvs[x][y] = b;
 						}
 
 					}
