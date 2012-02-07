@@ -15,7 +15,7 @@ import de.uvwxy.footpath.gui.FlowPath;
  * 
  */
 public class H263Parser {
-	private InputStream fis = null;
+	private BufferedInputStream fis = null;
 	private int lastFisPtr = 0;
 	private int fisPtr = 0; // points to the next unread byte
 	private int bitPtr = 7; // points to the current bit of the last byte read
@@ -54,7 +54,8 @@ public class H263Parser {
 //     11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111100
 	// = 10 + 10 + 10 + 9 + 8 = 47
 	// The smallest frame ist a total black picture consisting of 47 bytes.
-	private static int MINIMUM_BYTES_BETWEEN_PICTURES = 46;
+	// there are even smaller frames -> 24
+	private static int MINIMUM_BYTES_BETWEEN_PICTURES = 24;
 
 	/**
 	 * TODO: write this.
@@ -65,7 +66,7 @@ public class H263Parser {
 	public H263Parser(InputStream fis, int ptrOffset, boolean parsePs,
 			boolean parseGOBs, boolean parseMBs, boolean parseBs,
 			boolean blocking) {
-		this.fis = fis;
+		this.fis = new BufferedInputStream(fis);
 		this.fisPtr = ptrOffset;
 		this.parsePs = parsePs;
 		this.parseGOBs = parseGOBs;

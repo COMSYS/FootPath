@@ -30,17 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/Button01"
-        android:text="Please enter your name"
-        android:textSize="24px" >
-    </TextView>
-
-    <TextView
-        android:id="@+id/lbl02"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btn01"
-        android:text="Please try to count your steps! (Logging will stop if window gets hidden behind things ;) )"
-        android:textColor="#ff0000"
+        android:text="Please enter id"
         android:textSize="24px" >
     </TextView>
 
@@ -53,19 +43,17 @@
         android:text="N/A" />
 
     <SurfaceView
-        android:id="@+id/svMVPaint"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/sv01"
-        android:layout_marginLeft="66dp"
-        android:layout_toRightOf="@+id/lbl01" />
-
-    <SurfaceView
         android:id="@+id/sv01"
         android:layout_width="320px"
         android:layout_height="240px"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/lbl02" />
+        android:layout_below="@+id/txt01" />
+
+    <SurfaceView
+        android:id="@+id/svMVPaint"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="false"
+        android:layout_centerHorizontal="false" android:layout_alignTop="@id/sv01" android:layout_alignParentRight="true" android:layout_toRightOf="@id/sv01"/>
 
 </RelativeLayout>

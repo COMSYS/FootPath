@@ -109,7 +109,7 @@ public class FlowPath extends Activity {
 	// DCIF 528 × 384
 	public static final int PIC_SIZE_WIDTH = 320;
 	public static final int PIC_SIZE_HEIGHT = 240;
-	public static final int PIC_FPS = 60;
+	public static final int PIC_FPS = 30;
 	public static int port = 2000;
 	
 	private FlowPathParsingThread parsingThread = null;
@@ -186,7 +186,6 @@ public class FlowPath extends Activity {
 
 		btn01 = (Button) findViewById(R.id.btn01);
 		lbl01 = (TextView) findViewById(R.id.lbl01);
-		lbl02 = (TextView) findViewById(R.id.lbl02);
 		lblParserInfo = (TextView) findViewById(R.id.lblParserInfo);
 		sv01 = (SurfaceView) findViewById(R.id.sv01);
 		txt01 = (EditText) findViewById(R.id.txt01);
