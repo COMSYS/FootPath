@@ -6,33 +6,85 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import android.hardware.Camera;
-import android.hardware.Camera.Parameters;
 import android.media.MediaRecorder;
 import android.os.ParcelFileDescriptor;
+import android.view.SurfaceHolder;
 import de.uvwxy.footpath.gui.FlowPath;
 
 /**
- * A class for recording of an audio/video file, with input from the
- * microphone/camera . The directory written to is LOG_DIR in the directory
- * retrieved from getExternalStorageDirectory(). The file name is given to the
- * constructor.
- * 
- * @author Paul
+ * Start video capture and write video stream to TCP/IP socket.
+ * The following configuration variables are used:
+ * FlowPath.PIC_SIZE_WIDTH,
+ * FlowPath.PIC_SIZE_HEIGHT,
+ * FlowPath.PIC_FPS,
+ * FlowPath.PORT,				Port of localhost to connect to
+ * FlowPath.sh01 				SurfaceView for preview
+ * and H.263 encoding.
+ * @author Paul Smith
  * 
  */
 public class SocketAudioVideoWriter {
-	// Capture object
-	MediaRecorder recorder;
+	private MediaRecorder recorder;
+	private Socket sckClient = null;
 
+	/**
+	 * Initialization of capture device
+	 * 
+	 * @throws IllegalStateException
+	 * @throws IOException
+	 */
+	public void registerCapture() throws IllegalStateException, IOException {
+		recorder = new MediaRecorder();
+		recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
+		recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
+		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+		recorder.setVideoFrameRate(FlowPath.PIC_FPS);
+		recorder.setVideoSize(FlowPath.PIC_SIZE_WIDTH, FlowPath.PIC_SIZE_HEIGHT);
+		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
+		
+		// initialize socket here
+		startClient("127.0.0.1", FlowPath.port);
+		// to use fd from socket here
+		recorder.setOutputFile(getFileDescriptorFromClientSocket());	
+		
+		// setup sv01 for use as preview
+		SurfaceHolder sh01 = FlowPath.sv01.getHolder();
+		sh01.setSizeFromLayout();
+		sh01.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		recorder.setPreviewDisplay(sh01.getSurface());
+		
+		recorder.prepare();
+	}
 	
-	// Socket + Functions:
-	private Socket sckCltSend = null;
+	/**
+	 * Starts capture
+	 */
+	public void startCapture() {
+	    recorder.start();		
+	}
+
+	/**
+	 * Stops capture
+	 */
+	public void stopCapture() {
+		recorder.stop();
+		recorder.reset();
+		stopClient();
+	}
+
+	/**
+	 * Release capture device
+	 */
+	public void unregisterCapture() {
+		recorder.release();
+	}
+
 	
 	private void startClient(String hostname, int port){
 		try {
-			sckCltSend = new Socket(InetAddress.getByName(hostname), port);
-			sckCltSend.setTcpNoDelay(true);
+			sckClient = new Socket(InetAddress.getByName(hostname), port);
+			sckClient.setTcpNoDelay(true);
 		} catch (UnknownHostException e2) {
 			e2.printStackTrace();
 		} catch (IOException e2) {
@@ -42,74 +94,13 @@ public class SocketAudioVideoWriter {
 	
 	private void stopClient(){
 		try {
-			sckCltSend.close();
+			sckClient.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	private FileDescriptor getFileDescriptorFromClientSocket(){
-		return ParcelFileDescriptor.fromSocket(sckCltSend).getFileDescriptor();
+		return ParcelFileDescriptor.fromSocket(sckClient).getFileDescriptor();
 	}
-
-	/**
-	 * Initializes everything needed to capture from AudioSource.MIC. If this
-	 * succeeds the capture device is ready and can be started.
-	 * 
-	 * @throws IllegalStateException
-	 * @throws IOException
-	 */
-	public void registerCapture() throws IllegalStateException, IOException {
-		recorder = new MediaRecorder();
-		
-		
-		
-		recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
-		recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
-		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-		recorder.setVideoFrameRate(FlowPath.PIC_FPS);
-		recorder.setVideoSize(FlowPath.PIC_SIZE_WIDTH, FlowPath.PIC_SIZE_HEIGHT);
-		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
-		
-		startClient("127.0.0.1", FlowPath.port);
-		
-		recorder.setOutputFile(getFileDescriptorFromClientSocket());		
-		recorder.setPreviewDisplay(FlowPath.sh01.getSurface());
-		recorder.prepare();
-	}
-	
-	
-
-	/**
-	 * Starts the capture
-	 */
-	public void startCapture() {
-	    recorder.start();		
-	}
-
-	/**
-	 * Stops the capture
-	 */
-	public void stopCapture() {
-		recorder.stop();
-		recorder.reset();
-		Camera mCamera = Camera.open();
-		if( mCamera != null){
-            Parameters mParams = mCamera.getParameters();
-            mParams.setFlashMode( Parameters.FLASH_MODE_OFF );
-            mCamera.setParameters( mParams );
-	    
-	    }
-		mCamera.release();
-		stopClient();
-	}
-
-	/**
-	 * Resleases the capture device
-	 */
-	public void unregisterCapture() {
-		recorder.release();
-	}
-
 }
