@@ -61,7 +61,8 @@ public class FlowPath extends Activity {
 	private TextView lblParserInfo = null;
 
 	public static SurfaceView sv01;
-
+	public static SurfaceHolder sh01;
+	
 	// Sensors
 	private static SensorManager sm;
 	List<Sensor> lSensor;
@@ -190,7 +191,14 @@ public class FlowPath extends Activity {
 		txt01 = (EditText) findViewById(R.id.txt01);
 
 	
-
+		// setup sv01 for use as preview 
+		// Note: this has to be done here, otherwise some sort of
+		// "security exception"
+		sh01 = sv01.getHolder();
+		sh01.setSizeFromLayout();
+		sh01.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		
+		
 		svMVs = new PaintBoxMVs(this);
 
 		RelativeLayout layout = (RelativeLayout) findViewById(R.id.RelativeLayout01);

@@ -12,9 +12,9 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 	private int mvCount = 0;
 
 	private boolean surface_ok = false;
-	private boolean paintMVs = true;
+	private boolean paintMVs = false;
 	
-	private final int FRAME_NUM = 5;
+	private final int FRAME_NUM = FlowPath.PIC_FPS*2;
 	
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
@@ -101,6 +101,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 					mvy = mvs[x][y][1];
 					x_sum += mvx;
 					y_sum += mvy;
+					
 					if(paintMVs){
 					if (mvy < 0) {
 						p.setColor(Color.GREEN);
@@ -111,11 +112,14 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 							x * 16 + mvx + 16.0f, 16.0f + y * 16.0f + mvy
 									+ 16.0f, p);
 					}
+					
+					
 				}
 			}
 
 			x_sum /= divisor;
 			y_sum /= divisor;
+			
 			if (y_sum < 0) {
 				p.setColor(Color.GREEN);
 				movingfactor++;
@@ -134,29 +138,49 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 			
 			
 			float y_sec_sum_avg = 0;
+			
 			for (float f:y_sum_avgs){
 				y_sec_sum_avg+=f;
 			}
-			y_sec_sum_avg/=FlowPath.PIC_FPS/4;
 			
-			if (y_sec_sum_avg<0){
-				p.setColor(Color.GREEN);
-			} else {
-				p.setColor(Color.BLUE);
+			y_sec_sum_avg/=FlowPath.PIC_FPS;
+			
+			int barWidth = 8;
+			int barHeight = 120;
+			// draw average
+			drawSpeedBar(canvas,p,y_sec_sum_avg,barWidth*2,barHeight,16,16);
+			
+			// draw histogram
+			for(int i = 0; i < FRAME_NUM; i++) {
+				drawSpeedBar(canvas,p,y_sum_avgs[(y_sum_avgs_ptr+1+i)%FRAME_NUM],barWidth,barHeight,40 + (barWidth+2)*(i+1) ,16);
+
 			}
-			p.setStrokeWidth(8.0f);
-			canvas.drawLine(16, 16 + y_len * 8,
-					16, 16 + y_len * 8 + y_sec_sum_avg * 8, p);
 			
-			p.setStrokeWidth(1.0f);
-			p.setColor(Color.BLUE);
-			canvas.drawLine(16,16 +  y_len * 8 + 16 * 8,
-					16 + 4,16 +  y_len * 8 + 16 * 8, p);
-			p.setColor(Color.GREEN);
-			canvas.drawLine(16,16 +  y_len * 8 - 16 * 8,
-					16 + 4,16 + y_len * 8 - 16 * 8, p);
 		}
 		tsLast = System.currentTimeMillis();
 	}
 
+	private void drawSpeedBar(Canvas canvas, Paint p, float value, int width, int height,
+			int xOffset, int yOffset) {
+		
+		if (value < 0) {
+			p.setColor(Color.GREEN);
+		} else {
+			p.setColor(Color.BLUE);
+		}
+
+		// draw vertical bar:
+		p.setStrokeWidth(width);
+		canvas.drawLine(xOffset, yOffset + height, xOffset, yOffset + height + value*(height/16), p);
+
+		p.setStrokeWidth(1.0f);
+		p.setColor(Color.BLUE);
+
+		canvas.drawLine(xOffset, yOffset + height + height, xOffset + width,
+				yOffset + height + height, p);
+
+		p.setColor(Color.GREEN);
+		canvas.drawLine(xOffset, yOffset, xOffset + width,
+				yOffset, p);
+	}
 }

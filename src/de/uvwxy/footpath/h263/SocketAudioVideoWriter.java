@@ -48,11 +48,8 @@ public class SocketAudioVideoWriter {
 		// to use fd from socket here
 		recorder.setOutputFile(getFileDescriptorFromClientSocket());	
 		
-		// setup sv01 for use as preview
-		SurfaceHolder sh01 = FlowPath.sv01.getHolder();
-		sh01.setSizeFromLayout();
-		sh01.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		recorder.setPreviewDisplay(sh01.getSurface());
+		
+		recorder.setPreviewDisplay(FlowPath.sh01.getSurface());
 		
 		recorder.prepare();
 	}
