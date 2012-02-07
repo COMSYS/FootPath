@@ -65,6 +65,8 @@ public class FlowPathParsingThread extends Thread {
 			}
 
 		}
+		
+		parser.closeFis();
 	}
 
 	public H263Parser getParser() {

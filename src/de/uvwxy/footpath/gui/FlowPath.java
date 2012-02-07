@@ -69,20 +69,20 @@ public class FlowPath extends Activity {
 
 	// Logging I
 	static long tsNow = 0;
-	FileWriter fwCompass;
-	FileWriter fwAccelerometer;
-	FileWriter fwBarometer;
-	FileWriter fwGyrometer;
-	FileWriter fwWifi;
-	FileWriter fwGPS;
+//	FileWriter fwCompass;
+//	FileWriter fwAccelerometer;
+//	FileWriter fwBarometer;
+//	FileWriter fwGyrometer;
+//	FileWriter fwWifi;
+//	FileWriter fwGPS;
 	boolean logging = false;
 
 	// Audio
 	SocketAudioVideoWriter avwCapture;
-
-	// Wifi
-	WifiManager wm01;
-	WifiReceiver wr01;
+//
+//	// Wifi
+//	WifiManager wm01;
+//	WifiReceiver wr01;
 	List<ScanResult> lScanResult;
 	StringBuilder sb;
 
@@ -109,8 +109,9 @@ public class FlowPath extends Activity {
 	// DCIF 528 × 384
 	public static final int PIC_SIZE_WIDTH = 320;
 	public static final int PIC_SIZE_HEIGHT = 240;
-	public static final int PIC_FPS = 30;
-
+	public static final int PIC_FPS = 60;
+	public static int port = 2000;
+	
 	private FlowPathParsingThread parsingThread = null;
 
 	private Handler mHandler = new Handler();
@@ -161,7 +162,7 @@ public class FlowPath extends Activity {
 	private void startServer(int port) {
 		try {
 			sckSrvListen = new ServerSocket(port);
-			sckSrvListen.setReceiveBufferSize(80000);
+			st = new ServerThread();
 			st.start();
 		} catch (IOException e3) {
 			e3.printStackTrace();
@@ -205,13 +206,13 @@ public class FlowPath extends Activity {
 		layout.removeView(svOld);
 		layout.addView(svMVs, lpHistory);
 
-		// get sensors
-		sm = (SensorManager) getSystemService(SENSOR_SERVICE);
-		lSensor = sm.getSensorList(Sensor.TYPE_ALL);
-
-		// get GPS
-		locationManager = (LocationManager) this
-				.getSystemService(Context.LOCATION_SERVICE);
+//		// get sensors
+//		sm = (SensorManager) getSystemService(SENSOR_SERVICE);
+//		lSensor = sm.getSensorList(Sensor.TYPE_ALL);
+//
+//		// get GPS
+//		locationManager = (LocationManager) this
+//				.getSystemService(Context.LOCATION_SERVICE);
 
 		btn01.setOnClickListener(guiOnclickListener);
 	}
@@ -227,30 +228,30 @@ public class FlowPath extends Activity {
 		txt01.setEnabled(true);
 		// Request data from
 
-		// WiFi
-		wm01 = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-		wr01 = new WifiReceiver(wm01);
-		registerReceiver(wr01, new IntentFilter(
-				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+//		// WiFi
+//		wm01 = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+//		wr01 = new WifiReceiver(wm01);
+//		registerReceiver(wr01, new IntentFilter(
+//				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
-		// Sensors
-		for (int i = 0; i < lSensor.size(); i++) {
-			// Register only compass and accelerometer
-			
-			switch(lSensor.get(i).getType()){
-			case Sensor.TYPE_ACCELEROMETER:
-			case Sensor.TYPE_ORIENTATION:
-			case Sensor.TYPE_GYROSCOPE:
-			case Sensor.TYPE_PRESSURE:
-				sm.registerListener(mySensorEventListener, lSensor.get(i),
-						SensorManager.SENSOR_DELAY_GAME);
-				Log.i(LOG_ID, "Registered " + lSensor.get(i).getName());
-			}
-		}
+//		// Sensors
+//		for (int i = 0; i < lSensor.size(); i++) {
+//			// Register only compass and accelerometer
+//			
+//			switch(lSensor.get(i).getType()){
+//			case Sensor.TYPE_ACCELEROMETER:
+//			case Sensor.TYPE_ORIENTATION:
+//			case Sensor.TYPE_GYROSCOPE:
+//			case Sensor.TYPE_PRESSURE:
+////				sm.registerListener(mySensorEventListener, lSensor.get(i),
+//						SensorManager.SENSOR_DELAY_GAME);
+//				Log.i(LOG_ID, "Registered " + lSensor.get(i).getName());
+//			}
+//		}
 
-		// GPS
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-				0, locationListener);
+//		// GPS
+//		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+//				0, locationListener);
 		// Logging (logging stopped by 'onStop' or 'onDestroy')
 		logging = false;
 	}
@@ -263,9 +264,9 @@ public class FlowPath extends Activity {
 		super.onPause();
 		// Logging
 		stopLogging();
-		unregisterReceiver(wr01);
-		locationManager.removeUpdates(locationListener);
-		sm.unregisterListener(mySensorEventListener);
+//		unregisterReceiver(wr01);
+//		locationManager.removeUpdates(locationListener);
+//		sm.unregisterListener(mySensorEventListener);
 		Log.i(LOG_ID, "UnRegistered");
 	}
 
@@ -276,8 +277,8 @@ public class FlowPath extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		stopLogging();
-		locationManager.removeUpdates(locationListener);
-		sm.unregisterListener(mySensorEventListener);
+//		locationManager.removeUpdates(locationListener);
+//		sm.unregisterListener(mySensorEventListener);
 		Log.i(LOG_ID, "Destroyed");
 	}
 
@@ -320,7 +321,7 @@ public class FlowPath extends Activity {
 	private boolean startLogging() {
 		tsNow = System.currentTimeMillis();
 
-		startServer(1337);
+		startServer(++FlowPath.port);
 
 		// create audio writer + start it
 		avwCapture = new SocketAudioVideoWriter();
@@ -336,61 +337,61 @@ public class FlowPath extends Activity {
 			return false;
 		}
 
-		// Logging II
-		fwCompass = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
-				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
-				"compass.csv");
-		fwAccelerometer = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
-				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
-				"accelerometer.csv");
-		fwBarometer = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
-				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
-				"barometer.csv");
-		fwGyrometer = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
-				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
-				"gyroscope.csv");
-		fwWifi = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
-				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
-				"wifi.txt");
-		fwGPS = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
-				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
-				"GPS.csv");
+//		// Logging II
+//		fwCompass = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
+//				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
+//				"compass.csv");
+//		fwAccelerometer = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
+//				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
+//				"accelerometer.csv");
+//		fwBarometer = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
+//				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
+//				"barometer.csv");
+//		fwGyrometer = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
+//				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
+//				"gyroscope.csv");
+//		fwWifi = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
+//				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
+//				"wifi.txt");
+//		fwGPS = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
+//				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
+//				"GPS.csv");
 
 		;
 
-		try {
-			fwCompass.createFileOnCard();
-			fwAccelerometer.createFileOnCard();
-			fwBarometer.createFileOnCard();
-			fwGyrometer.createFileOnCard();
-			fwWifi.createFileOnCard();
-			fwGPS.createFileOnCard();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			avwCapture.unregisterCapture();
-			return false;
-		}
+//		try {
+//			fwCompass.createFileOnCard();
+//			fwAccelerometer.createFileOnCard();
+//			fwBarometer.createFileOnCard();
+//			fwGyrometer.createFileOnCard();
+//			fwWifi.createFileOnCard();
+//			fwGPS.createFileOnCard();
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//			avwCapture.unregisterCapture();
+//			return false;
+//		}
 
 		avwCapture.startCapture();
 
-		// Logging III
-		String data = "time(millis)"+DELIM+"azimuth"+DELIM+"pitch"+DELIM+"roll";
-		fwCompass.appendLineToFile(data);
-
-		data = "time(millis)"+DELIM+"x"+DELIM+"y"+DELIM+"z";
-		fwAccelerometer.appendLineToFile(data);
-
-		data = "time(millis)"+DELIM+"pressure";
-		fwBarometer.appendLineToFile(data);
-		
-		data = "time(millis)"+DELIM+"x"+DELIM+"y"+DELIM+"z";
-		fwGyrometer.appendLineToFile(data);
-		
-		data = "time(millis)"+DELIM+"lat"+DELIM+"long"+DELIM+"alti";
-		fwGPS.appendLineToFile(data);
+//		// Logging III
+//		String data = "time(millis)"+DELIM+"azimuth"+DELIM+"pitch"+DELIM+"roll";
+//		fwCompass.appendLineToFile(data);
+//
+//		data = "time(millis)"+DELIM+"x"+DELIM+"y"+DELIM+"z";
+//		fwAccelerometer.appendLineToFile(data);
+//
+//		data = "time(millis)"+DELIM+"pressure";
+//		fwBarometer.appendLineToFile(data);
+//		
+//		data = "time(millis)"+DELIM+"x"+DELIM+"y"+DELIM+"z";
+//		fwGyrometer.appendLineToFile(data);
+//		
+//		data = "time(millis)"+DELIM+"lat"+DELIM+"long"+DELIM+"alti";
+//		fwGPS.appendLineToFile(data);
 
 		// Wifi
-		wm01.startScan();
+//		wm01.startScan();
 
 		logging = true;
 
@@ -426,117 +427,123 @@ public class FlowPath extends Activity {
 
 		if (logging) {
 			logging = false;
-
-			// Logging IV
-			fwCompass.closeFileOnCard();
-			fwAccelerometer.closeFileOnCard();
-			fwBarometer.closeFileOnCard();
-			fwGyrometer.closeFileOnCard();
-			fwWifi.closeFileOnCard();
-			fwGPS.closeFileOnCard();
+//
+//			// Logging IV
+//			fwCompass.closeFileOnCard();
+//			fwAccelerometer.closeFileOnCard();
+//			fwBarometer.closeFileOnCard();
+//			fwGyrometer.closeFileOnCard();
+//			fwWifi.closeFileOnCard();
+//			fwGPS.closeFileOnCard();
 
 			// stop capture
 			avwCapture.stopCapture();
 			avwCapture.unregisterCapture();
+			
+			try {
+				sckSrvCon.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	/**
-	 * Handles sensor events. Writes the data to the appropriate files.
-	 */
-	private SensorEventListener mySensorEventListener = new SensorEventListener() {
-
-		@Override
-		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		}
-
-		@Override
-		public void onSensorChanged(SensorEvent event) {
-			if (logging) {
-				String data;
-				long ts = System.currentTimeMillis();
-				switch (event.sensor.getType()) {
-				case Sensor.TYPE_ACCELEROMETER:
-					// relative time stamp; x; y; z
-					data = "" + ts + DELIM + event.values[0] + DELIM
-							+ event.values[1] + DELIM + event.values[2];
-					fwAccelerometer.appendLineToFile(data);
-					break;
-				case Sensor.TYPE_ORIENTATION:
-					// relative time stamp; azimuth; pitch; roll
-					data = "" + ts + DELIM + event.values[0] + DELIM
-							+ event.values[1] + DELIM + event.values[2];
-					fwCompass.appendLineToFile(data);
-					break;
-				case Sensor.TYPE_PRESSURE:
-					data = "" + ts + DELIM + event.values[0];
-					fwBarometer.appendLineToFile(data);
-					break;
-				case Sensor.TYPE_GYROSCOPE:
-					data = "" + ts + DELIM + event.values[0] + DELIM
-							+ event.values[1] + DELIM + event.values[2];
-					fwGyrometer.appendLineToFile(data);
-				default:
-				}
-			}
-		}
-	};
-
-	/**
-	 * A class that receives the scans results of a WIFI scan. After each scan a
-	 * new scan is started.
-	 * 
-	 * @author Paul Smith
-	 * 
-	 */
-	class WifiReceiver extends BroadcastReceiver {
-		WifiManager wmLocal;
-
-		public WifiReceiver(WifiManager wm01) {
-			wmLocal = wm01;
-		}
-
-		@Override
-		public void onReceive(Context c, Intent intent) {
-			// currently not sure if this is triggered beforehand
-			if (logging) {
-				long ts = System.currentTimeMillis();
-				fwWifi.appendLineToFile("<timestamp>" + ts + "</timestamp>: ");
-				lScanResult = wm01.getScanResults();
-				for (int i = 0; i < lScanResult.size(); i++) {
-					fwWifi.appendLineToFile((new Integer(i + 1).toString()
-							+ "." + lScanResult.get(i)).toString());
-				}
-			}
-
-			wmLocal.startScan();
-		}
-
-	}
-
-	/*
-	 * Handles the writing of GPS data.
-	 */
-	LocationListener locationListener = new LocationListener() {
-		public void onLocationChanged(Location location) {
-			if (logging) {
-				// gpsFirstStamp has been set after the first Acc/Comp reading
-				long ts = System.currentTimeMillis();
-				fwGPS.appendLineToFile("" + ts + ";" + location.getLatitude()
-						+ ";" + location.getLongitude() + ";"
-						+ location.getAltitude());
-			}
-		}
-
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-		}
-
-		public void onProviderEnabled(String provider) {
-		}
-
-		public void onProviderDisabled(String provider) {
-		}
-
-	};
+//	/**
+//	 * Handles sensor events. Writes the data to the appropriate files.
+//	 */
+//	private SensorEventListener mySensorEventListener = new SensorEventListener() {
+//
+//		@Override
+//		public void onAccuracyChanged(Sensor sensor, int accuracy) {
+//		}
+//
+//		@Override
+//		public void onSensorChanged(SensorEvent event) {
+//			if (logging) {
+//				String data;
+//				long ts = System.currentTimeMillis();
+//				switch (event.sensor.getType()) {
+//				case Sensor.TYPE_ACCELEROMETER:
+//					// relative time stamp; x; y; z
+//					data = "" + ts + DELIM + event.values[0] + DELIM
+//							+ event.values[1] + DELIM + event.values[2];
+//					fwAccelerometer.appendLineToFile(data);
+//					break;
+//				case Sensor.TYPE_ORIENTATION:
+//					// relative time stamp; azimuth; pitch; roll
+//					data = "" + ts + DELIM + event.values[0] + DELIM
+//							+ event.values[1] + DELIM + event.values[2];
+//					fwCompass.appendLineToFile(data);
+//					break;
+//				case Sensor.TYPE_PRESSURE:
+//					data = "" + ts + DELIM + event.values[0];
+//					fwBarometer.appendLineToFile(data);
+//					break;
+//				case Sensor.TYPE_GYROSCOPE:
+//					data = "" + ts + DELIM + event.values[0] + DELIM
+//							+ event.values[1] + DELIM + event.values[2];
+//					fwGyrometer.appendLineToFile(data);
+//				default:
+//				}
+//			}
+//		}
+//	};
+//
+//	/**
+//	 * A class that receives the scans results of a WIFI scan. After each scan a
+//	 * new scan is started.
+//	 * 
+//	 * @author Paul Smith
+//	 * 
+//	 */
+//	class WifiReceiver extends BroadcastReceiver {
+//		WifiManager wmLocal;
+//
+//		public WifiReceiver(WifiManager wm01) {
+//			wmLocal = wm01;
+//		}
+//
+//		@Override
+//		public void onReceive(Context c, Intent intent) {
+//			// currently not sure if this is triggered beforehand
+//			if (logging) {
+//				long ts = System.currentTimeMillis();
+//				fwWifi.appendLineToFile("<timestamp>" + ts + "</timestamp>: ");
+//				lScanResult = wm01.getScanResults();
+//				for (int i = 0; i < lScanResult.size(); i++) {
+//					fwWifi.appendLineToFile((new Integer(i + 1).toString()
+//							+ "." + lScanResult.get(i)).toString());
+//				}
+//			}
+//
+//			wmLocal.startScan();
+//		}
+//
+//	}
+//
+//	/*
+//	 * Handles the writing of GPS data.
+//	 */
+//	LocationListener locationListener = new LocationListener() {
+//		public void onLocationChanged(Location location) {
+//			if (logging) {
+//				// gpsFirstStamp has been set after the first Acc/Comp reading
+//				long ts = System.currentTimeMillis();
+//				fwGPS.appendLineToFile("" + ts + ";" + location.getLatitude()
+//						+ ";" + location.getLongitude() + ";"
+//						+ location.getAltitude());
+//			}
+//		}
+//
+//		public void onStatusChanged(String provider, int status, Bundle extras) {
+//		}
+//
+//		public void onProviderEnabled(String provider) {
+//		}
+//
+//		public void onProviderDisabled(String provider) {
+//		}
+//
+//	};
 
 }

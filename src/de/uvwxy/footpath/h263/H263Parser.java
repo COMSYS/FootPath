@@ -1,13 +1,12 @@
 package de.uvwxy.footpath.h263;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.concurrent.BrokenBarrierException;
-
-import de.uvwxy.footpath.gui.FlowPath;
 
 import android.util.Log;
+import de.uvwxy.footpath.gui.FlowPath;
 
 /**
  * Warning: this is highly unstable and undocumented code ;) asdf you know!
@@ -55,7 +54,7 @@ public class H263Parser {
 //     11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111100
 	// = 10 + 10 + 10 + 9 + 8 = 47
 	// The smallest frame ist a total black picture consisting of 47 bytes.
-	private static int MINIMUM_BYTES_BETWEEN_PICTURES = 4;
+	private static int MINIMUM_BYTES_BETWEEN_PICTURES = 46;
 
 	/**
 	 * TODO: write this.
@@ -120,18 +119,12 @@ public class H263Parser {
 	private int decTry = 0;
 	
 	private float[][][] decodePicture() throws IOException, EOSException {
-		p = new H263PictureLayer(blockWidth, blockHeight);
-//		mvs = new float[blockWidth][blockHeight][2];
-		
-		
-		// checkForPictureStartCode();
 		checkForPictureStartCodeFaster();
 
 		// ugly hack to prevent crashing at end of file
 		if ((fisPtr - lastFisPtr) < MINIMUM_BYTES_BETWEEN_PICTURES
 				&& pictureBoxCount > 2) {
 			lastFisPtr = fisPtr;
-			printAndroidLogError("min mbytes PSC underrun");
 			return null;
 		}
 
@@ -410,7 +403,7 @@ public class H263Parser {
 				} else {
 					// TODO: this is not implemented
 					// Houston we have a problem.
-					printAndroidLogError("something with reference picture selection not implemented");
+//					printAndroidLogError("something with reference picture selection not implemented");
 				}
 			} else {
 				// When set to "1", this signals the presence of the following
@@ -423,7 +416,7 @@ public class H263Parser {
 		if (p.hBackChannelMessageIndication == 1) {
 			// TODO: this is not implemented
 			// Let's hope this is not present
-			printAndroidLogError("back channel maessage indication not implemented");
+//			printAndroidLogError("back channel maessage indication not implemented");
 		}
 
 		if (p.hReferencePictureResampling) {
@@ -432,7 +425,7 @@ public class H263Parser {
 			// Reference Picture Resampling mode bit is set in PLUSPTYPE.
 
 			// Let's hope this is not present
-			printAndroidLogError("reference picture resampling not implemented");
+//			printAndroidLogError("reference picture resampling not implemented");
 		}
 
 		p.hQuantizerInformation = readBits(5);
@@ -486,7 +479,7 @@ public class H263Parser {
 			// the EOS or EOSBS codeword is byte aligned. Decoders shall be
 			// designed to discard ESTUF. See Annex C for a description of
 			// EOSBS and its use.
-			printAndroidLogError("extra instertion information not implemented");
+//			printAndroidLogError("extra instertion information not implemented");
 		}
 
 		// TODO: Remove Stuffing here for byte alignment?
@@ -725,7 +718,7 @@ public class H263Parser {
 			
 			while (hmMCBPC != null && hmMCBPC[0] == -1) {
 				// reread hmMCBPC while we have stuffing
-				printAndroidLogError("STUFFING REMOVED");
+//				printAndroidLogError("STUFFING REMOVED");
 				hmMCBPC = readMCBPC4PFrames();
 			}
 
@@ -759,7 +752,7 @@ public class H263Parser {
 //				printAndroidLogError("DQUANT");
 			} else if (p.hModifiedQuantization) {
 				// TODO: modified quantization not implemented
-				printAndroidLogError("modified quantization not implemented");
+//				printAndroidLogError("modified quantization not implemented");
 			}
 
 			// TODO: parse MVD (two Variable Length Codes (VLC)
@@ -768,13 +761,7 @@ public class H263Parser {
 				if (!p.hUnrestrictedMotionVector) {
 					// horizontal component followed by vertical component
 					mvdHorizontal = readMVDComponent();
-					if (mvdHorizontal == null){
-						printAndroidLogError("mvdHorizontal failed " + x + ", " + y);
-					}
 					mvdVertical = readMVDComponent();
-					if (mvdVertical == null){
-						printAndroidLogError("mvdVertical failed " + x + ", " + y);
-					}
 					if (mvdHorizontal != null && mvdVertical != null) {
 						p.hMVDs[x][y][0] = mvdHorizontal;
 						p.hMVDs[x][y][1] = mvdVertical;
@@ -818,6 +805,7 @@ public class H263Parser {
 				// TODO: MCPBC decoding failed (something is unimplemented here)
 				numBrokenFrames++;
 				printAndroidLogError("MCPBC decoding failed (something is unimplemented here, block type" + hmMCBPC[0] +") " + x + ", " + y);
+				return;
 			}
 
 //			Log.i("FLOWPATH", "MVS @ " + x + ", " + y + ", " 
@@ -902,6 +890,7 @@ public class H263Parser {
 				} else {
 					// block decoding failed
 					printAndroidLogError("block decoding failed: ret == -1");
+					return;
 				}
 			}
 		}
@@ -922,7 +911,7 @@ public class H263Parser {
 
 		// "0000 0000 0011 1111 1111 1111 1111 1111" "clear mask";
 		// 0x 0 0 3 f f f f f"
-		long ts = System.currentTimeMillis();
+//		long ts = System.currentTimeMillis();
 
 		int bitsBufPSC = 0;
 		int bitCount = 0;
@@ -957,22 +946,15 @@ public class H263Parser {
 
 		int state = -1;
 		while (true) {
-			if (fis.available() == 0) {
-				if (blocking) {
-					throw new EOSException("EOS");
-				}
-			}
+
 
 			if (readNextByte() == 0) {
 				state++;
 
-				if (state > 0) {
+				if (state > 0 && readBits(6) == 32) {
 					// We have at least two consecutive zeros, check tail:
-					if (readBits(6) == 32) {
-						// found PSC start code
+					// found PSC start code
 						return;
-					}
-
 				}
 			} else {
 				state = -1;
@@ -3014,26 +2996,18 @@ public class H263Parser {
 
 		return res;
 	}
-
-//	private int byteBufferSize = 1; // ~10kb
-//	private byte[] byteBuffer = new byte[byteBufferSize];
-//	private int byteBufferPointer = -1;
-//	private int lastNumOfBytes = -1;
-
 	
 	private int readNextByte() throws IOException {
 		int ret = -1;
 		
-//		printAndroidLogError("loop start");
 		do {
 			ret = fis.read();
 		} while (ret == -1);
-//		printAndroidLogError("loop end");
 		
 		// reset bit reader
 		bitPtr = 7;
 		lastByte = -1;
-
+		fisPtr++;
 		return ret;
 	}
 	
@@ -3062,60 +3036,6 @@ public class H263Parser {
 		return ret;
 	}
 	
-//	private int readNextByte() throws IOException {
-////		printAndroidLogError("#######111#####bytes " + lastNumOfBytes);
-//		if (byteBufferPointer == -1 || byteBufferPointer >= (lastNumOfBytes)){
-//			do {
-//				// update buffer
-//				lastNumOfBytes = fis.read(byteBuffer);
-//				
-//				byteBufferPointer = 0;
-//				// as long as 0 > -1, i.e. nothing read
-//			} while (lastNumOfBytes == -1 || byteBufferPointer >= (lastNumOfBytes));
-////			fisPtr+=lastNumOfBytes;
-//			if (lastNumOfBytes != byteBufferSize){
-//				printAndroidLogError("#######000#####bytes " + lastNumOfBytes);
-//			}
-//		}
-//	
-//		if(byteBufferPointer>=lastNumOfBytes){
-//			printAndroidLogError("######################### WHY????");
-//		}
-//		
-//		bitPtr = 7;
-//		byteBufferPointer++;
-//		fisPtr++;
-////		t_temp[(++t_tempPtr)%t_tempSize]=byteBuffer[byteBufferPointer -1];
-//		return byteBuffer[byteBufferPointer - 1];
-//	}
-//
-//	private int readNextBit() throws IOException {
-//
-//		if (byteBufferPointer == -1 || byteBufferPointer >= (lastNumOfBytes)){
-//			do {
-//				// update buffer
-//				lastNumOfBytes = fis.read(byteBuffer);
-////				fisPtr+=lastNumOfBytes;
-//				
-//				byteBufferPointer = 0;
-//			} while (lastNumOfBytes == -1 || byteBufferPointer >= (lastNumOfBytes));
-//			fisPtr+=lastNumOfBytes;
-//			if (lastNumOfBytes != byteBufferSize){
-//				printAndroidLogError("##############bytes " + lastNumOfBytes);
-//			}
-//		}
-//	
-//		int res = (byteBuffer[byteBufferPointer] & (0x01 << bitPtr)) >> bitPtr;
-//		
-//		bitPtr--;
-//		if (bitPtr < 0) {
-//			bitPtr = 7;
-////			t_temp[(++t_tempPtr)%t_tempSize]=byteBuffer[byteBufferPointer];
-//			byteBufferPointer++;
-//			fisPtr++;
-//		}
-//		return res;
-//	}
 
 	private int oldFramesNum = 0;
 
@@ -3127,58 +3047,12 @@ public class H263Parser {
 		return t;
 	}
 	
-	int t_tempSize = 80;
-	byte[] t_temp = new byte[t_tempSize];
-	int t_tempPtr = 0;
+
 	
 	private void printAndroidLogError(String s){
-//		String type = "";
-//		switch (p.hPictureCodingType){
-//		case INTRA:
-//			type = "INTRA";
-//			break;
-//		case INTER:
-//			type = "INTER";
-//			break;
-//		case ImprovedPBFrame:
-//			type = "ImprovedPBFrame";
-//			break;
-//		case BPicture:
-//			type = "BPicture";
-//			break;
-//		case EIPicture:
-//			type = "EIPicture";
-//			break;
-//		case EPPicture:
-//			type = "EPPicture";
-//			break;
-//		case Reserved:
-//			type = "Reserved";
-//			break;
-//		case Undefined:
-//			type = "Undefined";
-//			break;
-//		}
-		
-//		String bits = "";
-//		String ints = "";
-//		for (int i = 0; i < t_tempSize; i++){
-//			bits = (((i+1)%10==0) ? "\n" : "") + byteToBin(t_temp[(t_tempPtr-i)%t_tempSize])+ " " + bits;
-//			ints = (((i+1)%10==0) ? "\n" : "") + t_temp[(t_tempPtr-i)%t_tempSize] + " " + ints;
-//		}
-		
-		Log.i("FLOWPATH",
-//				"FrameType: " + type 
-				"\n>>>>\n" + decTry + " " + s
-//				+ "\nnum of bytes: " + lastNumOfBytes + ", pointer: " + byteBufferPointer
-				+ "\n@" + (fisPtr+1)
-//				+ "\nBits:\n" + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
-//				+ "\nInts:\n" + ints + " | " + byteBuffer[byteBufferPointer]
-//				+ "\n<<<<"
-//				+ "\nUMV:" +  p.hUnrestrictedMotionVector
-				);
+		Log.i("FLOWPATH", "\n>>>>\n" + decTry + " " + s + "\n@" + (fisPtr+1));
 	}
-	
+
 	private String byteToBin(byte b){
 		String temp = Integer.toBinaryString(b & 0x000000ff);
 		temp = xZeros(8-temp.length()) + temp;
@@ -3192,5 +3066,13 @@ public class H263Parser {
 			temp+="0";
 		}
 		return temp;
+	}
+	
+	public void closeFis(){
+		try {
+			fis.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

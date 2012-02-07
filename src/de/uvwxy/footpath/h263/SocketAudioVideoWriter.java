@@ -32,11 +32,19 @@ public class SocketAudioVideoWriter {
 	private void startClient(String hostname, int port){
 		try {
 			sckCltSend = new Socket(InetAddress.getByName(hostname), port);
-			sckCltSend.setTcpNoDelay(false);
+			sckCltSend.setTcpNoDelay(true);
 		} catch (UnknownHostException e2) {
 			e2.printStackTrace();
 		} catch (IOException e2) {
 			e2.printStackTrace();
+		}
+	}
+	
+	private void stopClient(){
+		try {
+			sckCltSend.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -64,7 +72,7 @@ public class SocketAudioVideoWriter {
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
 		
-		startClient("127.0.0.1", 1337);
+		startClient("127.0.0.1", FlowPath.port);
 		
 		recorder.setOutputFile(getFileDescriptorFromClientSocket());		
 		recorder.setPreviewDisplay(FlowPath.sh01.getSurface());
@@ -94,6 +102,7 @@ public class SocketAudioVideoWriter {
 	    
 	    }
 		mCamera.release();
+		stopClient();
 	}
 
 	/**
