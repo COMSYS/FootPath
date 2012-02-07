@@ -34,8 +34,8 @@ public class FlowPathParsingThread extends Thread {
 		bRunning = run;
 	}
 
-	int frame_count = 0;
-	int periodicity = 1;
+	private int frame_count = 0;
+	private int periodicity = 1;
 
 	@Override
 	public void run() {
@@ -69,6 +69,10 @@ public class FlowPathParsingThread extends Thread {
 		parser.closeFis();
 	}
 
+	/**
+	 * We need access to parser.getStats from the GUI
+	 * @return
+	 */
 	public H263Parser getParser() {
 		H263Parser temp = null;
 		while (temp == null) {

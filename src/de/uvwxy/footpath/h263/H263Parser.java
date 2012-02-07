@@ -25,7 +25,7 @@ public class H263Parser {
 	private int numBrokenFrames = 0;
 	private int pictureBoxCount = 0;
 	private int groupOfBlocksCount = 0;
-	
+
 	// k is set at the beginning of the stream to the correct size
 	// as we assume we are working with a video height between 404 and 800
 	// we already set it to 2, see H.263(01/2005) page 10 (19 in pdf)
