@@ -123,7 +123,7 @@ public class H263Parser {
 		p = new H263PictureLayer(blockWidth, blockHeight);
 //		mvs = new float[blockWidth][blockHeight][2];
 		
-		decTry++;
+		
 		// checkForPictureStartCode();
 		checkForPictureStartCodeFaster();
 
@@ -581,6 +581,7 @@ public class H263Parser {
 		}
 
 		pictureBoxCount++;
+		decTry++;
 		if (p.hMVDs != null) {
 			return mvs;
 		} else {
@@ -736,7 +737,8 @@ public class H263Parser {
 					+ p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
 					+ p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1] +  " mbg: " + hmMCBPC[0] + ", " + hmMCBPC[1] + ", " + hmMCBPC[2]);
 //							+ "\n" + lastTCOEFF[0] + ", " + lastTCOEFF[1] + ", " + lastTCOEFF[2] + ", " + lastTCOEFF[3]);
-					throw new IOException("hCBPY failed, " + x + ", " + y);
+//					throw new IOException("hCBPY failed, " + x + ", " + y);
+					return;
 				}
 			} else {
 				// here we have hMCBPC == null so we are borked
@@ -744,7 +746,8 @@ public class H263Parser {
 				printAndroidLogError("hMCBPC failed, " + x + ", " + y + ", " 
 						+ p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
 						+ p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1]);
-				throw new IOException("hMCBPC failed, " + x + ", " + y);
+//				throw new IOException("hMCBPC failed, " + x + ", " + y);
+				return;
 			}
 			
 			
@@ -3012,39 +3015,60 @@ public class H263Parser {
 		return res;
 	}
 
-	private int byteBufferSize = 1024; // ~10kb
+	private int byteBufferSize = 1; // ~10kb
 	private byte[] byteBuffer = new byte[byteBufferSize];
 	private int byteBufferPointer = -1;
+	private int lastNumOfBytes = -1;
 
 	private int readNextByte() throws IOException {
-		if (byteBufferPointer == -1 || byteBufferPointer == byteBufferSize) {
-			// update buffer
-			fis.read(byteBuffer);
-			byteBufferPointer = 0;
+//		printAndroidLogError("#######111#####bytes " + lastNumOfBytes);
+		if (byteBufferPointer == -1 || byteBufferPointer >= (lastNumOfBytes)){
+			do {
+				// update buffer
+				lastNumOfBytes = fis.read(byteBuffer);
+				
+				byteBufferPointer = 0;
+				// as long as 0 > -1, i.e. nothing read
+			} while (lastNumOfBytes == -1 || byteBufferPointer >= (lastNumOfBytes));
+//			fisPtr+=lastNumOfBytes;
+			if (lastNumOfBytes != byteBufferSize){
+				printAndroidLogError("#######000#####bytes " + lastNumOfBytes);
+			}
 		}
+	
+		if(byteBufferPointer>=lastNumOfBytes){
+			printAndroidLogError("######################### WHY????");
+		}
+		
 		bitPtr = 7;
 		byteBufferPointer++;
 		fisPtr++;
-		t_temp[(++t_tempPtr)%t_tempSize]=byteBuffer[byteBufferPointer -1];
+//		t_temp[(++t_tempPtr)%t_tempSize]=byteBuffer[byteBufferPointer -1];
 		return byteBuffer[byteBufferPointer - 1];
 	}
 
 	private int readNextBit() throws IOException {
-		if (byteBufferPointer == -1 || byteBufferPointer == byteBufferSize) {
-			// update buffer
-			int res = fis.read(byteBuffer);
-			byteBufferSize = res;
-			Log.i("FLOWPATH", "bytes " + res);
-			byteBufferPointer = 0;
-		}
 
+		if (byteBufferPointer == -1 || byteBufferPointer >= (lastNumOfBytes)){
+			do {
+				// update buffer
+				lastNumOfBytes = fis.read(byteBuffer);
+//				fisPtr+=lastNumOfBytes;
+				
+				byteBufferPointer = 0;
+			} while (lastNumOfBytes == -1 || byteBufferPointer >= (lastNumOfBytes));
+			fisPtr+=lastNumOfBytes;
+			if (lastNumOfBytes != byteBufferSize){
+				printAndroidLogError("##############bytes " + lastNumOfBytes);
+			}
+		}
+	
 		int res = (byteBuffer[byteBufferPointer] & (0x01 << bitPtr)) >> bitPtr;
-		
 		
 		bitPtr--;
 		if (bitPtr < 0) {
 			bitPtr = 7;
-			t_temp[(++t_tempPtr)%t_tempSize]=byteBuffer[byteBufferPointer];
+//			t_temp[(++t_tempPtr)%t_tempSize]=byteBuffer[byteBufferPointer];
 			byteBufferPointer++;
 			fisPtr++;
 		}
@@ -3066,46 +3090,47 @@ public class H263Parser {
 	int t_tempPtr = 0;
 	
 	private void printAndroidLogError(String s){
-		String type = "";
-		switch (p.hPictureCodingType){
-		case INTRA:
-			type = "INTRA";
-			break;
-		case INTER:
-			type = "INTER";
-			break;
-		case ImprovedPBFrame:
-			type = "ImprovedPBFrame";
-			break;
-		case BPicture:
-			type = "BPicture";
-			break;
-		case EIPicture:
-			type = "EIPicture";
-			break;
-		case EPPicture:
-			type = "EPPicture";
-			break;
-		case Reserved:
-			type = "Reserved";
-			break;
-		case Undefined:
-			type = "Undefined";
-			break;
-		}
+//		String type = "";
+//		switch (p.hPictureCodingType){
+//		case INTRA:
+//			type = "INTRA";
+//			break;
+//		case INTER:
+//			type = "INTER";
+//			break;
+//		case ImprovedPBFrame:
+//			type = "ImprovedPBFrame";
+//			break;
+//		case BPicture:
+//			type = "BPicture";
+//			break;
+//		case EIPicture:
+//			type = "EIPicture";
+//			break;
+//		case EPPicture:
+//			type = "EPPicture";
+//			break;
+//		case Reserved:
+//			type = "Reserved";
+//			break;
+//		case Undefined:
+//			type = "Undefined";
+//			break;
+//		}
 		
-		String bits = "";
-		String ints = "";
-		for (int i = 0; i < t_tempSize; i++){
-			bits = (((i+1)%10==0) ? "\n" : "") + byteToBin(t_temp[(t_tempPtr-i)%t_tempSize])+ " " + bits;
-			ints = (((i+1)%10==0) ? "\n" : "") + t_temp[(t_tempPtr-i)%t_tempSize] + " " + ints;
-		}
+//		String bits = "";
+//		String ints = "";
+//		for (int i = 0; i < t_tempSize; i++){
+//			bits = (((i+1)%10==0) ? "\n" : "") + byteToBin(t_temp[(t_tempPtr-i)%t_tempSize])+ " " + bits;
+//			ints = (((i+1)%10==0) ? "\n" : "") + t_temp[(t_tempPtr-i)%t_tempSize] + " " + ints;
+//		}
 		
 		Log.i("FLOWPATH",
 //				"FrameType: " + type 
 				"\n>>>>\n" + decTry + " " + s
-				+ "\n@" + (bitPtr+1)
-				+ "\nBits:\n" + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
+				+ "\nnum of bytes: " + lastNumOfBytes + ", pointer: " + byteBufferPointer
+				+ "\n@" + (fisPtr+1)
+//				+ "\nBits:\n" + bits + " | " + byteToBin(byteBuffer[byteBufferPointer])
 //				+ "\nInts:\n" + ints + " | " + byteBuffer[byteBufferPointer]
 //				+ "\n<<<<"
 //				+ "\nUMV:" +  p.hUnrestrictedMotionVector
