@@ -1,4 +1,4 @@
-package de.uvwxy.footpath.h263;
+package de.uvwxy.flowpath;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 import android.media.MediaRecorder;
 import android.os.ParcelFileDescriptor;
 import android.view.SurfaceHolder;
-import de.uvwxy.footpath.gui.FlowPath;
+import de.uvwxy.footpath.gui.FlowPathTestGUI;
 
 /**
  * Start video capture and write video stream to TCP/IP socket.
@@ -40,18 +40,18 @@ public class SocketAudioVideoWriter {
 		recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
 		recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-		recorder.setVideoFrameRate(FlowPath.PIC_FPS);
-		recorder.setVideoSize(FlowPath.PIC_SIZE_WIDTH, FlowPath.PIC_SIZE_HEIGHT);
+		recorder.setVideoFrameRate(FlowPathTestGUI.PIC_FPS);
+		recorder.setVideoSize(FlowPathTestGUI.PIC_SIZE_WIDTH, FlowPathTestGUI.PIC_SIZE_HEIGHT);
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
 		
 		// initialize socket here
-		startClient("127.0.0.1", FlowPath.port);
+		startClient("127.0.0.1", FlowPathTestGUI.port);
 		// to use fd from socket here
 		recorder.setOutputFile(getFileDescriptorFromClientSocket());	
 		
 		
-		recorder.setPreviewDisplay(FlowPath.sh01.getSurface());
+		recorder.setPreviewDisplay(FlowPathTestGUI.sh01.getSurface());
 		
 		recorder.prepare();
 	}

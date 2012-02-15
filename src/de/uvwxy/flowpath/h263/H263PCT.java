@@ -1,4 +1,4 @@
-package de.uvwxy.footpath.h263;
+package de.uvwxy.flowpath.h263;
 
 public enum H263PCT {
 	INTRA,

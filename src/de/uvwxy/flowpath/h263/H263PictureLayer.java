@@ -1,4 +1,4 @@
-package de.uvwxy.footpath.h263;
+package de.uvwxy.flowpath.h263;
 
 public class H263PictureLayer {
 	public int hTemporalReference = -1; // Temporal Reference

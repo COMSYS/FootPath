@@ -1,10 +1,11 @@
-package de.uvwxy.footpath.gui;
+package de.uvwxy.flowpath;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import de.uvwxy.footpath.h263.EOSException;
-import de.uvwxy.footpath.h263.H263Parser;
+import de.uvwxy.flowpath.h263.EOSException;
+import de.uvwxy.flowpath.h263.H263Parser;
+
 
 /**
  * CURRENTLY: Creates an H263Parser object and continuously tries to parse a 
@@ -12,12 +13,12 @@ import de.uvwxy.footpath.h263.H263Parser;
  * @author paul
  * 
  */
-public class FlowPathParsingThread extends Thread {
+public class ParsingThread extends Thread {
 	private boolean bRunning = false;
 	private H263Parser parser = null;
 	private PaintBoxMVs pbMVs = null;
 
-	public FlowPathParsingThread(PaintBoxMVs pbMVs,
+	public ParsingThread(PaintBoxMVs pbMVs,
 			InputStream in) {
 		this.pbMVs = pbMVs;
 		

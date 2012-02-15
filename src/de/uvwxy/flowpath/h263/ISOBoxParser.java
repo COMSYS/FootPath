@@ -1,4 +1,4 @@
-package de.uvwxy.footpath.h263;
+package de.uvwxy.flowpath.h263;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

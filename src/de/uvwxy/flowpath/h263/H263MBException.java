@@ -1,4 +1,4 @@
-package de.uvwxy.footpath.h263;
+package de.uvwxy.flowpath.h263;
 
 public class H263MBException extends Exception {
 	private static final long serialVersionUID = 2021110802013382697L;

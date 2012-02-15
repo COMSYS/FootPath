@@ -33,9 +33,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import de.uvwxy.flowpath.FileWriter;
+import de.uvwxy.flowpath.PaintBoxMVs;
+import de.uvwxy.flowpath.ParsingThread;
+import de.uvwxy.flowpath.SocketAudioVideoWriter;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath.h263.FileWriter;
-import de.uvwxy.footpath.h263.SocketAudioVideoWriter;
 
 /**
  * This activity gives the user the possibility of recording sensor, WIFI and
@@ -59,7 +61,7 @@ import de.uvwxy.footpath.h263.SocketAudioVideoWriter;
  * @author Paul
  * 
  */
-public class FlowPath extends Activity {
+public class FlowPathTestGUI extends Activity {
 	// CONSTANTS:
 	public static final String LOG_DIR = "flowpath_logs";
 	public static final String LOG_ID = "FLOWPATH";
@@ -123,7 +125,7 @@ public class FlowPath extends Activity {
 	public static final int PIC_FPS = 30;
 	public static int port = 2000;
 	
-	private FlowPathParsingThread parsingThread = null;
+	private ParsingThread parsingThread = null;
 
 	private Handler mHandler = new Handler();
 	private long delayMillis = 1000;
@@ -335,7 +337,7 @@ public class FlowPath extends Activity {
 	private boolean startLogging() {
 		tsNow = System.currentTimeMillis();
 
-		startServer(++FlowPath.port);
+		startServer(++FlowPathTestGUI.port);
 
 		// create audio writer + start it
 		avwCapture = new SocketAudioVideoWriter();
@@ -424,7 +426,7 @@ public class FlowPath extends Activity {
 			e.printStackTrace();
 		}
 
-		parsingThread = new FlowPathParsingThread(svMVs, sckIn);
+		parsingThread = new ParsingThread(svMVs, sckIn);
 		parsingThread.setRunning(true);
 		parsingThread.start();
 		unPauseHandler();

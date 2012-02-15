@@ -1,5 +1,6 @@
-package de.uvwxy.footpath.gui;
+package de.uvwxy.flowpath;
 
+import de.uvwxy.footpath.gui.FlowPathTestGUI;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -22,7 +23,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 	private boolean surface_ok = false;
 	private boolean paintMVs = false;
 	
-	private final int FRAME_NUM = FlowPath.PIC_FPS*2;
+	private final int FRAME_NUM = FlowPathTestGUI.PIC_FPS*2;
 	
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
@@ -85,7 +86,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 		p.setColor(Color.WHITE);
 
 		if (mvs == null) {
-			canvas.drawText("C (@" + FlowPath.PIC_FPS + "): " + mvCount
+			canvas.drawText("C (@" + FlowPathTestGUI.PIC_FPS + "): " + mvCount
 					+ " -> " + fps + "fps", 0, 16, p);
 			canvas.drawText("NO MVDS!", getWidth() / 2, getHeight() / 2, p);
 		} else {
@@ -100,7 +101,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 			float mvx = 0;
 			float mvy = 0;
 
-			canvas.drawText("C (@" + FlowPath.PIC_FPS + "): " + mvCount
+			canvas.drawText("C (@" + FlowPathTestGUI.PIC_FPS + "): " + mvCount
 					+ " -> " + fps + "fps",32, 16, p);
 
 			for (int x = 0; x < x_len; x++) {
@@ -151,7 +152,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 				y_sec_sum_avg+=f;
 			}
 			
-			y_sec_sum_avg/=FlowPath.PIC_FPS;
+			y_sec_sum_avg/=FlowPathTestGUI.PIC_FPS;
 			
 			int barWidth = 8;
 			int barHeight = 120;
