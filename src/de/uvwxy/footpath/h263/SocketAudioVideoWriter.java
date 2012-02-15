@@ -20,6 +20,8 @@ import de.uvwxy.footpath.gui.FlowPath;
  * FlowPath.PORT,				Port of localhost to connect to
  * FlowPath.sh01 				SurfaceView for preview
  * and H.263 encoding.
+ * 
+ * CURRENTLY: Starts the TCP/IP client to send data into.
  * @author Paul Smith
  * 
  */

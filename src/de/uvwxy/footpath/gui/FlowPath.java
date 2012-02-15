@@ -45,6 +45,17 @@ import de.uvwxy.footpath.h263.SocketAudioVideoWriter;
  * 
  * Output is in a directory, e.g. 1328199328345_320_240_60_h263
  * 
+ * DEFINES: VIDEO SIZE x*y@f
+ *          PORT
+ *          LOG_DIR
+ *          LOG_ID
+ *          DELIM - the delimiter used in csv files
+ * HANDLES: Start/Stop of recording/parsing
+ *          Display of PaintBoxMV.
+ *          Creation of TCP/IP Server socket, passes socket.InputStream to
+ *          FlowPathParsingThread
+ * CAN HANDLE: Logging of Sensors.
+ * 
  * @author Paul
  * 
  */

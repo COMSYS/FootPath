@@ -7,7 +7,8 @@ import de.uvwxy.footpath.h263.EOSException;
 import de.uvwxy.footpath.h263.H263Parser;
 
 /**
- * 
+ * CURRENTLY: Creates an H263Parser object and continuously tries to parse a 
+ *            frame. Received MVD data is passed to PaintBoxMV object.
  * @author paul
  * 
  */

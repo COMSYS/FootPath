@@ -7,6 +7,14 @@ import android.graphics.Paint;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+/**
+ * HANDLES: Display of MVD data / Speed
+ * 
+ * CURRENTLY: Estimation of Speed. (move this somewhere else during refactoring)
+ * 
+ * @author paul
+ *
+ */
 public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 	private float[][][] mvs = null;
 	private int mvCount = 0;
