@@ -12,11 +12,11 @@ import android.view.SurfaceView;
  * HANDLES: Display of MVD data / Speed
  * 
  * CURRENTLY: Estimation of Speed. (move this somewhere else during refactoring)
- * 
+ * 			  No automatic redraw. Has to be called manually.
  * @author paul
  *
  */
-public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
+public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback, MVDTrigger {
 	private float[][][] mvs = null;
 	private int mvCount = 0;
 
@@ -42,12 +42,6 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 	public PaintBoxMVs(Context context) {
 		super(context);
 		getHolder().addCallback(this);
-	}
-
-	public void updateMVs(float[][][] mvs) {
-		this.mvs = mvs;
-		paintMVs();
-		mvCount++;
 	}
 
 	public void paintMVs() {
@@ -193,5 +187,12 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 		p.setColor(Color.GREEN);
 		canvas.drawLine(xOffset, yOffset, xOffset + width,
 				yOffset, p);
+	}
+
+	@Override
+	public void processMVData(long now_ms, float[][][] mvds) {
+		this.mvs = mvds;
+		paintMVs();
+		mvCount++;		
 	}
 }

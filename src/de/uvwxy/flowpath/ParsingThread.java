@@ -16,11 +16,10 @@ import de.uvwxy.flowpath.h263.H263Parser;
 public class ParsingThread extends Thread {
 	private boolean bRunning = false;
 	private H263Parser parser = null;
-	private PaintBoxMVs pbMVs = null;
 
-	public ParsingThread(PaintBoxMVs pbMVs,
-			InputStream in) {
-		this.pbMVs = pbMVs;
+	private FlowPathInterface flowPathInterface = FlowPathInterface.getInterface();
+	
+	public ParsingThread(InputStream in) {
 		
 		// int newPtr = boxParser.jumpIntoMDATBox();
 		boolean parsePs = true; // parse picture layer
@@ -52,10 +51,7 @@ public class ParsingThread extends Thread {
 					mvs = parser.parseH263Frame();
 
 					if (mvs != null) {
-						// wahay we have dem vectorz
-						if (pbMVs != null) {
-							pbMVs.updateMVs(mvs);
-						}
+						flowPathInterface.notifyTriggersWithMVD(System.currentTimeMillis(), mvs);
 					}
 				} else {
 					parser.skipH263Frame();

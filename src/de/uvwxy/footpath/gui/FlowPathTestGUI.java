@@ -1,9 +1,5 @@
 package de.uvwxy.footpath.gui;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.List;
 
 import android.app.Activity;
@@ -23,10 +19,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import de.uvwxy.flowpath.FlowPathConfig;
+import de.uvwxy.flowpath.FlowPathInterface;
 import de.uvwxy.flowpath.PaintBoxMVs;
-import de.uvwxy.flowpath.ParsingThread;
-import de.uvwxy.flowpath.SocketAudioVideoWriter;
 import de.uvwxy.footpath.R;
 
 /**
@@ -81,8 +75,7 @@ public class FlowPathTestGUI extends Activity {
 //	FileWriter fwGPS;
 	boolean logging = false;
 
-	// Audio
-	SocketAudioVideoWriter avwCapture;
+	
 //
 //	// Wifi
 //	WifiManager wm01;
@@ -100,19 +93,21 @@ public class FlowPathTestGUI extends Activity {
 	// private long tsFirst = 0;
 	// private long tsWifiFirst = 0;
 	
-	private ParsingThread parsingThread = null;
+	private FlowPathInterface flowPathInterface = FlowPathInterface.getInterface();
+	
+	private PaintBoxMVs svMVs = null;
 
 	private Handler mHandler = new Handler();
 	private long delayMillis = 1000;
 
-	private PaintBoxMVs svMVs = null;
+
 
 	private Runnable mUpdateTimeTask = new Runnable() {
 
 		public void run() {
 
 			// Action
-			lblParserInfo.setText(parsingThread.getParser().getStats());
+			lblParserInfo.setText(flowPathInterface.getStats());
 
 			mHandler.postDelayed(this, delayMillis);
 		}
@@ -127,35 +122,7 @@ public class FlowPathTestGUI extends Activity {
 		mHandler.postDelayed(mUpdateTimeTask, delayMillis);
 	}
 
-	// server socket + functions:
-	private ServerSocket sckSrvListen = null;
-	private Socket sckSrvCon = null;
-
-	private ServerThread st = new ServerThread();
-
-	private class ServerThread extends Thread {
-		public void run() {
-			accept();
-		}
-	}
-
-	private void accept() {
-		try {
-			sckSrvCon = sckSrvListen.accept();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void startServer(int port) {
-		try {
-			sckSrvListen = new ServerSocket(port);
-			st = new ServerThread();
-			st.start();
-		} catch (IOException e3) {
-			e3.printStackTrace();
-		}
-	}
+	
 
 	/*
 	 * needed for: test if video stream readable BufferedReader inBuffer;
@@ -206,6 +173,8 @@ public class FlowPathTestGUI extends Activity {
 //				.getSystemService(Context.LOCATION_SERVICE);
 
 		btn01.setOnClickListener(guiOnclickListener);
+		
+		flowPathInterface.addMVDTrigger(svMVs);
 	}
 
 	/**
@@ -312,22 +281,10 @@ public class FlowPathTestGUI extends Activity {
 	private boolean startLogging() {
 		tsNow = System.currentTimeMillis();
 
-		startServer(++FlowPathConfig.port);
-
-		// create audio writer + start it
-		avwCapture = new SocketAudioVideoWriter();
-		try {
-			avwCapture.registerCapture();
-		} catch (IllegalStateException e) {
-			// failed
-			Log.i(LOG_ID, "Failed to register capture device (ISE).");
-			return false;
-		} catch (IOException e) {
-			// failed
-			Log.i(LOG_ID, "Failed to register capture device (IOE).");
-			return false;
-		}
-
+		boolean fpOk = flowPathInterface.startFlowpath();
+		
+		if (fpOk){
+		
 //		// Logging II
 //		fwCompass = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
 //				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
@@ -363,7 +320,7 @@ public class FlowPathTestGUI extends Activity {
 //			return false;
 //		}
 
-		avwCapture.startCapture();
+
 
 //		// Logging III
 //		String data = "time(millis)"+DELIM+"azimuth"+DELIM+"pitch"+DELIM+"roll";
@@ -386,34 +343,21 @@ public class FlowPathTestGUI extends Activity {
 
 		logging = true;
 
-		while (sckSrvCon == null) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-
-		InputStream sckIn = null;
-		try {
-			sckIn = sckSrvCon.getInputStream();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		parsingThread = new ParsingThread(svMVs, sckIn);
-		parsingThread.setRunning(true);
-		parsingThread.start();
+		
 		unPauseHandler();
 
 		return true;
+		} else {
+			logging = false;
+			return false;
+		}
 	}
 
 	/**
 	 * Stops logging, resets variables, closes log files.
 	 */
 	private void stopLogging() {
-		parsingThread.setRunning(false);
+		flowPathInterface.stopFlowPath();
 		pauseHandler();
 
 		if (logging) {
@@ -428,14 +372,7 @@ public class FlowPathTestGUI extends Activity {
 //			fwGPS.closeFileOnCard();
 
 			// stop capture
-			avwCapture.stopCapture();
-			avwCapture.unregisterCapture();
 			
-			try {
-				sckSrvCon.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
