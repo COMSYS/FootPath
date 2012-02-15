@@ -167,6 +167,8 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		tsLast = System.currentTimeMillis();
 	}
+	
+	
 
 	private void drawSpeedBar(Canvas canvas, Paint p, float value, int width, int height,
 			int xOffset, int yOffset) {
