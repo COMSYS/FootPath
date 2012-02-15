@@ -23,7 +23,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 	private boolean surface_ok = false;
 	private boolean paintMVs = false;
 	
-	private final int FRAME_NUM = FlowPathTestGUI.PIC_FPS*2;
+	private final int FRAME_NUM = FlowPathConfig.PIC_FPS*2;
 	
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
@@ -86,7 +86,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 		p.setColor(Color.WHITE);
 
 		if (mvs == null) {
-			canvas.drawText("C (@" + FlowPathTestGUI.PIC_FPS + "): " + mvCount
+			canvas.drawText("C (@" + FlowPathConfig.PIC_FPS + "): " + mvCount
 					+ " -> " + fps + "fps", 0, 16, p);
 			canvas.drawText("NO MVDS!", getWidth() / 2, getHeight() / 2, p);
 		} else {
@@ -101,7 +101,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 			float mvx = 0;
 			float mvy = 0;
 
-			canvas.drawText("C (@" + FlowPathTestGUI.PIC_FPS + "): " + mvCount
+			canvas.drawText("C (@" + FlowPathConfig.PIC_FPS + "): " + mvCount
 					+ " -> " + fps + "fps",32, 16, p);
 
 			for (int x = 0; x < x_len; x++) {
@@ -152,7 +152,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback {
 				y_sec_sum_avg+=f;
 			}
 			
-			y_sec_sum_avg/=FlowPathTestGUI.PIC_FPS;
+			y_sec_sum_avg/=FlowPathConfig.PIC_FPS;
 			
 			int barWidth = 8;
 			int barHeight = 120;

@@ -1,6 +1,5 @@
 package de.uvwxy.footpath.gui;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
@@ -8,19 +7,10 @@ import java.net.Socket;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -33,7 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import de.uvwxy.flowpath.FileWriter;
+import de.uvwxy.flowpath.FlowPathConfig;
 import de.uvwxy.flowpath.PaintBoxMVs;
 import de.uvwxy.flowpath.ParsingThread;
 import de.uvwxy.flowpath.SocketAudioVideoWriter;
@@ -66,6 +56,7 @@ public class FlowPathTestGUI extends Activity {
 	public static final String LOG_DIR = "flowpath_logs";
 	public static final String LOG_ID = "FLOWPATH";
 	private static final char DELIM = ',';
+	
 	// GUI
 	Button btn01;
 	TextView lbl01;
@@ -108,22 +99,6 @@ public class FlowPathTestGUI extends Activity {
 	// Internal
 	// private long tsFirst = 0;
 	// private long tsWifiFirst = 0;
-
-	// Stream parsing
-	// Format Video Resolution
-	// SQCIF 128 × 96 @ 10 @ 30 (not 20)
-	// QCIF 176 × 144 30,10
-	// SCIF 256 x 192
-	// SIF(525) 352 x 240
-	// CIF/SIF(625) 352 × 288
-	// 4SIF(525) 704 x 480
-	// 4CIF/4SIF(625) 704 × 576
-	// 16CIF 1408 × 1152
-	// DCIF 528 × 384
-	public static final int PIC_SIZE_WIDTH = 320;
-	public static final int PIC_SIZE_HEIGHT = 240;
-	public static final int PIC_FPS = 30;
-	public static int port = 2000;
 	
 	private ParsingThread parsingThread = null;
 
@@ -337,7 +312,7 @@ public class FlowPathTestGUI extends Activity {
 	private boolean startLogging() {
 		tsNow = System.currentTimeMillis();
 
-		startServer(++FlowPathTestGUI.port);
+		startServer(++FlowPathConfig.port);
 
 		// create audio writer + start it
 		avwCapture = new SocketAudioVideoWriter();

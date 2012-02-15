@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 
 import android.util.Log;
-import de.uvwxy.footpath.gui.FlowPathTestGUI;
+import de.uvwxy.flowpath.FlowPathConfig;
 
 /**
  * Warning: this is highly unstable and undocumented code ;) asdf you know!
@@ -31,8 +31,8 @@ public class H263Parser {
 	private int k = 2;
 
 	// resolution from nexus s is
-	private int width = FlowPathTestGUI.PIC_SIZE_WIDTH;
-	private int height = FlowPathTestGUI.PIC_SIZE_HEIGHT;
+	private int width = FlowPathConfig.PIC_SIZE_WIDTH;
+	private int height = FlowPathConfig.PIC_SIZE_HEIGHT;
 	private int blockWidth = (width + 15) / 16;
 	private int blockHeight = (height + 15) / 16;
 

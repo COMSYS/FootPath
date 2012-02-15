@@ -40,13 +40,13 @@ public class SocketAudioVideoWriter {
 		recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
 		recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-		recorder.setVideoFrameRate(FlowPathTestGUI.PIC_FPS);
-		recorder.setVideoSize(FlowPathTestGUI.PIC_SIZE_WIDTH, FlowPathTestGUI.PIC_SIZE_HEIGHT);
+		recorder.setVideoFrameRate(FlowPathConfig.PIC_FPS);
+		recorder.setVideoSize(FlowPathConfig.PIC_SIZE_WIDTH, FlowPathConfig.PIC_SIZE_HEIGHT);
 		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
 		
 		// initialize socket here
-		startClient("127.0.0.1", FlowPathTestGUI.port);
+		startClient("127.0.0.1", FlowPathConfig.port);
 		// to use fd from socket here
 		recorder.setOutputFile(getFileDescriptorFromClientSocket());	
 		
