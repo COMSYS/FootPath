@@ -1,10 +1,10 @@
 package de.uvwxy.flowpath;
 
-import de.uvwxy.footpath.gui.FlowPathTestGUI;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -12,19 +12,21 @@ import android.view.SurfaceView;
  * HANDLES: Display of MVD data / Speed
  * 
  * CURRENTLY: Estimation of Speed. (move this somewhere else during refactoring)
- * 			  No automatic redraw. Has to be called manually.
+ * No automatic redraw. Has to be called manually.
+ * 
  * @author paul
- *
+ * 
  */
-public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback, MVDTrigger {
+public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
+		MVDTrigger {
 	private float[][][] mvs = null;
 	private int mvCount = 0;
 
 	private boolean surface_ok = false;
 	private boolean paintMVs = false;
-	
-	private final int FRAME_NUM = FlowPathConfig.PIC_FPS*2;
-	
+
+	private final int FRAME_NUM = FlowPathConfig.PIC_FPS * 2;
+
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
 	}
@@ -63,18 +65,11 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback, 
 		}
 	}
 
-	private long tsLast = 0;
-
-	int movingfactor = 0;
-	float[] y_sum_avgs = new float[FRAME_NUM]; // average speed over the last FRAME_NUM frames
-	int y_sum_avgs_ptr = 0;
-	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		long tsDiff = System.currentTimeMillis() - tsLast;
 		float fps = 1000.0f / tsDiff;
-		
-		
+
 		canvas.drawColor(Color.BLACK);
 		Paint p = new Paint();
 		p.setColor(Color.WHITE);
@@ -85,89 +80,174 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback, 
 			canvas.drawText("NO MVDS!", getWidth() / 2, getHeight() / 2, p);
 		} else {
 
+			canvas.drawText("C (@" + FlowPathConfig.PIC_FPS + "): " + mvCount
+					+ " -> " + fps + "fps", 32, 16, p);
+
+			if (paintMVs) {
+				drawAllMVs(canvas, p, mvs, 16.0f);
+			}
+
 			int x_len = mvs.length;
 			int y_len = mvs[0].length;
+			float[] avg = mvdAverage(mvs);
+			float x_sum = avg[0];
+			float y_sum = avg[1];
 
-			float divisor = x_len * y_len;
-			float x_sum = 0.0f;
-			float y_sum = 0.0f;
+			drawAvgVector(canvas, p, x_sum, y_sum, x_len * 8, y_len * 8);
 
-			float mvx = 0;
-			float mvy = 0;
+			drawHistogramm(canvas, p, y_sum);
+			
+			float[][][] f = mvdFields(mvs,4,3);
+			paintFields(canvas,p,f,16.0f, 300,300);
 
-			canvas.drawText("C (@" + FlowPathConfig.PIC_FPS + "): " + mvCount
-					+ " -> " + fps + "fps",32, 16, p);
-
-			for (int x = 0; x < x_len; x++) {
-				for (int y = 0; y < y_len; y++) {
-					mvx = mvs[x][y][0];
-					mvy = mvs[x][y][1];
-					x_sum += mvx;
-					y_sum += mvy;
-					
-					if(paintMVs){
-					if (mvy < 0) {
-						p.setColor(Color.GREEN);
-					} else {
-						p.setColor(Color.GRAY);
-					}
-					canvas.drawLine(x * 16.0f + 16.0f, 16 + y * 16.0f + 16.0f,
-							x * 16 + mvx + 16.0f, 16.0f + y * 16.0f + mvy
-									+ 16.0f, p);
-					}
-					
-					
-				}
-			}
-
-			x_sum /= divisor;
-			y_sum /= divisor;
-			
-			if (y_sum < 0) {
-				p.setColor(Color.GREEN);
-				movingfactor++;
-				canvas.drawText("MOVING " + movingfactor, 256, 16, p);
-			} else {
-				p.setColor(Color.RED);
-				movingfactor--;
-				canvas.drawText("NOT MOVING " + movingfactor, 256, 16, p);
-			}
-			canvas.drawLine(x_len * 8 + 16.0f, 16 + y_len * 8 + 16.0f, x_len
-					* 8 + x_sum * 16 + 16.0f, 16 + y_len * 8 + y_sum * 16
-					+ 16.0f, p);
-
-			
-			y_sum_avgs[++y_sum_avgs_ptr%FRAME_NUM] = y_sum;
-			
-			
-			float y_sec_sum_avg = 0;
-			
-			for (float f:y_sum_avgs){
-				y_sec_sum_avg+=f;
-			}
-			
-			y_sec_sum_avg/=FlowPathConfig.PIC_FPS;
-			
-			int barWidth = 8;
-			int barHeight = 120;
-			// draw average
-			drawSpeedBar(canvas,p,y_sec_sum_avg,barWidth*2,barHeight,16,16);
-			
-			// draw histogram
-			for(int i = 0; i < FRAME_NUM; i++) {
-				drawSpeedBar(canvas,p,y_sum_avgs[(y_sum_avgs_ptr+1+i)%FRAME_NUM],barWidth,barHeight,40 + (barWidth+2)*(i+1) ,16);
-
-			}
-			
 		}
 		tsLast = System.currentTimeMillis();
 	}
-	
-	
 
-	private void drawSpeedBar(Canvas canvas, Paint p, float value, int width, int height,
-			int xOffset, int yOffset) {
+	private void paintFields(Canvas c, Paint p, float[][][] fields,
+			float scale, int xoffset, int yoffset) {
+		if (fields == null)
+			return;
 		
+		int x_len = fields.length;
+		int y_len = fields[0].length;
+
+		for (int x = 0; x < x_len; x++) {
+			for (int y = 0; y < y_len; y++) {
+				c.drawLine(xoffset + x * scale, yoffset + y * scale, xoffset
+						+ x * scale + fields[x][y][0], yoffset + y * scale
+						+ fields[x][y][1], p);
+			}
+		}
+	}
+
+	private float[][][] mvdFields(float[][][] mvs, int blockDivX, int blockDivY) {
+		int x_len = mvs.length;
+		int y_len = mvs[0].length;
+
+		if (x_len % blockDivX != 0 || y_len % blockDivY != 0){
+			Log.i("FLOWPATH", "ÖRKS " + x_len + " " + y_len + " " + (x_len % blockDivX) + " " + (y_len % blockDivY));
+			return null;
+		}
+
+		if (blockDivX == 1 && blockDivY == 1) {
+			return mvs;
+		}
+
+		float[][][] ret = new float[blockDivX][blockDivY][2];
+
+		int blockWidth = x_len / blockDivX;
+		int blockHeight = y_len / blockDivY;
+
+		for (int y = 0; y < blockDivY; y++) {
+			for (int x = 0; x < blockDivX; x++) {
+				float sumx = 0.0f;
+				float sumy = 0.0f;
+				for (int yr = 0; yr < blockHeight; yr++) {
+					for (int xr = 0; xr < blockWidth; xr++) {
+						sumx += mvs[x * blockWidth + xr][y * blockHeight + yr][0];
+						sumy += mvs[x * blockWidth + xr][y * blockHeight + yr][1];
+					}
+				}
+				ret[x][y][0] = sumx/(blockWidth*blockHeight);
+				ret[x][y][1] = sumy/(blockWidth*blockHeight);
+			}
+		}
+
+		return ret;
+	}
+
+	private void drawAvgVector(Canvas canvas, Paint p, float x_sum,
+			float y_sum, int sizex, int sizey) {
+		if (y_sum < 0) {
+			p.setColor(Color.GREEN);
+			canvas.drawText("MOVING ", 256, 16, p);
+		} else {
+			p.setColor(Color.RED);
+			canvas.drawText("NOT MOVING ", 256, 16, p);
+		}
+		// paint average motion vector
+		canvas.drawLine(sizex + 16.0f, 16 + sizex + 16.0f, sizex + x_sum * 16
+				+ 16.0f, 16 + sizey + y_sum * 16 + 16.0f, p);
+	}
+
+	private float[] mvdAverage(float[][][] mvs) {
+		int x_len = mvs.length;
+		int y_len = mvs[0].length;
+
+		float x_sum = 0.0f;
+		float y_sum = 0.0f;
+
+		for (int x = 0; x < x_len; x++) {
+			for (int y = 0; y < y_len; y++) {
+				x_sum += mvs[x][y][0];
+				y_sum += mvs[x][y][1];
+			}
+		}
+
+		x_sum /= x_len * y_len;
+		y_sum /= x_len * y_len;
+
+		float[] ret = { x_sum, y_sum };
+		return ret;
+	}
+
+	private long tsLast = 0;
+	float[] y_sum_avgs = new float[FRAME_NUM]; // average speed over the last
+												// FRAME_NUM frames
+	int y_sum_avgs_ptr = 0;
+
+	private void drawHistogramm(Canvas c, Paint p, float y_sum) {
+		y_sum_avgs[++y_sum_avgs_ptr % FRAME_NUM] = y_sum;
+
+		float y_sec_sum_avg = 0;
+
+		for (float f : y_sum_avgs) {
+			y_sec_sum_avg += f;
+		}
+
+		y_sec_sum_avg /= FlowPathConfig.PIC_FPS;
+
+		int barWidth = 8;
+		int barHeight = 120;
+		// draw average
+		drawSpeedBar(c, p, y_sec_sum_avg, barWidth * 2, barHeight, 16, 16);
+
+		// draw histogram
+		for (int i = 0; i < FRAME_NUM; i++) {
+			drawSpeedBar(c, p,
+					y_sum_avgs[(y_sum_avgs_ptr + 1 + i) % FRAME_NUM], barWidth,
+					barHeight, 40 + (barWidth + 2) * (i + 1), 16);
+
+		}
+	}
+
+	private void drawAllMVs(Canvas c, Paint p, float[][][] mvs, float scale) {
+		int x_len = mvs.length;
+		int y_len = mvs[0].length;
+
+		float mvx = 0;
+		float mvy = 0;
+
+		for (int x = 0; x < x_len; x++) {
+			for (int y = 0; y < y_len; y++) {
+
+				if (mvy < 0) {
+					p.setColor(Color.GREEN);
+				} else {
+					p.setColor(Color.GRAY);
+				}
+				c.drawLine(x * scale + scale, 16 + y * scale + scale, x * scale
+						+ mvx + scale, scale + y * scale + mvy + scale, p);
+
+			}
+		}
+
+	}
+
+	private void drawSpeedBar(Canvas canvas, Paint p, float value, int width,
+			int height, int xOffset, int yOffset) {
+
 		if (value < 0) {
 			p.setColor(Color.GREEN);
 		} else {
@@ -176,7 +256,8 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback, 
 
 		// draw vertical bar:
 		p.setStrokeWidth(width);
-		canvas.drawLine(xOffset, yOffset + height, xOffset, yOffset + height + value*(height/16), p);
+		canvas.drawLine(xOffset, yOffset + height, xOffset, yOffset + height
+				+ value * (height / 16), p);
 
 		p.setStrokeWidth(1.0f);
 		p.setColor(Color.BLUE);
@@ -185,14 +266,13 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback, 
 				yOffset + height + height, p);
 
 		p.setColor(Color.GREEN);
-		canvas.drawLine(xOffset, yOffset, xOffset + width,
-				yOffset, p);
+		canvas.drawLine(xOffset, yOffset, xOffset + width, yOffset, p);
 	}
 
 	@Override
 	public void processMVData(long now_ms, float[][][] mvds) {
 		this.mvs = mvds;
 		paintMVs();
-		mvCount++;		
+		mvCount++;
 	}
 }

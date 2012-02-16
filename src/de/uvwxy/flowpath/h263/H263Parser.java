@@ -183,7 +183,7 @@ public class H263Parser {
 				// When set to "000", it indicates that only those extended
 				// PTYPE fields which need to be signalled in every picture
 				// header (MPPTYPE) are included in the current picture header.
-				printAndroidLogError("dafuq happened here?");
+//				printAndroidLogError("dafuq happened here?");
 			} // check if Optionlal Part of PlusTYPE is present
 
 			// Regardless of the value of UFEP, the following 9 bits are also
