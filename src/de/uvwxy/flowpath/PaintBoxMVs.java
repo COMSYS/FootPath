@@ -97,8 +97,8 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 
 			drawHistogramm(canvas, p, y_sum);
 
-			float[][][] f = mvdFields(mvs, 4, 3);
-			paintFields(canvas, p, f, 16.0f, 300, 300);
+//			float[][][] f = mvdFields(mvs, 4, 3);
+//			paintFields(canvas, p, f, 16.0f, 300, 300);
 
 			int[][] m = mvdHeatMap(mvs);
 			int size = 128;
@@ -125,6 +125,9 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 
 		c.drawRect(xoffset - 1, yoffset - 1, xoffset + size + 2, yoffset + size
 				+ 2, p);
+		
+		int[][] accumulatedMap = new int[x_len][y_len];
+		
 		for (int x = 0; x < x_len; x++) {
 			for (int y = 0; y < y_len; y++) {
 				// c.drawText("" + map[x][y], x*scale + xoffset, y*scale +
@@ -133,9 +136,29 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 				int v = 0;
 				for (int i = 0; i < numOfHeatMaps; i++) {
 					if (maps[i] != null)
-						v += maps[i][x][y];
+						accumulatedMap[x][y] += maps[i][x][y];
 				}
-
+			}
+		}
+		
+		int totalSum = x_len*y_len;
+		int rowSum = 0;
+		
+		int s = 0;
+		
+		for (int y = 0; y < y_len; y++) {
+			for (int x = 0; x < x_len; x++) {
+				
+				
+				
+				int v = accumulatedMap[x][y];
+				rowSum+=v;
+				
+				if (s == 0 && rowSum > totalSum *4) {
+					s = y;
+				}
+				
+				p.setColor(Color.BLACK);
 				if (v > 1) {
 					p.setColor(Color.DKGRAY);
 				}
@@ -153,11 +176,16 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 				}
 				c.drawRect(xoffset + x * f, yoffset + y * f, xoffset + (x + 1)
 						* f, yoffset + (y + 1) * f, p);
+				
+				
 			}
+			
 		}
 		p.setColor(Color.GREEN);
 		c.drawLine(xoffset - 2, yoffset + size / 2, xoffset + size + 2, yoffset
 				+ size / 2, p);
+		p.setColor(Color.RED);
+		c.drawLine(xoffset-1,yoffset + + s*f,xoffset+size+2, yoffset  + s*f, p);
 	}
 
 	private void paintHeatMap(Canvas c, Paint p, int[][] map, int xoffset,
