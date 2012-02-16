@@ -96,19 +96,123 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 			drawAvgVector(canvas, p, x_sum, y_sum, x_len * 8, y_len * 8);
 
 			drawHistogramm(canvas, p, y_sum);
-			
-			float[][][] f = mvdFields(mvs,4,3);
-			paintFields(canvas,p,f,16.0f, 300,300);
 
+			float[][][] f = mvdFields(mvs, 4, 3);
+			paintFields(canvas, p, f, 16.0f, 300, 300);
+
+			int[][] m = mvdHeatMap(mvs);
+			int size = 128;
+			if (this.getHeight()>512){
+				size = 256;
+			}
+			heatMaps[++hmPtr % numOfHeatMaps] = m;
+			paintHeatMap(canvas, p, m, 400, 280, size);
+			paintHeatMaps(canvas, p, heatMaps, 660, 280, size);
 		}
 		tsLast = System.currentTimeMillis();
+	}
+
+	private int numOfHeatMaps = 30;
+	private int[][][] heatMaps = new int[numOfHeatMaps][][];
+	private int hmPtr = 0;
+
+	private void paintHeatMaps(Canvas c, Paint p, int[][][] maps, int xoffset,
+			int yoffset, int size) {
+		int x_len = maps[hmPtr % numOfHeatMaps].length;
+		int y_len = maps[hmPtr % numOfHeatMaps][0].length;
+
+		int f = size / 32;
+
+		c.drawRect(xoffset - 1, yoffset - 1, xoffset + size + 2, yoffset + size
+				+ 2, p);
+		for (int x = 0; x < x_len; x++) {
+			for (int y = 0; y < y_len; y++) {
+				// c.drawText("" + map[x][y], x*scale + xoffset, y*scale +
+				// yoffset, p);
+				p.setColor(Color.BLACK);
+				int v = 0;
+				for (int i = 0; i < numOfHeatMaps; i++) {
+					if (maps[i] != null)
+						v += maps[i][x][y];
+				}
+
+				if (v > 1) {
+					p.setColor(Color.DKGRAY);
+				}
+				if (v > 4) {
+					p.setColor(Color.GRAY);
+				}
+				if (v > 8) {
+					p.setColor(Color.LTGRAY);
+				}
+				if (v > 16) {
+					p.setColor(Color.WHITE);
+				}
+				if (v > 24) {
+					p.setColor(Color.RED);
+				}
+				c.drawRect(xoffset + x * f, yoffset + y * f, xoffset + (x + 1)
+						* f, yoffset + (y + 1) * f, p);
+			}
+		}
+		p.setColor(Color.GREEN);
+		c.drawLine(xoffset - 2, yoffset + size / 2, xoffset + size + 2, yoffset
+				+ size / 2, p);
+	}
+
+	private void paintHeatMap(Canvas c, Paint p, int[][] map, int xoffset,
+			int yoffset, int size) {
+		int x_len = map.length;
+		int y_len = map[0].length;
+		int f = size / 32;
+		c.drawRect(xoffset - 1, yoffset - 1, xoffset + size + 2, yoffset + size
+				+ 2, p);
+		for (int x = 0; x < x_len; x++) {
+			for (int y = 0; y < y_len; y++) {
+				// c.drawText("" + map[x][y], x*scale + xoffset, y*scale +
+				// yoffset, p);
+				p.setColor(Color.BLACK);
+				if (map[x][y] > 1) {
+					p.setColor(Color.DKGRAY);
+				} else if (map[x][y] > 2) {
+					p.setColor(Color.GRAY);
+				} else if (map[x][y] > 4) {
+					p.setColor(Color.LTGRAY);
+				} else if (map[x][y] > 6) {
+					p.setColor(Color.WHITE);
+				} else if (map[x][y] > 8) {
+					p.setColor(Color.RED);
+				}
+				c.drawRect(xoffset + x * f, yoffset + y * f, xoffset + (x + 1)
+						* f, yoffset + (y + 1) * f, p);
+			}
+		}
+	}
+
+	private int[][] mvdHeatMap(float[][][] mvs) {
+		int x_len = mvs.length;
+		int y_len = mvs[0].length;
+
+		int[][] ret = new int[32][32];
+
+		for (int x = 0; x < x_len; x++) {
+			for (int y = 0; y < y_len; y++) {
+				int mvx = (int) mvs[x][y][0];
+				int mvy = (int) mvs[x][y][1];
+				mvx += 16;
+				mvy += 16;
+				ret[mvx][mvy]++;
+			}
+		}
+
+		return ret;
 	}
 
 	private void paintFields(Canvas c, Paint p, float[][][] fields,
 			float scale, int xoffset, int yoffset) {
 		if (fields == null)
 			return;
-		
+
 		int x_len = fields.length;
 		int y_len = fields[0].length;
 
@@ -125,8 +229,9 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 		int x_len = mvs.length;
 		int y_len = mvs[0].length;
 
-		if (x_len % blockDivX != 0 || y_len % blockDivY != 0){
-			Log.i("FLOWPATH", "ÖRKS " + x_len + " " + y_len + " " + (x_len % blockDivX) + " " + (y_len % blockDivY));
+		if (x_len % blockDivX != 0 || y_len % blockDivY != 0) {
+			Log.i("FLOWPATH", "ÖRKS " + x_len + " " + y_len + " "
+					+ (x_len % blockDivX) + " " + (y_len % blockDivY));
 			return null;
 		}
 
@@ -149,8 +254,8 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 						sumy += mvs[x * blockWidth + xr][y * blockHeight + yr][1];
 					}
 				}
-				ret[x][y][0] = sumx/(blockWidth*blockHeight);
-				ret[x][y][1] = sumy/(blockWidth*blockHeight);
+				ret[x][y][0] = sumx / (blockWidth * blockHeight);
+				ret[x][y][1] = sumy / (blockWidth * blockHeight);
 			}
 		}
 
