@@ -100,13 +100,13 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 			// float[][][] f = mvdFields(mvs, 4, 3);
 			// paintFields(canvas, p, f, 16.0f, 300, 300);
 
-			int[][] m = mvdHeatMap(mvs);
+			mvdHeatMap(mvs, ++hmPtr);
 			int size = 128;
 			if (this.getHeight() > 512) {
 				size = 256;
 			}
-			heatMaps[++hmPtr % numOfHeatMaps] = m;
-			paintHeatMap(canvas, p, m, 400, 280, size);
+			
+			paintHeatMap(canvas, p, heatMaps[hmPtr % numOfHeatMaps], 400, 280, size);
 			paintHeatMaps(canvas, p, heatMaps, 660, 280, size);
 		}
 		tsLast = System.currentTimeMillis();
@@ -123,6 +123,10 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 
 	private void paintHeatMaps(Canvas c, Paint p, int[][][] maps, int xoffset,
 			int yoffset, int size) {
+		
+		if (maps[hmPtr % numOfHeatMaps]==null)
+			return;
+		
 		int x_len = maps[hmPtr % numOfHeatMaps].length;
 		int y_len = maps[hmPtr % numOfHeatMaps][0].length;
 
@@ -222,9 +226,27 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 		s1 = (s1 - 16) * -1;
 		s2 = (s2 - 16) * -1;
 
-		int NOTMOVING = 3;
-		int SLOWFORWARD = 6;
-		int MEDIUMFORWARD = 9;
+		if (s0 > 0) {
+			p.setColor(Color.BLUE);
+			c.drawRect(xoffset, yoffset - 32 - s0 * 10, xoffset + 10,
+					yoffset - 32, p);
+		}
+
+		if (s1 > 0) {
+			p.setColor(Color.YELLOW);
+			c.drawRect(xoffset + 20, yoffset - 32 - s1 * 10, xoffset + 30,
+					yoffset - 32, p);
+		}
+
+		if (s2 > 0) {
+			p.setColor(Color.RED);
+			c.drawRect(xoffset + 40, yoffset - 32 - s2 * 10, xoffset + 50,
+					yoffset - 32, p);
+		}
+
+		int NOTMOVING = 2;
+		int SLOWFORWARD = 7;
+		int MEDIUMFORWARD = 10;
 
 		if (s0 < NOTMOVING && s1 < NOTMOVING && s2 < NOTMOVING) {
 			action = "NOT MOOVING";
@@ -236,11 +258,14 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 			action = "FAST FORWARD";
 		}
 		c.drawText(action, xoffset, yoffset + 64, p);
-
 	}
 
 	private void paintHeatMap(Canvas c, Paint p, int[][] map, int xoffset,
 			int yoffset, int size) {
+		
+		if(map == null)
+			return;
+		
 		int x_len = map.length;
 		int y_len = map[0].length;
 		int f = size / 32;
@@ -268,23 +293,28 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 		}
 	}
 
-	private int[][] mvdHeatMap(float[][][] mvs) {
+	private void mvdHeatMap(float[][][] mvs, int ptr) {
 		int x_len = mvs.length;
 		int y_len = mvs[0].length;
 
-		int[][] ret = new int[32][32];
+		if (heatMaps[ptr%numOfHeatMaps] == null)
+			heatMaps[ptr%numOfHeatMaps] = new int[32][32];
 
+		for (int x = 0; x < 32; x++) {
+			for (int y = 0; y < 32; y++) {
+				heatMaps[ptr%numOfHeatMaps][x][y] = 0;
+			}
+		}
+		
 		for (int x = 0; x < x_len; x++) {
 			for (int y = 0; y < y_len; y++) {
 				int mvx = (int) mvs[x][y][0];
 				int mvy = (int) mvs[x][y][1];
 				mvx += 16;
 				mvy += 16;
-				ret[mvx][mvy]++;
+				heatMaps[ptr%numOfHeatMaps][mvx][mvy]++;
 			}
 		}
-
-		return ret;
 	}
 
 	private void paintFields(Canvas c, Paint p, float[][][] fields,

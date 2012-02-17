@@ -48,6 +48,8 @@ public class H263Parser {
 	private boolean breakOnBitErrors = true;
 	private boolean noGSCMode = true;
 
+	
+	private long STARTUP = 0;
 
 	// there are even small frames -> 24 (as seen with 320x240@30fps)
 	private static int MINIMUM_BYTES_BETWEEN_PICTURES = 24;
@@ -68,6 +70,7 @@ public class H263Parser {
 		this.parseMBs = parseMBs;
 		this.parseBs = parseBs;
 		this.blocking = blocking;
+		this.STARTUP = System.currentTimeMillis();
 	}
 
 	public void parseH263() throws IOException {
@@ -3040,10 +3043,12 @@ public class H263Parser {
 	private int oldFramesNum = 0;
 
 	public String getStats() {
+		long lag = (((System.currentTimeMillis()-STARTUP)/1000L)*29)-(numIframes+numPframes);
 		String t = "I Frames: " + numIframes + ", P Frames: " + numPframes
-				+ "(+" + (numPframes - oldFramesNum) + ")" + "\nSize: " + width
-				+ "x" + height + "\nBrokenFrames: " + numBrokenFrames;
-		oldFramesNum = numPframes;
+				+ "(+" + ((numPframes+numIframes) - oldFramesNum) + ")" + "\nSize: " + width
+				+ "x" + height + "\nBrokenFrames: " + numBrokenFrames
+				+ " Lag: " + lag + " frames";
+		oldFramesNum = numPframes + numIframes;
 		return t;
 	}
 	
