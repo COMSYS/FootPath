@@ -53,8 +53,8 @@ public class ParsingThread extends Thread {
 					if (mvs != null) {
 						flowPathInterface.notifyTriggersWithMVD(System.currentTimeMillis(), mvs);
 					}
-					
-					System.gc();
+					if(frame_count%60==0)
+						System.gc();
 				} else {
 					parser.skipH263Frame();
 				}

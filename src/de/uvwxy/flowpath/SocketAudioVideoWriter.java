@@ -28,7 +28,14 @@ import de.uvwxy.footpath.gui.FlowPathTestGUI;
 public class SocketAudioVideoWriter {
 	private MediaRecorder recorder;
 	private Socket sckClient = null;
-
+	private FileDescriptor fd = null;
+	
+	public SocketAudioVideoWriter(FileDescriptor fd){
+		this.fd = fd;
+	}
+	
+	
+	
 	/**
 	 * Initialization of capture device
 	 * 
@@ -46,9 +53,9 @@ public class SocketAudioVideoWriter {
 		recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
 		
 		// initialize socket here
-		startClient("127.0.0.1", FlowPathConfig.port);
+//		startClient("127.0.0.1", FlowPathConfig.port);
 		// to use fd from socket here
-		recorder.setOutputFile(getFileDescriptorFromClientSocket());	
+		recorder.setOutputFile(fd);	
 		
 		
 		recorder.setPreviewDisplay(FlowPathTestGUI.sh01.getSurface());

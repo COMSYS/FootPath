@@ -1,11 +1,13 @@
 package de.uvwxy.flowpath;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 
@@ -19,6 +21,8 @@ import android.util.Log;
  */
 public class FlowPathInterface {
 	private static final FlowPathInterface singleton = new FlowPathInterface();
+	
+	private ParcelFileDescriptor[] fds = null;
 	
 	private FlowPathInterface(){
 		// Set Constructor to private so no further object instantiation
@@ -58,10 +62,23 @@ public class FlowPathInterface {
 	}
 	
 	public boolean startFlowpath() {
-		startServer(++FlowPathConfig.port);
+		
+		try {
+			// The first ParcelFileDescriptor in the returned array is the read 
+			// side; the second is the write side.
+			fds = ParcelFileDescriptor.createPipe();
+		} catch (IOException e1) {
+			// no pipes created
+			e1.printStackTrace();
+			return false;
+		}
+		
+		
+		
+//		startServer(++FlowPathConfig.port);
 
 		// create audio writer + start it
-		avwCapture = new SocketAudioVideoWriter();
+		avwCapture = new SocketAudioVideoWriter(fds[1].getFileDescriptor());
 		try {
 			avwCapture.registerCapture();
 		} catch (IllegalStateException e) {
@@ -76,22 +93,25 @@ public class FlowPathInterface {
 
 		avwCapture.startCapture();
 
-		while (sckSrvCon == null) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+//		while (sckSrvCon == null) {
+//			try {
+//				Thread.sleep(50);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
 
-		InputStream sckIn = null;
-		try {
-			sckIn = sckSrvCon.getInputStream();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
+		FileInputStream x = new FileInputStream(fds[0].getFileDescriptor());
+		
+//		InputStream sckIn = null;
+//		try {
+//			sckIn = sckSrvCon.getInputStream();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 
-		parsingThread = new ParsingThread(sckIn);
+		parsingThread = new ParsingThread(x);
 		parsingThread.setRunning(true);
 		parsingThread.start();
 
@@ -126,6 +146,8 @@ public class FlowPathInterface {
 	private void accept() {
 		try {
 			sckSrvCon = sckSrvListen.accept();
+			sckSrvCon.setTcpNoDelay(true);
+//			sckSrvCon.setReceiveBufferSize(128);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
