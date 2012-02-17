@@ -89,20 +89,20 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 
 			int x_len = mvs.length;
 			int y_len = mvs[0].length;
-			float[] avg = mvdAverage(mvs);
-			float x_sum = avg[0];
-			float y_sum = avg[1];
+			// float[] avg = mvdAverage(mvs);
+			// float x_sum = avg[0];
+			// float y_sum = avg[1];
 
-			drawAvgVector(canvas, p, x_sum, y_sum, x_len * 8, y_len * 8);
+			// drawAvgVector(canvas, p, x_sum, y_sum, x_len * 8, y_len * 8);
 
-			drawHistogramm(canvas, p, y_sum);
+			// drawHistogramm(canvas, p, y_sum);
 
-//			float[][][] f = mvdFields(mvs, 4, 3);
-//			paintFields(canvas, p, f, 16.0f, 300, 300);
+			// float[][][] f = mvdFields(mvs, 4, 3);
+			// paintFields(canvas, p, f, 16.0f, 300, 300);
 
 			int[][] m = mvdHeatMap(mvs);
 			int size = 128;
-			if (this.getHeight()>512){
+			if (this.getHeight() > 512) {
 				size = 256;
 			}
 			heatMaps[++hmPtr % numOfHeatMaps] = m;
@@ -112,9 +112,14 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 		tsLast = System.currentTimeMillis();
 	}
 
-	private int numOfHeatMaps = 30;
+	private int numOfHeatMaps = 5;
 	private int[][][] heatMaps = new int[numOfHeatMaps][][];
 	private int hmPtr = 0;
+
+	private int numMVs = ((FlowPathConfig.PIC_SIZE_HEIGHT / 16)
+			* (FlowPathConfig.PIC_SIZE_WIDTH / 16) * numOfHeatMaps);
+
+	private int[][] accumulatedMap = null;
 
 	private void paintHeatMaps(Canvas c, Paint p, int[][][] maps, int xoffset,
 			int yoffset, int size) {
@@ -125,39 +130,49 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 
 		c.drawRect(xoffset - 1, yoffset - 1, xoffset + size + 2, yoffset + size
 				+ 2, p);
-		
-		int[][] accumulatedMap = new int[x_len][y_len];
-		
+
+		if (accumulatedMap == null)
+			accumulatedMap = new int[x_len][y_len];
+
 		for (int x = 0; x < x_len; x++) {
 			for (int y = 0; y < y_len; y++) {
 				// c.drawText("" + map[x][y], x*scale + xoffset, y*scale +
 				// yoffset, p);
 				p.setColor(Color.BLACK);
-				int v = 0;
+
+				// reset map, as it is only created once
+				accumulatedMap[x][y] = 0;
 				for (int i = 0; i < numOfHeatMaps; i++) {
 					if (maps[i] != null)
 						accumulatedMap[x][y] += maps[i][x][y];
 				}
 			}
 		}
-		
-		int totalSum = x_len*y_len;
+
 		int rowSum = 0;
-		
-		int s = 0;
-		
+
+		int s0 = 0;
+		int s1 = 0;
+		int s2 = 0;
+
 		for (int y = 0; y < y_len; y++) {
 			for (int x = 0; x < x_len; x++) {
-				
-				
-				
+
 				int v = accumulatedMap[x][y];
-				rowSum+=v;
-				
-				if (s == 0 && rowSum > totalSum *4) {
-					s = y;
+				rowSum += v;
+
+				if (s0 == 0 && rowSum > (numMVs / 4)) {
+					s0 = y;
 				}
-				
+
+				if (s1 == 0 && rowSum > (numMVs / 2)) {
+					s1 = y;
+				}
+
+				if (s2 == 0 && rowSum > (numMVs / 4) * 3) {
+					s2 = y;
+				}
+
 				p.setColor(Color.BLACK);
 				if (v > 1) {
 					p.setColor(Color.DKGRAY);
@@ -176,16 +191,52 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 				}
 				c.drawRect(xoffset + x * f, yoffset + y * f, xoffset + (x + 1)
 						* f, yoffset + (y + 1) * f, p);
-				
-				
+
 			}
-			
+
 		}
 		p.setColor(Color.GREEN);
 		c.drawLine(xoffset - 2, yoffset + size / 2, xoffset + size + 2, yoffset
 				+ size / 2, p);
+
+		p.setTextSize(32);
+		p.setColor(Color.BLUE);
+		c.drawLine(xoffset - 1, yoffset + +s0 * f, xoffset + size + 2, yoffset
+				+ s0 * f, p);
+		c.drawText("" + (s0 - 16) * -1, xoffset, yoffset, p);
+
+		p.setColor(Color.YELLOW);
+		c.drawLine(xoffset - 1, yoffset + +s1 * f, xoffset + size + 2, yoffset
+				+ s1 * f, p);
+		c.drawText("" + (s1 - 16) * -1, xoffset + 32, yoffset, p);
+
 		p.setColor(Color.RED);
-		c.drawLine(xoffset-1,yoffset + + s*f,xoffset+size+2, yoffset  + s*f, p);
+		c.drawLine(xoffset - 1, yoffset + +s2 * f, xoffset + size + 2, yoffset
+				+ s2 * f, p);
+		c.drawText("" + (s2 - 16) * -1, xoffset + 64, yoffset, p);
+
+		String action = "UNDEFINED";
+
+		// speed "normalization" positive forward..
+		s0 = (s0 - 16) * -1;
+		s1 = (s1 - 16) * -1;
+		s2 = (s2 - 16) * -1;
+
+		int NOTMOVING = 3;
+		int SLOWFORWARD = 6;
+		int MEDIUMFORWARD = 9;
+
+		if (s0 < NOTMOVING && s1 < NOTMOVING && s2 < NOTMOVING) {
+			action = "NOT MOOVING";
+		} else if (s0 < SLOWFORWARD) {
+			action = "SLOW FORWARD";
+		} else if (s0 < MEDIUMFORWARD) {
+			action = "MEDIUM FORWARD";
+		} else if (s0 >= MEDIUMFORWARD) {
+			action = "FAST FORWARD";
+		}
+		c.drawText(action, xoffset, yoffset + 64, p);
+
 	}
 
 	private void paintHeatMap(Canvas c, Paint p, int[][] map, int xoffset,
