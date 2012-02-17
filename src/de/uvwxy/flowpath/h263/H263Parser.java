@@ -491,10 +491,10 @@ public class H263Parser {
 				// vertical + horizontal
 				// [2] because of value and predictor
 
-				p.hMVDs = null;
-				mvs = null;
-				p.hMVDs = new float[blockWidth][blockHeight][2][2];
-				mvs = new float[blockWidth][blockHeight][2];
+//				p.hMVDs = null;
+//				mvs = null;
+//				p.hMVDs = new float[blockWidth][blockHeight][2][2];
+//				mvs = new float[blockWidth][blockHeight][2];
 
 				boolean mbAreOk = true;
 				for (int y = 0; y < blockHeight; y++) {

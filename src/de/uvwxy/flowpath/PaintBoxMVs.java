@@ -34,6 +34,9 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 	@Override
 	public void surfaceCreated(SurfaceHolder arg0) {
 		surface_ok = true;
+		if (this.getHeight() > 512) {
+			size = 256;
+		}
 	}
 
 	@Override
@@ -64,14 +67,20 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 			}
 		}
 	}
-
+	
+	private Paint p = new Paint();
+	private int size = 128;
+	private long tsDiff;
+	private float fps;
+	
+	
 	@Override
 	protected void onDraw(Canvas canvas) {
-		long tsDiff = System.currentTimeMillis() - tsLast;
-		float fps = 1000.0f / tsDiff;
+		tsDiff = System.currentTimeMillis() - tsLast;
+		fps = 1000.0f / tsDiff;
 
 		canvas.drawColor(Color.BLACK);
-		Paint p = new Paint();
+		
 		p.setColor(Color.WHITE);
 
 		if (mvs == null) {
@@ -87,8 +96,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 				drawAllMVs(canvas, p, mvs, 16.0f);
 			}
 
-			int x_len = mvs.length;
-			int y_len = mvs[0].length;
+			
 			// float[] avg = mvdAverage(mvs);
 			// float x_sum = avg[0];
 			// float y_sum = avg[1];
@@ -101,10 +109,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 			// paintFields(canvas, p, f, 16.0f, 300, 300);
 
 			mvdHeatMap(mvs, ++hmPtr);
-			int size = 128;
-			if (this.getHeight() > 512) {
-				size = 256;
-			}
+			
 			
 			paintHeatMap(canvas, p, heatMaps[hmPtr % numOfHeatMaps], 400, 280, size);
 			paintHeatMaps(canvas, p, heatMaps, 660, 280, size);
