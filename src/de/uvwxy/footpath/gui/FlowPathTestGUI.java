@@ -1,10 +1,16 @@
 package de.uvwxy.footpath.gui;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Context;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
@@ -19,6 +25,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import de.uvwxy.flowpath.FileWriter;
+import de.uvwxy.flowpath.FlowPathConfig;
 import de.uvwxy.flowpath.FlowPathInterface;
 import de.uvwxy.flowpath.PaintBoxMVs;
 import de.uvwxy.footpath.R;
@@ -31,8 +39,6 @@ import de.uvwxy.footpath.R;
  * 
  * Output is in a directory, e.g. 1328199328345_320_240_60_h263
  * 
- * DEFINES: VIDEO SIZE x*y@f
- *          PORT
  *          LOG_DIR
  *          LOG_ID
  *          DELIM - the delimiter used in csv files
@@ -67,12 +73,12 @@ public class FlowPathTestGUI extends Activity {
 
 	// Logging I
 	static long tsNow = 0;
-//	FileWriter fwCompass;
+	FileWriter fwCompass;
 //	FileWriter fwAccelerometer;
 //	FileWriter fwBarometer;
 //	FileWriter fwGyrometer;
 //	FileWriter fwWifi;
-//	FileWriter fwGPS;
+	FileWriter fwGPS;
 	boolean logging = false;
 
 	
@@ -165,12 +171,12 @@ public class FlowPathTestGUI extends Activity {
 		layout.addView(svMVs, lpHistory);
 
 //		// get sensors
-//		sm = (SensorManager) getSystemService(SENSOR_SERVICE);
-//		lSensor = sm.getSensorList(Sensor.TYPE_ALL);
+		sm = (SensorManager) getSystemService(SENSOR_SERVICE);
+		lSensor = sm.getSensorList(Sensor.TYPE_ALL);
 //
 //		// get GPS
-//		locationManager = (LocationManager) this
-//				.getSystemService(Context.LOCATION_SERVICE);
+		locationManager = (LocationManager) this
+				.getSystemService(Context.LOCATION_SERVICE);
 
 		btn01.setOnClickListener(guiOnclickListener);
 		
@@ -195,19 +201,19 @@ public class FlowPathTestGUI extends Activity {
 //				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
 //		// Sensors
-//		for (int i = 0; i < lSensor.size(); i++) {
-//			// Register only compass and accelerometer
-//			
-//			switch(lSensor.get(i).getType()){
-//			case Sensor.TYPE_ACCELEROMETER:
-//			case Sensor.TYPE_ORIENTATION:
-//			case Sensor.TYPE_GYROSCOPE:
-//			case Sensor.TYPE_PRESSURE:
-////				sm.registerListener(mySensorEventListener, lSensor.get(i),
-//						SensorManager.SENSOR_DELAY_GAME);
-//				Log.i(LOG_ID, "Registered " + lSensor.get(i).getName());
-//			}
-//		}
+		for (int i = 0; i < lSensor.size(); i++) {
+			// Register only compass and accelerometer
+			
+			switch(lSensor.get(i).getType()){
+			case Sensor.TYPE_ACCELEROMETER:
+			case Sensor.TYPE_ORIENTATION:
+			case Sensor.TYPE_GYROSCOPE:
+			case Sensor.TYPE_PRESSURE:
+				sm.registerListener(mySensorEventListener, lSensor.get(i),
+						SensorManager.SENSOR_DELAY_NORMAL);
+				Log.i(LOG_ID, "Registered " + lSensor.get(i).getName());
+			}
+		}
 
 //		// GPS
 //		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
@@ -286,9 +292,9 @@ public class FlowPathTestGUI extends Activity {
 		if (fpOk){
 		
 //		// Logging II
-//		fwCompass = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
-//				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
-//				"compass.csv");
+		fwCompass = new FileWriter(tsNow + "_" + FlowPathConfig.PIC_SIZE_WIDTH + "_"
+				+ FlowPathConfig.PIC_SIZE_HEIGHT + "_" + FlowPathConfig.PIC_FPS + "_" + txt01.getText(),
+				"compass.csv");
 //		fwAccelerometer = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
 //				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
 //				"accelerometer.csv");
@@ -301,30 +307,30 @@ public class FlowPathTestGUI extends Activity {
 //		fwWifi = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
 //				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
 //				"wifi.txt");
-//		fwGPS = new FileWriter(tsNow + "_" + PIC_SIZE_WIDTH + "_"
-//				+ PIC_SIZE_HEIGHT + "_" + PIC_FPS + "_" + txt01.getText(),
-//				"GPS.csv");
+		fwGPS = new FileWriter(tsNow + "_" + FlowPathConfig.PIC_SIZE_WIDTH + "_"
+				+ FlowPathConfig.PIC_SIZE_HEIGHT + "_" + FlowPathConfig.PIC_FPS + "_" + txt01.getText(),
+				"GPS.csv");
 
 		;
 
-//		try {
-//			fwCompass.createFileOnCard();
+		try {
+			fwCompass.createFileOnCard();
 //			fwAccelerometer.createFileOnCard();
 //			fwBarometer.createFileOnCard();
 //			fwGyrometer.createFileOnCard();
 //			fwWifi.createFileOnCard();
-//			fwGPS.createFileOnCard();
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
+			fwGPS.createFileOnCard();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 //			avwCapture.unregisterCapture();
-//			return false;
-//		}
+			return false;
+		}
 
 
 
 //		// Logging III
-//		String data = "time(millis)"+DELIM+"azimuth"+DELIM+"pitch"+DELIM+"roll";
-//		fwCompass.appendLineToFile(data);
+		String data = "time(millis)"+DELIM+"azimuth"+DELIM+"pitch"+DELIM+"roll";
+		fwCompass.appendLineToFile(data);
 //
 //		data = "time(millis)"+DELIM+"x"+DELIM+"y"+DELIM+"z";
 //		fwAccelerometer.appendLineToFile(data);
@@ -335,8 +341,8 @@ public class FlowPathTestGUI extends Activity {
 //		data = "time(millis)"+DELIM+"x"+DELIM+"y"+DELIM+"z";
 //		fwGyrometer.appendLineToFile(data);
 //		
-//		data = "time(millis)"+DELIM+"lat"+DELIM+"long"+DELIM+"alti";
-//		fwGPS.appendLineToFile(data);
+		data = "time(millis)"+DELIM+"lat"+DELIM+"long"+DELIM+"alti";
+		fwGPS.appendLineToFile(data);
 
 		// Wifi
 //		wm01.startScan();
@@ -364,45 +370,45 @@ public class FlowPathTestGUI extends Activity {
 			logging = false;
 //
 //			// Logging IV
-//			fwCompass.closeFileOnCard();
+			fwCompass.closeFileOnCard();
 //			fwAccelerometer.closeFileOnCard();
 //			fwBarometer.closeFileOnCard();
 //			fwGyrometer.closeFileOnCard();
 //			fwWifi.closeFileOnCard();
-//			fwGPS.closeFileOnCard();
+			fwGPS.closeFileOnCard();
 
 			// stop capture
 			
 		}
 	}
 
-//	/**
-//	 * Handles sensor events. Writes the data to the appropriate files.
-//	 */
-//	private SensorEventListener mySensorEventListener = new SensorEventListener() {
-//
-//		@Override
-//		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-//		}
-//
-//		@Override
-//		public void onSensorChanged(SensorEvent event) {
-//			if (logging) {
-//				String data;
-//				long ts = System.currentTimeMillis();
-//				switch (event.sensor.getType()) {
+	/**
+	 * Handles sensor events. Writes the data to the appropriate files.
+	 */
+	private SensorEventListener mySensorEventListener = new SensorEventListener() {
+
+		@Override
+		public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		}
+
+		@Override
+		public void onSensorChanged(SensorEvent event) {
+			if (logging) {
+				String data;
+				long ts = System.currentTimeMillis();
+				switch (event.sensor.getType()) {
 //				case Sensor.TYPE_ACCELEROMETER:
 //					// relative time stamp; x; y; z
 //					data = "" + ts + DELIM + event.values[0] + DELIM
 //							+ event.values[1] + DELIM + event.values[2];
 //					fwAccelerometer.appendLineToFile(data);
 //					break;
-//				case Sensor.TYPE_ORIENTATION:
-//					// relative time stamp; azimuth; pitch; roll
-//					data = "" + ts + DELIM + event.values[0] + DELIM
-//							+ event.values[1] + DELIM + event.values[2];
-//					fwCompass.appendLineToFile(data);
-//					break;
+				case Sensor.TYPE_ORIENTATION:
+					// relative time stamp; azimuth; pitch; roll
+					data = "" + ts + DELIM + event.values[0] + DELIM
+							+ event.values[1] + DELIM + event.values[2];
+					fwCompass.appendLineToFile(data);
+					break;
 //				case Sensor.TYPE_PRESSURE:
 //					data = "" + ts + DELIM + event.values[0];
 //					fwBarometer.appendLineToFile(data);
@@ -411,11 +417,11 @@ public class FlowPathTestGUI extends Activity {
 //					data = "" + ts + DELIM + event.values[0] + DELIM
 //							+ event.values[1] + DELIM + event.values[2];
 //					fwGyrometer.appendLineToFile(data);
-//				default:
-//				}
-//			}
-//		}
-//	};
+				default:
+				}
+			}
+		}
+	};
 //
 //	/**
 //	 * A class that receives the scans results of a WIFI scan. After each scan a
@@ -449,29 +455,29 @@ public class FlowPathTestGUI extends Activity {
 //
 //	}
 //
-//	/*
-//	 * Handles the writing of GPS data.
-//	 */
-//	LocationListener locationListener = new LocationListener() {
-//		public void onLocationChanged(Location location) {
-//			if (logging) {
-//				// gpsFirstStamp has been set after the first Acc/Comp reading
-//				long ts = System.currentTimeMillis();
-//				fwGPS.appendLineToFile("" + ts + ";" + location.getLatitude()
-//						+ ";" + location.getLongitude() + ";"
-//						+ location.getAltitude());
-//			}
-//		}
-//
-//		public void onStatusChanged(String provider, int status, Bundle extras) {
-//		}
-//
-//		public void onProviderEnabled(String provider) {
-//		}
-//
-//		public void onProviderDisabled(String provider) {
-//		}
-//
-//	};
+	/*
+	 * Handles the writing of GPS data.
+	 */
+	LocationListener locationListener = new LocationListener() {
+		public void onLocationChanged(Location location) {
+			if (logging) {
+				// gpsFirstStamp has been set after the first Acc/Comp reading
+				long ts = System.currentTimeMillis();
+				fwGPS.appendLineToFile("" + ts + ";" + location.getLatitude()
+						+ ";" + location.getLongitude() + ";"
+						+ location.getAltitude());
+			}
+		}
+
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+		}
+
+		public void onProviderEnabled(String provider) {
+		}
+
+		public void onProviderDisabled(String provider) {
+		}
+
+	};
 
 }
