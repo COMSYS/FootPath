@@ -76,7 +76,7 @@ public class SocketAudioVideoWriter {
 	public void stopCapture() {
 		recorder.stop();
 		recorder.reset();
-		stopClient();
+//		stopClient();
 	}
 
 	/**
@@ -87,26 +87,26 @@ public class SocketAudioVideoWriter {
 	}
 
 	
-	private void startClient(String hostname, int port){
-		try {
-			sckClient = new Socket(InetAddress.getByName(hostname), port);
-			sckClient.setTcpNoDelay(true);
-		} catch (UnknownHostException e2) {
-			e2.printStackTrace();
-		} catch (IOException e2) {
-			e2.printStackTrace();
-		}
-	}
-	
-	private void stopClient(){
-		try {
-			sckClient.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private FileDescriptor getFileDescriptorFromClientSocket(){
-		return ParcelFileDescriptor.fromSocket(sckClient).getFileDescriptor();
-	}
+//	private void startClient(String hostname, int port){
+//		try {
+//			sckClient = new Socket(InetAddress.getByName(hostname), port);
+//			sckClient.setTcpNoDelay(true);
+//		} catch (UnknownHostException e2) {
+//			e2.printStackTrace();
+//		} catch (IOException e2) {
+//			e2.printStackTrace();
+//		}
+//	}
+//	
+//	private void stopClient(){
+//		try {
+//			sckClient.close();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
+//	
+//	private FileDescriptor getFileDescriptorFromClientSocket(){
+//		return ParcelFileDescriptor.fromSocket(sckClient).getFileDescriptor();
+//	}
 }

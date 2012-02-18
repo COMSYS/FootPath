@@ -37,11 +37,8 @@ public class FlowPathInterface {
 	
 	private ParsingThread parsingThread = null;
 
-	// server socket + functions:
-	private ServerSocket sckSrvListen = null;
-	private Socket sckSrvCon = null;
 
-	private ServerThread st = new ServerThread();
+
 
 	LinkedList<MVDTrigger> mvdTriggers = new LinkedList<MVDTrigger>();
 	
@@ -124,11 +121,11 @@ public class FlowPathInterface {
 		avwCapture.stopCapture();
 		avwCapture.unregisterCapture();
 
-		try {
-			sckSrvCon.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			sckSrvCon.close();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	public String getStats() {
@@ -136,30 +133,34 @@ public class FlowPathInterface {
 	}
 	
 	// SOCKET STUFF:
-	
-	private class ServerThread extends Thread {
-		public void run() {
-			accept();
-		}
-	}
+//	private ServerThread st = new ServerThread();
+//	// server socket + functions:
+//	private ServerSocket sckSrvListen = null;
+//	private Socket sckSrvCon = null;
 
-	private void accept() {
-		try {
-			sckSrvCon = sckSrvListen.accept();
-			sckSrvCon.setTcpNoDelay(true);
-//			sckSrvCon.setReceiveBufferSize(128);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void startServer(int port) {
-		try {
-			sckSrvListen = new ServerSocket(port);
-			st = new ServerThread();
-			st.start();
-		} catch (IOException e3) {
-			e3.printStackTrace();
-		}
-	}
+//	private class ServerThread extends Thread {
+//		public void run() {
+//			accept();
+//		}
+//	}
+//
+//	private void accept() {
+//		try {
+//			sckSrvCon = sckSrvListen.accept();
+//			sckSrvCon.setTcpNoDelay(true);
+////			sckSrvCon.setReceiveBufferSize(128);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
+//
+//	private void startServer(int port) {
+//		try {
+//			sckSrvListen = new ServerSocket(port);
+//			st = new ServerThread();
+//			st.start();
+//		} catch (IOException e3) {
+//			e3.printStackTrace();
+//		}
+//	}
 }
