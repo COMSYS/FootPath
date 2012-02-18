@@ -504,7 +504,7 @@ public class H263Parser {
 							decodeMacroBlock(p, x, y);
 						} catch (H263MBException e) {
 							mbAreOk = false;
-							e.printStackTrace();
+//							e.printStackTrace();
 						}
 
 						if (p.hMVDs != null && mbAreOk) {
@@ -726,18 +726,18 @@ public class H263Parser {
 				hmCBPY = readCBPY();
 				if (hmCBPY == null) {
 					numBrokenFrames++;
-					printAndroidLogError("hCBPY failed, " + x + ", " + y + ",  " 
-					+ p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
-					+ p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1] +  " mbg: " + hmMCBPC[0] + ", " + hmMCBPC[1] + ", " + hmMCBPC[2]);
-//							+ "\n" + lastTCOEFF[0] + ", " + lastTCOEFF[1] + ", " + lastTCOEFF[2] + ", " + lastTCOEFF[3]);
+//					printAndroidLogError("hCBPY failed, " + x + ", " + y + ",  " 
+//					+ p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
+//					+ p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1] +  " mbg: " + hmMCBPC[0] + ", " + hmMCBPC[1] + ", " + hmMCBPC[2]);
+////							+ "\n" + lastTCOEFF[0] + ", " + lastTCOEFF[1] + ", " + lastTCOEFF[2] + ", " + lastTCOEFF[3]);
 					throw new H263MBException("hCBPY failed, " + x + ", " + y);
 				}
 			} else {
 				// here we have hMCBPC == null so we are borked
 				numBrokenFrames++;
-				printAndroidLogError("hMCBPC failed, " + x + ", " + y + ", " 
-						+ p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
-						+ p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1]);
+//				printAndroidLogError("hMCBPC failed, " + x + ", " + y + ", " 
+//						+ p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
+//						+ p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1]);
 				throw new H263MBException("hMCBPC failed, " + x + ", " + y);
 
 			}
@@ -803,7 +803,7 @@ public class H263Parser {
 			} else {
 				// TODO: MCPBC decoding failed (something is unimplemented here)
 				numBrokenFrames++;
-				printAndroidLogError("MCPBC decoding failed (something is unimplemented here, block type" + hmMCBPC[0] +") " + x + ", " + y);
+//				printAndroidLogError("MCPBC decoding failed (something is unimplemented here, block type" + hmMCBPC[0] +") " + x + ", " + y);
 				throw new H263MBException("MCBPC failed, " + x + ", " + y);
 			}
 
@@ -888,7 +888,7 @@ public class H263Parser {
 					}
 				} else {
 					// block decoding failed
-					printAndroidLogError("block decoding failed: ret == -1");
+//					printAndroidLogError("block decoding failed: ret == -1");
 					throw new H263MBException("block decoding failed: ret == -1");
 				}
 			}
