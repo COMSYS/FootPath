@@ -27,14 +27,11 @@ import de.uvwxy.footpath.gui.FlowPathTestGUI;
  */
 public class SocketAudioVideoWriter {
 	private MediaRecorder recorder;
-	private Socket sckClient = null;
 	private FileDescriptor fd = null;
 	
 	public SocketAudioVideoWriter(FileDescriptor fd){
 		this.fd = fd;
 	}
-	
-	
 	
 	/**
 	 * Initialization of capture device
@@ -86,7 +83,7 @@ public class SocketAudioVideoWriter {
 		recorder.release();
 	}
 
-	
+//	private Socket sckClient = null;
 //	private void startClient(String hostname, int port){
 //		try {
 //			sckClient = new Socket(InetAddress.getByName(hostname), port);

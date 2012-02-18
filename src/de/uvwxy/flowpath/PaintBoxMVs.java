@@ -97,16 +97,18 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 			}
 
 			
-			// float[] avg = mvdAverage(mvs);
-			// float x_sum = avg[0];
-			// float y_sum = avg[1];
+			float[] avg = mvdAverage(mvs);
+			float x_sum = avg[0];
+			float y_sum = avg[1];
+			int x_len = mvs.length;
+			int y_len = mvs[0].length;
 
-			// drawAvgVector(canvas, p, x_sum, y_sum, x_len * 8, y_len * 8);
+			drawAvgVector(canvas, p, x_sum, y_sum, x_len * 8, y_len * 8);
 
-			// drawHistogramm(canvas, p, y_sum);
+			drawHistogramm(canvas, p, y_sum);
 
-			// float[][][] f = mvdFields(mvs, 4, 3);
-			// paintFields(canvas, p, f, 16.0f, 300, 300);
+			float[][][] f = mvdFields(mvs, 4, 3);
+			paintFields(canvas, p, f, 16.0f, 300, 300);
 
 			mvdHeatMap(mvs, ++hmPtr);
 			
