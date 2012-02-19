@@ -205,10 +205,10 @@ public class FlowPathTestGUI extends Activity {
 			// Register only compass and accelerometer
 			
 			switch(lSensor.get(i).getType()){
-			case Sensor.TYPE_ACCELEROMETER:
+//			case Sensor.TYPE_ACCELEROMETER:
 			case Sensor.TYPE_ORIENTATION:
-			case Sensor.TYPE_GYROSCOPE:
-			case Sensor.TYPE_PRESSURE:
+//			case Sensor.TYPE_GYROSCOPE:
+//			case Sensor.TYPE_PRESSURE:
 				sm.registerListener(mySensorEventListener, lSensor.get(i),
 						SensorManager.SENSOR_DELAY_NORMAL);
 				Log.i(LOG_ID, "Registered " + lSensor.get(i).getName());
