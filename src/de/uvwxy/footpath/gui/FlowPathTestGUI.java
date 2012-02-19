@@ -81,7 +81,7 @@ public class FlowPathTestGUI extends Activity {
 	FileWriter fwGPS;
 	boolean logging = false;
 
-	
+	private float[] compValues = {0,0,0};
 //
 //	// Wifi
 //	WifiManager wm01;
@@ -405,8 +405,9 @@ public class FlowPathTestGUI extends Activity {
 //					break;
 				case Sensor.TYPE_ORIENTATION:
 					// relative time stamp; azimuth; pitch; roll
-					data = "" + ts + DELIM + event.values[0] + DELIM
-							+ event.values[1] + DELIM + event.values[2];
+					compValues = compFilter(compValues, event.values,0.1f);
+					data = "" + ts + DELIM + compValues[0] + DELIM
+							+ compValues[1] + DELIM + compValues[2];
 					fwCompass.appendLineToFile(data);
 					break;
 //				case Sensor.TYPE_PRESSURE:
@@ -479,5 +480,46 @@ public class FlowPathTestGUI extends Activity {
 		}
 
 	};
+	
+	private float[] compFilter(float[] oldv, float[] newv, float factor) {
+		if (oldv == null || newv == null || factor == 0 || oldv.length != 3
+				|| newv.length != 3)
+			return null;
+		float[] ret = compDiff(oldv, newv);
+
+		ret[0] = factor * ret[0] + oldv[0];
+		ret[1] = factor * ret[1] + oldv[1];
+		ret[2] = factor * ret[2] + oldv[2];
+
+		for (float f : ret) {
+			if (f > 360)
+				f = (f - 360);
+			if (f < 0)
+				f = (f + 360);
+		}
+
+		return ret;
+	}
+
+	private float[] compDiff(float[] oldv, float[] newv) {
+		if (oldv == null || newv == null || oldv.length != 3
+				|| newv.length != 3)
+			return null;
+
+		float[] ret = { 0, 0, 0 };
+
+		ret[0] = newv[0] - oldv[0];
+		ret[1] = newv[1] - oldv[1];
+		ret[2] = newv[2] - oldv[2];
+
+		for (int f = 0; f < 3; f++) {
+			if (ret[f] > 180)
+				ret[f] = (ret[f] - 360);
+			else if (ret[f] < -180)
+				ret[f] = (ret[f] + 360);
+		}
+
+		return ret;
+	}
 
 }
