@@ -2,13 +2,9 @@ package de.uvwxy.flowpath;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 
 import android.media.MediaRecorder;
-import android.os.ParcelFileDescriptor;
-import android.view.SurfaceHolder;
+import android.util.Log;
 import de.uvwxy.footpath.gui.FlowPathTestGUI;
 
 /**
@@ -64,7 +60,11 @@ public class SocketAudioVideoWriter {
 	 * Starts capture
 	 */
 	public void startCapture() {
-	    recorder.start();		
+		try{
+			recorder.start();
+		} catch (RuntimeException e){
+			Log.i("FLOWPATH", "Caught runtime exception " + e.getLocalizedMessage());
+		}
 	}
 
 	/**

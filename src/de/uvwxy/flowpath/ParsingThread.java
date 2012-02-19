@@ -60,6 +60,7 @@ public class ParsingThread extends Thread {
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
+				break;
 			} catch (EOSException e) {
 				e.printStackTrace();
 			}

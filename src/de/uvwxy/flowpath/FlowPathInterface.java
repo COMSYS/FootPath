@@ -3,8 +3,6 @@ package de.uvwxy.flowpath;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.LinkedList;
 
 import android.os.ParcelFileDescriptor;
