@@ -78,6 +78,7 @@ public class FlowPathTestGUI extends Activity {
 	private long tsLastGyro = 0;
 	// log only at 30 FPS
 	private long tsIntervall = (1000 / 30);
+	FileWriter fwFrames;
 	FileWriter fwCompass;
 	FileWriter fwAccelerometer;
 	FileWriter fwBarometer;
@@ -89,6 +90,7 @@ public class FlowPathTestGUI extends Activity {
 	// disable all logging here
 	boolean generalLogging = true;
 	// be selective here
+	boolean frameLogging = true;
 	boolean compLogging = true;
 	boolean accLogging = true;
 	boolean baroLogging = true;
@@ -172,7 +174,7 @@ public class FlowPathTestGUI extends Activity {
 		sh01.setSizeFromLayout();
 		sh01.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-		svMVs = new PaintBoxMVs(this);
+		svMVs = new PaintBoxMVs(this,this);
 
 		RelativeLayout layout = (RelativeLayout) findViewById(R.id.RelativeLayout01);
 		SurfaceView svOld = (SurfaceView) findViewById(R.id.svMVPaint);
@@ -334,6 +336,12 @@ public class FlowPathTestGUI extends Activity {
 
 		if (fpOk) {
 			if (generalLogging) {
+				if (frameLogging)
+					fwFrames = new FileWriter(tsNow + "_"
+							+ FlowPathConfig.PIC_SIZE_WIDTH + "_"
+							+ FlowPathConfig.PIC_SIZE_HEIGHT + "_"
+							+ FlowPathConfig.PIC_FPS + "_" + txt01.getText(),
+							"frames.csv");
 				// // Logging II
 				if (compLogging)
 					fwCompass = new FileWriter(tsNow + "_"
@@ -378,6 +386,8 @@ public class FlowPathTestGUI extends Activity {
 							"GPS.csv");
 
 				try {
+					if (frameLogging)
+						fwFrames.createFileOnCard();
 					if (compLogging)
 						fwCompass.createFileOnCard();
 					if (accLogging)
@@ -400,6 +410,13 @@ public class FlowPathTestGUI extends Activity {
 				String data = "";
 
 				// // Logging III
+				if (frameLogging) {
+					data = "time(millis)" + DELIM + "avg" + DELIM + "l0"
+							+ DELIM + "l1" + DELIM + "l2";
+					fwFrames.appendLineToFile(data);
+				}
+				
+				
 				if (compLogging) {
 					data = "time(millis)" + DELIM + "azimuth" + DELIM + "pitch"
 							+ DELIM + "roll";
@@ -456,6 +473,8 @@ public class FlowPathTestGUI extends Activity {
 			isLogging = false;
 
 			// Logging IV
+			if (frameLogging)
+				fwFrames.closeFileOnCard();
 			if (compLogging)
 				fwCompass.closeFileOnCard();
 			if (accLogging)
@@ -590,6 +609,17 @@ public class FlowPathTestGUI extends Activity {
 
 	};
 
+	public void logFrame(float avg, int l0, int l1, int l2){
+		long ts = System.currentTimeMillis();
+		if (frameLogging && isLogging){
+			String data = "" + ts + DELIM + avg + DELIM
+					+ l0 + DELIM + l1 + DELIM + l2;
+			fwFrames.appendLineToFile(data);
+			
+			
+		}
+	}
+	
 	private float[] compFilter(float[] oldv, float[] newv, float factor) {
 		if (oldv == null || newv == null || factor == 0 || oldv.length != 3
 				|| newv.length != 3)

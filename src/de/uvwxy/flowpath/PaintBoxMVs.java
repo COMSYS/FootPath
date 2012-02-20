@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import de.uvwxy.footpath.gui.FlowPathTestGUI;
 
 /**
  * HANDLES: Display of MVD data / Speed
@@ -27,6 +28,9 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 
 	private final int FRAME_NUM = FlowPathConfig.PIC_FPS * 2;
 
+	
+	private FlowPathTestGUI g = null;
+	
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
 	}
@@ -44,8 +48,9 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 		surface_ok = false;
 	}
 
-	public PaintBoxMVs(Context context) {
+	public PaintBoxMVs(Context context, FlowPathTestGUI g) {
 		super(context);
+		this.g = g;
 		getHolder().addCallback(this);
 	}
 
@@ -73,6 +78,8 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 	private long tsDiff;
 	private float fps;
 	
+	//need this in the draw function later
+	private float yAvg = 0;
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
@@ -99,6 +106,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 			
 			float[] avg = mvdAverage(mvs);
 			float x_sum = avg[0];
+			yAvg = avg[1]*-1;
 			float y_sum = avg[1];
 			int x_len = mvs.length;
 			int y_len = mvs[0].length;
@@ -251,6 +259,8 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 					yoffset - 32, p);
 		}
 
+		g.logFrame(yAvg, s0, s1, s2);
+		
 		int NOTMOVING = 2;
 		int SLOWFORWARD = 7;
 		int MEDIUMFORWARD = 10;
