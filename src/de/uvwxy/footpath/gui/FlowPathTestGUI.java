@@ -87,7 +87,7 @@ public class FlowPathTestGUI extends Activity {
 	// flag if we were able to start logging
 	boolean isLogging = false;
 	// disable all logging here
-	boolean generalLogging = false;
+	boolean generalLogging = true;
 	// be selective here
 	boolean compLogging = true;
 	boolean accLogging = true;
