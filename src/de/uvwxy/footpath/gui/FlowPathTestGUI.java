@@ -73,6 +73,11 @@ public class FlowPathTestGUI extends Activity {
 
 	// Logging I
 	static long tsNow = 0;
+	private long tsLastComp = 0;
+	private long tsLastAcc = 0;
+	private long tsLastGyro = 0;
+	// log only at 30 FPS
+	private long tsIntervall = (1000 / 30);
 	FileWriter fwCompass;
 	FileWriter fwAccelerometer;
 	FileWriter fwBarometer;
@@ -82,7 +87,7 @@ public class FlowPathTestGUI extends Activity {
 	// flag if we were able to start logging
 	boolean isLogging = false;
 	// disable all logging here
-	boolean generalLogging = true;
+	boolean generalLogging = false;
 	// be selective here
 	boolean compLogging = true;
 	boolean accLogging = true;
@@ -323,7 +328,8 @@ public class FlowPathTestGUI extends Activity {
 	 */
 	private boolean startLogging() {
 		tsNow = System.currentTimeMillis();
-
+		tsLastComp = tsNow;
+		tsLastAcc = tsNow;
 		boolean fpOk = flowPathInterface.startFlowpath();
 
 		if (fpOk) {
@@ -442,10 +448,10 @@ public class FlowPathTestGUI extends Activity {
 	 * Stops logging, resets variables, closes log files.
 	 */
 	private void stopLogging() {
-		Log.i("FLOWPATH","Pausing handler");
+		Log.i("FLOWPATH", "Pausing handler");
 		pauseHandler();
-		
-		Log.i("FLOWPATH","Closing Files");
+
+		Log.i("FLOWPATH", "Closing Files");
 		if (isLogging && generalLogging) {
 			isLogging = false;
 
@@ -466,7 +472,7 @@ public class FlowPathTestGUI extends Activity {
 			// stop capture
 
 		}
-		Log.i("FLOWPATH","Trying to stop FlowPath");
+		Log.i("FLOWPATH", "Trying to stop FlowPath");
 		flowPathInterface.stopFlowPath();
 	}
 
@@ -486,29 +492,39 @@ public class FlowPathTestGUI extends Activity {
 				long ts = System.currentTimeMillis();
 				switch (event.sensor.getType()) {
 				case Sensor.TYPE_ACCELEROMETER:
-					// relative time stamp; x; y; z
-					data = "" + ts + DELIM + event.values[0] + DELIM
-							+ event.values[1] + DELIM + event.values[2];
-					fwAccelerometer.appendLineToFile(data);
+					if (ts - tsLastAcc >= tsIntervall) {
+						tsLastAcc = ts;
+						// relative time stamp; x; y; z
+						data = "" + ts + DELIM + event.values[0] + DELIM
+								+ event.values[1] + DELIM + event.values[2];
+						fwAccelerometer.appendLineToFile(data);
+					}
 					break;
 				case Sensor.TYPE_ORIENTATION:
-					// relative time stamp; azimuth; pitch; roll
-					if (compFiltering)
-						compValues = compFilter(compValues, event.values, 0.1f);
-					else
-						compValues = event.values;
-					data = "" + ts + DELIM + compValues[0] + DELIM
-							+ compValues[1] + DELIM + compValues[2];
-					fwCompass.appendLineToFile(data);
+					if (ts - tsLastComp >= tsIntervall) {
+						tsLastComp = ts;
+						// relative time stamp; azimuth; pitch; roll
+						if (compFiltering)
+							compValues = compFilter(compValues, event.values,
+									0.1f);
+						else
+							compValues = event.values;
+						data = "" + ts + DELIM + compValues[0] + DELIM
+								+ compValues[1] + DELIM + compValues[2];
+						fwCompass.appendLineToFile(data);
+					}
 					break;
 				case Sensor.TYPE_PRESSURE:
 					data = "" + ts + DELIM + event.values[0];
 					fwBarometer.appendLineToFile(data);
 					break;
 				case Sensor.TYPE_GYROSCOPE:
-					data = "" + ts + DELIM + event.values[0] + DELIM
-							+ event.values[1] + DELIM + event.values[2];
-					fwGyrometer.appendLineToFile(data);
+					if (ts - tsLastGyro >= tsIntervall) {
+						tsLastGyro = ts;
+						data = "" + ts + DELIM + event.values[0] + DELIM
+								+ event.values[1] + DELIM + event.values[2];
+						fwGyrometer.appendLineToFile(data);
+					}
 				default:
 				}
 			}
