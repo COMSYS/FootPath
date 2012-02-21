@@ -1,12 +1,11 @@
 package de.uvwxy.footpath.gui;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Stack;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,18 +16,15 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ZoomControls;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath.ToolBox;
 import de.uvwxy.footpath.core.NPConfig;
 import de.uvwxy.footpath.core.Positioner;
 import de.uvwxy.footpath.core.Positioner_OnlineBestFit;
 import de.uvwxy.footpath.core.Positioner_OnlineFirstFit;
 import de.uvwxy.footpath.core.StepDetection;
-import de.uvwxy.footpath.core.StepTrigger;
 import de.uvwxy.footpath.graph.Graph;
 import de.uvwxy.footpath.graph.GraphEdge;
 import de.uvwxy.footpath.graph.GraphNode;
 import de.uvwxy.footpath.graph.LatLonPos;
-import de.uvwxy.footpath.log.AudioWriter;
 import de.uvwxy.footpath.log.DataLogger;
 /**
  * 
@@ -47,7 +43,8 @@ public abstract class Navigator extends Activity {
 	Button btnRecalc;
 	Button btnSwitchFit;
 	Graph g;									// Reference to graph
-	
+	SurfaceView sv01;
+	SurfaceHolder sh01;
 	
 	// Route information
 	String nodeFrom;							// Node we will start from, i.e. "5052"
@@ -333,6 +330,17 @@ public abstract class Navigator extends Activity {
 			setContentView(R.layout.displayroutefootpath);
 		} else {
 			setContentView(R.layout.displayrouteflowpath);	
+			
+			
+			sv01 = (SurfaceView) findViewById(R.id.sv01);
+			
+			// setup sv01 for use as preview
+			// Note: this has to be done here, otherwise some sort of
+			// "security exception"
+			sh01 = sv01.getHolder();
+			sh01.setSizeFromLayout();
+			sh01.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+			
 		}
 		
 		Stack<GraphNode> navPathStack;

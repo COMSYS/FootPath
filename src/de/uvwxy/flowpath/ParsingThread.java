@@ -34,6 +34,10 @@ public class ParsingThread extends Thread {
 	public void setRunning(boolean run) {
 		bRunning = run;
 	}
+	
+	public boolean isRunning(){
+		return bRunning;
+	}
 
 	private int frame_count = 0;
 	private int periodicity = 1;

@@ -53,7 +53,9 @@ public class SocketAudioVideoWriter {
 		// to use fd from socket here
 		recorder.setOutputFile(fd);	
 		
-		
+		if (sh == null){
+			Log.i("FLOWPATH", "sh is null!");
+		}
 		recorder.setPreviewDisplay(sh.getSurface());
 		
 		recorder.prepare();

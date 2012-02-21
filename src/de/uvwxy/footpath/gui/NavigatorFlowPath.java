@@ -1,40 +1,16 @@
 package de.uvwxy.footpath.gui;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Stack;
-
-import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.ZoomControls;
 import de.uvwxy.flowpath.FlowPathInterface;
 import de.uvwxy.flowpath.MVDTrigger;
-import de.uvwxy.flowpath.PaintBoxMVs;
 import de.uvwxy.footpath.R;
 import de.uvwxy.footpath.ToolBox;
-import de.uvwxy.footpath.core.NPConfig;
-import de.uvwxy.footpath.core.Positioner;
-import de.uvwxy.footpath.core.Positioner_OnlineBestFit;
-import de.uvwxy.footpath.core.Positioner_OnlineFirstFit;
 import de.uvwxy.footpath.core.StepDetection;
 import de.uvwxy.footpath.core.StepTrigger;
-import de.uvwxy.footpath.graph.Graph;
-import de.uvwxy.footpath.graph.GraphEdge;
-import de.uvwxy.footpath.graph.GraphNode;
 import de.uvwxy.footpath.graph.LatLonPos;
-import de.uvwxy.footpath.log.AudioWriter;
-import de.uvwxy.footpath.log.DataLogger;
 
 /**
  * 
@@ -46,13 +22,28 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 	private FlowPathInterface flowPathInterface = FlowPathInterface
 			.getInterface();
 
-	private static SurfaceView sv01;
-	private static SurfaceHolder sh01;
+	private Button btnStartNav = null;
+	boolean fpOk = false;
 	
 	// #########################################################################
 	// ############################## Functions ################################
 	// #########################################################################
 
+	private OnClickListener onClickListener = new OnClickListener() {
+		@Override
+		public void onClick(View view) {
+			if (view.equals(btnStartNav)){
+				if (!fpOk){
+					fpOk = flowPathInterface.startFlowpath(sh01);
+					btnStartNav.setText("Stop");
+				} else {
+					flowPathInterface.stopFlowPath();
+					btnStartNav.setText("Start");
+				}
+			}
+		}
+	};
+	
 	// #########################################################################
 	// ######################## Activity Life Cycle ############################
 	// #########################################################################
@@ -68,22 +59,16 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		double peak = getSharedPreferences(Calibrator.CALIB_DATA,0).getFloat("peak", 0.5f);
 		int step_timeout_ms = getSharedPreferences(Calibrator.CALIB_DATA,0).getInt("timeout", 666);
 		
+		
+		btnStartNav = (Button) findViewById(R.id.btnStartNav);
+		btnStartNav.setOnClickListener(onClickListener);
 		// Use StepDetection to obtain compass data. Ignore Step triggers
 		// TODO: FiX DiS: Split Step And Compass Trigger
 		// BUT: Is still needed for logging, see below.
 		// Has to be initialized, because it is loaded in onResume in Parent
 		// class
 		stepDetection = new StepDetection(this, this, a, peak, step_timeout_ms);
-		
-		sv01 = (SurfaceView) findViewById(R.id.sv01);
-		
-		// setup sv01 for use as preview
-		// Note: this has to be done here, otherwise some sort of
-		// "security exception"
-		sh01 = sv01.getHolder();
-		sh01.setSizeFromLayout();
-		sh01.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		
+	
 		flowPathInterface.addMVDTrigger(this);
 		setNavigating(true);
 	}
@@ -94,7 +79,6 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 	@Override
 	protected void onResume() {
 		super.onResume();
-		boolean fpOk = flowPathInterface.startFlowpath(sh01);
 	}
 	
 	/**

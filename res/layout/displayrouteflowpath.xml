@@ -47,6 +47,17 @@
         android:id="@+id/btnSwitchFit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Switch to First Fit Algorithm" android:layout_toLeftOf="@id/btnRecalc" android:layout_alignTop="@id/btnRecalc"/>
+        android:layout_above="@+id/btnRecalc"
+        android:layout_alignParentRight="true"
+        android:text="Switch to First Fit Algorithm" android:layout_alignLeft="@id/btnRecalc"/>
+
+    <Button
+        android:id="@+id/btnStartNav"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btnSwitchFit"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:text="@string/flow" />
 
 </RelativeLayout>
