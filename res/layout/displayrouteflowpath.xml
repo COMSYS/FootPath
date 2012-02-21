@@ -4,19 +4,11 @@
     android:layout_height="fill_parent"
     android:keepScreenOn="true" >
 
-    <SurfaceView
-        android:id="@+id/sv01"
-        android:layout_width="320px"
-        android:layout_height="240px"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true" />
-    
     <LinearLayout
         android:id="@+id/ll01"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_alignParentLeft="true"
-        android:layout_toLeftOf="@id/sv01"
         android:orientation="vertical"
         android:weightSum="2" >
 
@@ -25,8 +17,6 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent" />
     </LinearLayout>
-
-
 
     <ZoomControls
         android:id="@+id/zoomCtrl"
@@ -48,8 +38,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/btnRecalc"
+        android:layout_alignLeft="@id/btnRecalc"
         android:layout_alignParentRight="true"
-        android:text="Switch to First Fit Algorithm" android:layout_alignLeft="@id/btnRecalc"/>
+        android:text="Switch to First Fit Algorithm" />
 
     <Button
         android:id="@+id/btnStartNav"
@@ -59,5 +50,12 @@
         android:layout_alignParentRight="true"
         android:layout_marginRight="10dp"
         android:text="@string/flow" />
+
+    <SurfaceView
+        android:id="@+id/sv01"
+        android:layout_width="320px"
+        android:layout_height="240px"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="false" android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>
