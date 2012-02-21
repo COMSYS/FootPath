@@ -92,7 +92,8 @@ public abstract class Navigator extends Activity {
 	// Logging
 	DataLogger logger;
 	boolean log = false;
-
+	// NavigatorFootPath sets this to true so the right xmlgui is loaded
+	boolean footPath = false;
 	
 	// Listeners
 	OnClickListener onClick = new OnClickListener(){
@@ -328,7 +329,11 @@ public abstract class Navigator extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,   
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); 
-		setContentView(R.layout.displayroute);
+		if (footPath){
+			setContentView(R.layout.displayroutefootpath);
+		} else {
+			setContentView(R.layout.displayrouteflowpath);	
+		}
 		
 		Stack<GraphNode> navPathStack;
 		
@@ -437,6 +442,10 @@ public abstract class Navigator extends Activity {
 				
 			// Create correct pointer to chosen positioner
 			conf = confBestFit;
+			
+			
+			posBestFit = new Positioner_OnlineBestFit(this, this.navPathEdges, confBestFit);
+			posFirstFit = new Positioner_OnlineFirstFit(this, this.navPathEdges, confFirstFit);
 		} else { // navPathStack was null
 			this.setResult(RESULT_CANCELED);
 			this.finish();

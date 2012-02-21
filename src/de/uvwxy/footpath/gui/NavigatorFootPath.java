@@ -38,19 +38,17 @@ import de.uvwxy.footpath.log.DataLogger;
 public class NavigatorFootPath extends Navigator implements StepTrigger {
 	
 	
-	
-	
-	
 
 	// #########################################################################
 	// ######################## Activity Life Cycle ############################
 	// #########################################################################
 
 	
-	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		
+		footPath = true;
 		// route calculation and so on..
 		super.onCreate(savedInstanceState);
 		
@@ -59,9 +57,7 @@ public class NavigatorFootPath extends Navigator implements StepTrigger {
 		int step_timeout_ms = getSharedPreferences(Calibrator.CALIB_DATA,0).getInt("timeout", 666);
 		
 		stepDetection = new StepDetection(this, this, a, peak, step_timeout_ms);
-		
-		posBestFit = new Positioner_OnlineBestFit(this, this.navPathEdges, confBestFit);
-		posFirstFit = new Positioner_OnlineFirstFit(this, this.navPathEdges, confFirstFit);
+
 		
 		
 		setNavigating( true );

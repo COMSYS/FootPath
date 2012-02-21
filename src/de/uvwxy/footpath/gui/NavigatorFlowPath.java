@@ -30,18 +30,29 @@ import de.uvwxy.footpath.graph.GraphNode;
 import de.uvwxy.footpath.graph.LatLonPos;
 import de.uvwxy.footpath.log.AudioWriter;
 import de.uvwxy.footpath.log.DataLogger;
+
 /**
  * 
  * @author Paul Smith
- *
+ * 
  */
 public class NavigatorFlowPath extends Navigator {
-	
-	
-	
 
 	// #########################################################################
 	// ############################## Functions ################################
 	// #########################################################################
-	
+
+	// #########################################################################
+	// ######################## Activity Life Cycle ############################
+	// #########################################################################
+
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+
+		// route calculation and so on..
+		super.onCreate(savedInstanceState);
+
+		setNavigating(true);
+	}
 }

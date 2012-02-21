@@ -3,6 +3,7 @@ package de.uvwxy.footpath.core;
 import java.util.LinkedList;
 
 import de.uvwxy.footpath.graph.GraphEdge;
+import de.uvwxy.footpath.gui.Navigator;
 import de.uvwxy.footpath.gui.NavigatorFootPath;
 
 /**
@@ -12,7 +13,7 @@ import de.uvwxy.footpath.gui.NavigatorFootPath;
  *
  */
 public class Positioner_OnlineBestFit extends Positioner{
-	private NavigatorFootPath nav = null;
+	private Navigator nav = null;
 	private NPConfig conf = null;
 	private LinkedList<GraphEdge> edges = null;
 	private double[][] c = null;
@@ -25,7 +26,7 @@ public class Positioner_OnlineBestFit extends Positioner{
 	private int currentStep = 0;
 	private double progress = 0.0;
 	
-	public Positioner_OnlineBestFit(NavigatorFootPath nav, LinkedList<GraphEdge> edges, NPConfig conf){
+	public Positioner_OnlineBestFit(Navigator nav, LinkedList<GraphEdge> edges, NPConfig conf){
 		this.nav = nav;
 		this.edges = edges;
 		this.conf = conf;
