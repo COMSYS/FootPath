@@ -3,7 +3,7 @@ package de.uvwxy.footpath.log;
 import java.io.File;
 import java.io.IOException;
 
-import de.uvwxy.footpath.gui.Navigator;
+import de.uvwxy.footpath.gui.NavigatorFootPath;
 
 import android.media.MediaRecorder;
 import android.os.Environment;
@@ -38,7 +38,7 @@ public class AudioWriter {
 	 */
 	public AudioWriter(String sub_directory, String fileName) {
 		File dir = new File(Environment.getExternalStorageDirectory(),
-				Navigator.LOG_DIR + sub_directory);
+				NavigatorFootPath.LOG_DIR + sub_directory);
 		dir.mkdir();
 		this.filePath = dir.getAbsolutePath() + "/" + fileName;
 	}

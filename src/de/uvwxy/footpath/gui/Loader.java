@@ -566,7 +566,7 @@ public class Loader extends Activity {
 	private void startNavigation(){
 		Log.i("FOOTPATH", "Starting navigation intent");
 		// Create intent for navigation
-		Intent intentNavigator = new Intent(Loader.this, Navigator.class);
+		Intent intentNavigator = new Intent(Loader.this, NavigatorFootPath.class);
 		// Add values to be passed to navigator
 		intentNavigator.putExtra("from",		nodeFrom);
 		intentNavigator.putExtra("fromId",		closestNodeID);

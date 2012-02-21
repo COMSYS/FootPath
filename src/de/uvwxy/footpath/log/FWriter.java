@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import de.uvwxy.footpath.gui.Navigator;
+import de.uvwxy.footpath.gui.NavigatorFootPath;
 
 import android.os.Environment;
 import android.util.Log;
@@ -45,13 +45,13 @@ public class FWriter {
 	 */
 	public void openFileOnCard() throws FileNotFoundException {
 		// check if first dir exists
-		File dir = new File(Environment.getExternalStorageDirectory(),Navigator.LOG_DIR);
+		File dir = new File(Environment.getExternalStorageDirectory(),NavigatorFootPath.LOG_DIR);
 		if(!dir.exists()){
 			dir.mkdir();
 		}
 		// check if second dir exists
 		dir = new File(Environment.getExternalStorageDirectory(),
-				Navigator.LOG_DIR + sub_directory);
+				NavigatorFootPath.LOG_DIR + sub_directory);
 		if(!dir.exists()){
 			dir.mkdir();
 		}

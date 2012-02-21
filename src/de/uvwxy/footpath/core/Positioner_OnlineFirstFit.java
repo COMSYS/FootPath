@@ -3,7 +3,7 @@ package de.uvwxy.footpath.core;
 import java.util.LinkedList;
 
 import de.uvwxy.footpath.graph.GraphEdge;
-import de.uvwxy.footpath.gui.Navigator;
+import de.uvwxy.footpath.gui.NavigatorFootPath;
 
 /**
  * A class calculating the position concerning First Fit
@@ -21,8 +21,8 @@ public class Positioner_OnlineFirstFit extends Positioner{
 	// If this value is passed, lookahead is started
 	private int maxFallBackSteps = 4;
 	
-	private Navigator nav = null;
-	public Positioner_OnlineFirstFit(Navigator nav, LinkedList<GraphEdge> navPathEdges, NPConfig conf){
+	private NavigatorFootPath nav = null;
+	public Positioner_OnlineFirstFit(NavigatorFootPath nav, LinkedList<GraphEdge> navPathEdges, NPConfig conf){
 		this.navPathEdges = navPathEdges;
 		this.conf = conf;
 		this.nav = nav;

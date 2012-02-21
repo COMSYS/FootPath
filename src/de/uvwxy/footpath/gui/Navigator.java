@@ -35,7 +35,7 @@ import de.uvwxy.footpath.log.DataLogger;
  * @author Paul Smith
  *
  */
-public class Navigator extends Activity implements StepTrigger {
+public abstract class Navigator extends Activity {
 	public static final String LOG_DIR = "routelog/";
 	
 	// #########################################################################
@@ -43,58 +43,55 @@ public class Navigator extends Activity implements StepTrigger {
 	// #########################################################################
 	
 	// GUI Elements
-	private PaintBoxMap pbMap;							// Objects to handle the graphics
-	private Button btnRecalc;
-	private Button btnSwitchFit;
-	private Graph g;									// Reference to graph
+	PaintBoxMap pbMap;							// Objects to handle the graphics
+	Button btnRecalc;
+	Button btnSwitchFit;
+	Graph g;									// Reference to graph
 	
 	
 	// Route information
-	private String nodeFrom;							// Node we will start from, i.e. "5052"
-	private int nodeFromId = 0;							// This is used if we choose nearest location from GPS fix
-	private String nodeTo;								// Node we plan to end up with
-	private boolean staircase;
-	private boolean elevator;
-	private boolean outside;
-	private LinkedList<GraphEdge> navPathEdges;			// Contains path with corrected compass bearings
+	String nodeFrom;							// Node we will start from, i.e. "5052"
+	int nodeFromId = 0;							// This is used if we choose nearest location from GPS fix
+	String nodeTo;								// Node we plan to end up with
+	boolean staircase;
+	boolean elevator;
+	boolean outside;
+	LinkedList<GraphEdge> navPathEdges;			// Contains path with corrected compass bearings
 														// used by PaintBoxMap to paint the path
 	
-	private LinkedList<GraphEdge> tempEdges;			// Stores the original edges on path
+	LinkedList<GraphEdge> tempEdges;			// Stores the original edges on path
 														// Needs to be global: is used for logging in onResume()
-	private double navPathLen = 0.0;					// Total length of path
-	private double naiveStairsWidth = 0.25;				// Naive amount in meters to use as stairs step length
+	double navPathLen = 0.0;					// Total length of path
+	double naiveStairsWidth = 0.25;				// Naive amount in meters to use as stairs step length
 	
 	
 	// Navigation
-	private double acceptanceWidth = 42.0;				// Amount of derivation allowed for compassValue to path
-	private StepDetection stepDetection;
-	private Positioner posBestFit = null; 				// Object to do another progress estimation
-	private Positioner posFirstFit = null;
-	private NPConfig confBestFit = null;
-	private NPConfig confFirstFit = null;
-	private NPConfig conf = null;
+	double acceptanceWidth = 42.0;				// Amount of derivation allowed for compassValue to path
+	StepDetection stepDetection;
+	Positioner posBestFit = null; 				// Object to do another progress estimation
+	Positioner posFirstFit = null;
+	NPConfig confBestFit = null;
+	NPConfig confFirstFit = null;
+	NPConfig conf = null;
 	
 	// Progress information
-	private boolean isNavigating = false;				// Set to false when nodeTo is reached
-	private int totalStepsWalked = 0;					// Total number of detected steps
-	
+	boolean isNavigating = false;				// Set to false when nodeTo is reached
+	int totalStepsWalked = 0;					// Total number of detected steps
 	
 	// Runtime information
-	private double compassValue = -1.0;
+	double compassValue = -1.0;
 	
-	private LinkedList<Double> zVarHistory = new LinkedList<Double>();  // store the variance of each step
-	private int historySize = 64;						// Back log of last 64 values to calculate variance
-	private double[] x_History = new double[historySize];
-	private double[] y_History = new double[historySize];
-	private double[] z_History = new double[historySize];
-	private int historyPtr = 0;
+	LinkedList<Double> zVarHistory = new LinkedList<Double>();  // store the variance of each step
+	int historySize = 64;						// Back log of last 64 values to calculate variance
+	double[] x_History = new double[historySize];
+	double[] y_History = new double[historySize];
+	double[] z_History = new double[historySize];
+	int historyPtr = 0;
 		
 	
 	// Logging
-	private DataLogger logger;
-	private boolean log = false;
-	private boolean logAudio = false;
-	private AudioWriter avwCapture;
+	DataLogger logger;
+	boolean log = false;
 
 	
 	// Listeners
@@ -317,67 +314,6 @@ public class Navigator extends Activity implements StepTrigger {
 		this.isNavigating = b;
 	}
 
-	// #########################################################################
-	// ########################## Step/Data Callbacks ##########################
-	// #########################################################################
-	
-	@Override
-	public void trigger(long now_ms, double compDir) {
-		this.totalStepsWalked++;
-		if (!isNavigating) {
-			// Destination was reached
-			return;
-		}
-		
-		if(log){
-			logger.logStep(now_ms, compDir);
-		}
-		
-		posBestFit.addStep(compDir);
-		posFirstFit.addStep(compDir);
-		
-		Log.i("FOOTPATH", "posBestFit: " + posBestFit.getProgress());
-		Log.i("FOOTPATH", "posFirstFit: " + posFirstFit.getProgress());
-		if(log){
-			// Write location to file after detected step
-			LatLonPos bestPos = getPosition(confBestFit);
-			LatLonPos firstPos = getPosition(confFirstFit);
-			logger.logPosition(now_ms, bestPos.getLat(), bestPos.getLon(), posBestFit.getProgress()/this.navPathLen
-					, firstPos.getLat(), firstPos.getLon(), posFirstFit.getProgress()/this.navPathLen);
-		}
-	}
-	
-	@Override
-	public void dataHookAcc(long now_ms, double x, double y, double z){
-		// add values to history (for variance)
-		addTriple(x, y, z);
-		if(log){
-			logger.logRawAcc(now_ms, x, y, z);
-		}
-	}
-	
-	@Override
-	public void dataHookComp(long now_ms, double x, double y, double z){
-		if(log){
-			logger.logRawCompass(now_ms, x, y, z);
-		}
-		compassValue = ToolBox.lowpassFilter(compassValue,  x, 0.5);
-	}
-	
-	@Override
-	public void timedDataHook(long now_ms, double[] acc, double[] comp){
-		double varZ = getVarianceOfZ();
-		zVarHistory.add(new Double(acc[2]));
-		
-		if(log){
-			logger.logTimedVariance(now_ms, varZ);
-		}
-		if(log){
-			// Write Compass and Accelerometer data
-			logger.logTimedAcc(now_ms, acc[2]);
-			logger.logTimedCompass(now_ms, comp[0]);
-		}
-	}
 
 
 	// #########################################################################
@@ -408,7 +344,7 @@ public class Navigator extends Activity implements StepTrigger {
 		elevator 	= 		this.getIntent().getBooleanExtra("elevator", false);
 		outside 	= 		this.getIntent().getBooleanExtra("outside", true);
 		log 		= 		this.getIntent().getBooleanExtra("log", false);
-		logAudio	= 		this.getIntent().getBooleanExtra("audio", false);
+		
 		
 		// calculate route
 		if(nodeFromId==0){
@@ -501,18 +437,6 @@ public class Navigator extends Activity implements StepTrigger {
 				
 			// Create correct pointer to chosen positioner
 			conf = confBestFit;
-			
-			double a = getSharedPreferences(Calibrator.CALIB_DATA,0).getFloat("a", 0.5f);
-			double peak = getSharedPreferences(Calibrator.CALIB_DATA,0).getFloat("peak", 0.5f);
-			int step_timeout_ms = getSharedPreferences(Calibrator.CALIB_DATA,0).getInt("timeout", 666);
-			
-			stepDetection = new StepDetection(this, this, a, peak, step_timeout_ms);
-			
-			posBestFit = new Positioner_OnlineBestFit(this, this.navPathEdges, confBestFit);
-			posFirstFit = new Positioner_OnlineFirstFit(this, this.navPathEdges, confFirstFit);
-			
-			
-			setNavigating( true );
 		} else { // navPathStack was null
 			this.setResult(RESULT_CANCELED);
 			this.finish();
@@ -532,10 +456,6 @@ public class Navigator extends Activity implements StepTrigger {
 			logger.logInfo("Estimated stepsize: " + this.getEstimatedStepLength());
 			logger.logInfo("Output of columns:");
 			logger.stopLogging();
-			if(logAudio){
-				avwCapture.stopCapture();
-				avwCapture.unregisterCapture();
-			}
 		}
 		
 	}
@@ -563,30 +483,6 @@ public class Navigator extends Activity implements StepTrigger {
 					logger.logRoute(e.getNode1().getLat(), e.getNode1().getLon());
 				}
 				
-				
-				
-				
-				// Create files for AudioWrite here, with correct file name as other log files
-				if(nodeFromId==0){
-					if(logAudio){
-						avwCapture = new AudioWriter("" + logger.getRouteId() + "_" + nodeFrom + "_" + nodeTo +"/", "video.3gp");
-					}
-				} else {
-					if(logAudio){
-						avwCapture = new AudioWriter("" + logger.getRouteId() + "_" + nodeFromId + "_" + nodeTo +"/", "video.3gp");
-					}
-				}
-				
-				if(logAudio){
-					try {
-						avwCapture.registerCapture();
-						avwCapture.startCapture();
-					} catch (IllegalStateException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
 			}
 		
 		}
@@ -605,7 +501,7 @@ public class Navigator extends Activity implements StepTrigger {
 	// ############################## Functions ################################
 	// #########################################################################
 
-	private void replaceSurfaceView(SurfaceView svNew, SurfaceView svOld) {
+	void replaceSurfaceView(SurfaceView svNew, SurfaceView svOld) {
 		LayoutParams layParam = svOld.getLayoutParams();
 		LinearLayout ll = (LinearLayout) findViewById(R.id.ll01);
 		ll.removeView(svOld);
@@ -613,24 +509,13 @@ public class Navigator extends Activity implements StepTrigger {
 	}
 
 	
-	/**
-	 * Add values to backlog (for variance)
-	 * @param x	Sensor x value
-	 * @param y	Sensor y value
-	 * @param z Sensor z value
-	 */
-	private void addTriple(double x, double y, double z) {
-		x_History[(historyPtr + 1) % historySize] = x;
-		y_History[(historyPtr + 1) % historySize] = y;
-		z_History[(historyPtr + 1) % historySize] = z;
-		historyPtr++;
-	}
+
 	/**
 	 * Calculates the mean of a given set
 	 * @param set the set
 	 * @return	the mean value
 	 */
-	private double meanOfSet(double[] set) {
+	double meanOfSet(double[] set) {
 		double res = 0.0;
 		for (double i : set) {
 			res += i;
@@ -643,7 +528,7 @@ public class Navigator extends Activity implements StepTrigger {
 	 * @param set the set
 	 * @return	the variance value
 	 */
-	private double varianceOfSet(double[] set) {
+	double varianceOfSet(double[] set) {
 		double res = 0.0;
 		double mean = meanOfSet(set);
 		for (double i : set) {
