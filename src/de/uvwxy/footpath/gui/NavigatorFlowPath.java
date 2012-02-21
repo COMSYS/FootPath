@@ -46,8 +46,8 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 	private FlowPathInterface flowPathInterface = FlowPathInterface
 			.getInterface();
 
-	public static SurfaceView sv01;
-	public static SurfaceHolder sh01;
+	private static SurfaceView sv01;
+	private static SurfaceHolder sh01;
 	
 	// #########################################################################
 	// ############################## Functions ################################
@@ -94,7 +94,7 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 	@Override
 	protected void onResume() {
 		super.onResume();
-		boolean fpOk = flowPathInterface.startFlowpath();
+		boolean fpOk = flowPathInterface.startFlowpath(sh01);
 	}
 	
 	/**

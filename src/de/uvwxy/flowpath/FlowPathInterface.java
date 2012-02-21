@@ -2,11 +2,11 @@ package de.uvwxy.flowpath;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.LinkedList;
 
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.view.SurfaceHolder;
 
 
 /**
@@ -56,7 +56,7 @@ public class FlowPathInterface {
 		}
 	}
 	
-	public boolean startFlowpath() {
+	public boolean startFlowpath(SurfaceHolder sh) {
 		
 		try {
 			// The first ParcelFileDescriptor in the returned array is the read 
@@ -73,7 +73,7 @@ public class FlowPathInterface {
 //		startServer(++FlowPathConfig.port);
 
 		// create audio writer + start it
-		avwCapture = new SocketAudioVideoWriter(fds[1].getFileDescriptor());
+		avwCapture = new SocketAudioVideoWriter(fds[1].getFileDescriptor(), sh);
 		try {
 			avwCapture.registerCapture();
 		} catch (IllegalStateException e) {

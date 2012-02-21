@@ -64,8 +64,8 @@ public class FlowPathTestGUI extends Activity {
 	EditText txt01;
 	private TextView lblParserInfo = null;
 
-	public static SurfaceView sv01;
-	public static SurfaceHolder sh01;
+	private static SurfaceView sv01;
+	private static SurfaceHolder sh01;
 
 	// Sensors
 	private static SensorManager sm;
@@ -332,7 +332,7 @@ public class FlowPathTestGUI extends Activity {
 		tsNow = System.currentTimeMillis();
 		tsLastComp = tsNow;
 		tsLastAcc = tsNow;
-		boolean fpOk = flowPathInterface.startFlowpath();
+		boolean fpOk = flowPathInterface.startFlowpath(sh01);
 
 		if (fpOk) {
 			if (generalLogging) {

@@ -4,50 +4,49 @@
     android:layout_height="fill_parent"
     android:keepScreenOn="true" >
 
+    <SurfaceView
+        android:id="@+id/sv01"
+        android:layout_width="320px"
+        android:layout_height="240px"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true" />
+    
     <LinearLayout
         android:id="@+id/ll01"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_alignParentLeft="true" android:orientation="vertical" android:weightSum="2">
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@id/sv01"
+        android:orientation="vertical"
+        android:weightSum="2" >
 
         <SurfaceView
             android:id="@+id/svPath"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent" android:layout_weight="1"/>
-
+            android:layout_height="fill_parent" />
     </LinearLayout>
+
+
 
     <ZoomControls
         android:id="@+id/zoomCtrl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/ll01"
-        android:layout_alignRight="@+id/ll01" >
-    </ZoomControls>
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true" />
 
     <Button
         android:id="@+id/btnRecalc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/ll01"
-        android:layout_alignLeft="@+id/ll01"
-        android:text="Recalc First Fit" >
-    </Button>
+        android:layout_above="@+id/zoomCtrl"
+        android:layout_alignParentRight="true"
+        android:text="Recalc First Fit" />
 
     <Button
         android:id="@+id/btnSwitchFit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/btnRecalc"
-        android:layout_alignRight="@id/btnRecalc"
-        android:text="Switch to First Fit Algorithm" >
-    </Button>
-
-    <SurfaceView
-        android:id="@+id/sv01"
-        android:layout_width="320px"
-        android:layout_height="240px"
-        android:layout_above="@+id/btnRecalc"
-        android:layout_toRightOf="@+id/btnRecalc" android:layout_alignBottom="@id/btnRecalc"/>
+        android:text="Switch to First Fit Algorithm" android:layout_toLeftOf="@id/btnRecalc" android:layout_alignTop="@id/btnRecalc"/>
 
 </RelativeLayout>

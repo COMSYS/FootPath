@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import android.media.MediaRecorder;
 import android.util.Log;
+import android.view.SurfaceHolder;
 import de.uvwxy.footpath.gui.FlowPathTestGUI;
 
 /**
@@ -24,9 +25,11 @@ import de.uvwxy.footpath.gui.FlowPathTestGUI;
 public class SocketAudioVideoWriter {
 	private MediaRecorder recorder;
 	private FileDescriptor fd = null;
+	private SurfaceHolder sh = null;
 	
-	public SocketAudioVideoWriter(FileDescriptor fd){
+	public SocketAudioVideoWriter(FileDescriptor fd, SurfaceHolder sh){
 		this.fd = fd;
+		this.sh = sh;
 	}
 	
 	/**
@@ -51,7 +54,7 @@ public class SocketAudioVideoWriter {
 		recorder.setOutputFile(fd);	
 		
 		
-		recorder.setPreviewDisplay(FlowPathTestGUI.sh01.getSurface());
+		recorder.setPreviewDisplay(sh.getSurface());
 		
 		recorder.prepare();
 	}

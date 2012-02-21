@@ -453,7 +453,7 @@ public abstract class Navigator extends Activity {
 	}
 	
 	@Override
-	public void onPause() {
+	protected void onPause() {
 		super.onPause();
 		stepDetection.unload();
 		if(log){
