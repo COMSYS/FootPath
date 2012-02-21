@@ -249,7 +249,8 @@ class PaintBoxMap extends PaintBox {
 //					"Variances: " + ToolBox.tdp(navigator.getVarianceOfX()) + "/" + ToolBox.tdp(navigator.getVarianceOfY()) 
 //					+ "/" + ToolBox.tdp(navigator.getVarianceOfZ()), 10, 138, ToolBox.greenPaint(32.0f));
 			canvas.drawText("Est. step length: " 
-					+ ToolBox.tdp(navigator.getEstimatedStepLength()) + " vs " + ToolBox.tdp(navigator.getStepLengthInMeters()) ,10, 138, ToolBox.greenPaint(32.0f));
+					+ ToolBox.tdp(navigator.getEstimatedStepLength()) + " vs " + ToolBox.tdp(navigator.getStepLengthInMeters())
+					+ ", " + navigator.getTotalStepsWalked(),10, 138, ToolBox.greenPaint(32.0f));
 
 		} else {
 			canvas.drawText("Destination ( " + navigator.getRouteEnd().getName() + ") reached", 10, 32, ToolBox.redPaint(32.0f));

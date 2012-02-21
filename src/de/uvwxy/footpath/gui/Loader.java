@@ -64,6 +64,7 @@ public class Loader extends Activity {
 	private Spinner spFrom = null;			// Drop down lists
 	private Spinner spTo = null;
 	private Button bGo = null;				// Buttons
+	private Button bFlow = null;
 	private Button bLoad = null;
 	private Button bSave = null;
 	private Button bCalibrate = null;
@@ -116,8 +117,14 @@ public class Loader extends Activity {
 					shortToast("Please.... " + nodeFrom + " to " + nodeTo + "?");
 					return;
 				}
-				startNavigation();			
-			} else if(v.equals(bLoad)){
+				startNavigationFootPath();			
+			} else if (v.equals(bFlow)) { 
+				if(nodeFrom.equals(nodeTo)){
+					shortToast("Please.... " + nodeFrom + " to " + nodeTo + "?");
+					return;
+				}
+				startNavigationFlowPath();		
+		    } else if(v.equals(bLoad)){
 				// Load values from settings, second parameter is passed if value is not found
 				int tNodeFrom 	 = 	getSharedPreferences(LOADER_SETTINGS,0).getInt("nodeFrom", 		0);
 				int tNodeTo 	 = 	getSharedPreferences(LOADER_SETTINGS,0).getInt("nodeTo", 		0);
@@ -259,6 +266,7 @@ public class Loader extends Activity {
 		spFrom 		= (Spinner)  findViewById(R.id.Spinner01);
 		spTo 		= (Spinner)  findViewById(R.id.Spinner02);
 		bGo 		= (Button)   findViewById(R.id.btnGo);
+		bFlow 		= (Button)   findViewById(R.id.btnFlow);
 		bLoad	 	= (Button)   findViewById(R.id.btnLoad);
 		bSave 		= (Button)   findViewById(R.id.btnSave);
 		bCalibrate 	= (Button) 	 findViewById(R.id.btnCalibrate);
@@ -276,6 +284,7 @@ public class Loader extends Activity {
 		spFrom.setOnItemSelectedListener(spinnerListener);
 		spTo.setOnItemSelectedListener(spinnerListener);
 		bGo.setOnClickListener(onListener);
+		bFlow.setOnClickListener(onListener);
 		bLoad.setOnClickListener(onListener);
 		bSave.setOnClickListener(onListener);
 		bCalibrate.setOnClickListener(onListener);
@@ -346,14 +355,14 @@ public class Loader extends Activity {
 	            		longToast("Even if the URL was correct, you will not be going far from " + nodeFrom + " to " + nodeTo);
 	            	}
 	            	longToast("Starting navigation from " + nodeFrom + " to " + nodeTo);
-	            	startNavigation();
+	            	startNavigationFootPath();
 	            }
 	        } else if (resultCode == RESULT_CANCELED) {
 	            // Handle cancel
 	        }
 	    } else if (requestCode == 1){
 	    	if(resultCode == RESULT_CANCELED){
-	    		longToast("No Route found!");
+	    		longToast("Navigation Over!");
 	    	}
 	    }
 	}
@@ -563,8 +572,8 @@ public class Loader extends Activity {
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 		longToast("Waiting for GPS fix\n\nPlease wait for a notification to continue.\n\nYou can select a destination.");
 	}
-	private void startNavigation(){
-		Log.i("FOOTPATH", "Starting navigation intent");
+	private void startNavigationFootPath(){
+		Log.i("FOOTPATH", "Starting FootPath navigation intent");
 		// Create intent for navigation
 		Intent intentNavigator = new Intent(Loader.this, NavigatorFootPath.class);
 		// Add values to be passed to navigator
@@ -578,6 +587,25 @@ public class Loader extends Activity {
 //		intentNavigator.putExtra("audio",		cbAudio.isChecked());
 		// Source: http://www.pedometersaustralia.com/g/13868/measure-step-length-.html
 		intentNavigator.putExtra("stepLength", 	Float.parseFloat(et01.getText().toString()) * 0.415f);
+		// Start intent for navigation
+		startActivityForResult(intentNavigator, 1);
+	}
+	
+	private void startNavigationFlowPath(){
+		Log.i("FOOTPATH", "Starting FlowPath navigation intent");
+		// Create intent for navigation
+		Intent intentNavigator = new Intent(Loader.this, NavigatorFlowPath.class);
+		// Add values to be passed to navigator
+		intentNavigator.putExtra("from",		nodeFrom);
+		intentNavigator.putExtra("fromId",		closestNodeID);
+		intentNavigator.putExtra("to",			nodeTo);
+		intentNavigator.putExtra("stairs",		cbStairs.isChecked());
+		intentNavigator.putExtra("elevator",	cbElevator.isChecked());
+		intentNavigator.putExtra("outside",		cbOutside.isChecked());
+		intentNavigator.putExtra("log", 		cbLog.isChecked());
+//		intentNavigator.putExtra("audio",		cbAudio.isChecked());
+		// Source: http://www.pedometersaustralia.com/g/13868/measure-step-length-.html
+		intentNavigator.putExtra("stepLength", 	0.25f);
 		// Start intent for navigation
 		startActivityForResult(intentNavigator, 1);
 	}

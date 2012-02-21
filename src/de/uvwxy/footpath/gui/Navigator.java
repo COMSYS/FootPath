@@ -470,7 +470,7 @@ public abstract class Navigator extends Activity {
 	}
 
 	@Override
-	public void onResume() {
+	protected void onResume() {
 		super.onResume();
 		if(log){
 			logger.startLogging();
@@ -501,7 +501,7 @@ public abstract class Navigator extends Activity {
 
 	
 	@Override
-	public void onDestroy() {
+	protected void onDestroy() {
 		super.onDestroy();
 	}
 	
