@@ -605,7 +605,7 @@ public class Loader extends Activity {
 		intentNavigator.putExtra("log", 		cbLog.isChecked());
 //		intentNavigator.putExtra("audio",		cbAudio.isChecked());
 		// Source: http://www.pedometersaustralia.com/g/13868/measure-step-length-.html
-		intentNavigator.putExtra("stepLength", 	0.25f);
+		intentNavigator.putExtra("stepLength", 	100f);
 		// Start intent for navigation
 		startActivityForResult(intentNavigator, 1);
 	}
