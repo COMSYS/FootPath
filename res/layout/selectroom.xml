@@ -28,10 +28,6 @@
 		android:layout_alignTop="@+id/cbStairs" android:layout_alignBottom="@+id/cbStairs"
 		android:id="@+id/cbLog" android:text="Log Data" android:checked="true"></CheckBox>
 	<CheckBox android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:layout_below="@+id/cbLog"
-		android:layout_alignLeft="@+id/cbLog" android:layout_alignRight="@+id/cbLog"
-		android:id="@+id/cbAudio" android:text="Include Audio"></CheckBox>
-	<CheckBox android:layout_width="wrap_content"
 		android:layout_below="@+id/cbStairs" android:layout_height="wrap_content"
 		android:layout_alignLeft="@+id/cbStairs" android:id="@+id/cbElevators"
 		android:text="Elevators" android:checked="false"></CheckBox>
