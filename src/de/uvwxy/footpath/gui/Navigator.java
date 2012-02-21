@@ -541,11 +541,6 @@ public class Navigator extends Activity implements StepTrigger {
 	}
 
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-	}
-
-	@Override
 	public void onResume() {
 		super.onResume();
 		if(log){
@@ -597,9 +592,13 @@ public class Navigator extends Activity implements StepTrigger {
 		}
 		
 		stepDetection.load();
-		
 	}
 
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+	}
 	
 
 	// #########################################################################
