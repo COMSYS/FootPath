@@ -74,7 +74,7 @@ public class Loader extends Activity {
 	private CheckBox cbElevator = null;
 	private CheckBox cbOutside = null;
 	private CheckBox cbLog = null;
-//	private CheckBox cbAudio = null;
+	private CheckBox cbAudio = null;
 	private ArrayAdapter<String> adapter1 = null;	// Adapter to manage drop down lists
 	private ArrayAdapter<String> adapter2 = null;
 	
@@ -269,7 +269,7 @@ public class Loader extends Activity {
 		cbElevator 	= (CheckBox) findViewById(R.id.cbElevators);
 		cbOutside 	= (CheckBox) findViewById(R.id.cbOutside);
 		cbLog		= (CheckBox) findViewById(R.id.cbLog);
-//		cbAudio		= (CheckBox) findViewById(R.id.cbAudio);
+		cbAudio		= (CheckBox) findViewById(R.id.cbAudio);
 		this.setTitle("Footpath r(" + Rev.rev.substring(0,8) + ")");
 						
 		// Set select/click listeners
@@ -575,7 +575,7 @@ public class Loader extends Activity {
 		intentNavigator.putExtra("elevator",	cbElevator.isChecked());
 		intentNavigator.putExtra("outside",		cbOutside.isChecked());
 		intentNavigator.putExtra("log", 		cbLog.isChecked());
-//		intentNavigator.putExtra("audio",		cbAudio.isChecked());
+		intentNavigator.putExtra("audio",		cbAudio.isChecked());
 		// Source: http://www.pedometersaustralia.com/g/13868/measure-step-length-.html
 		intentNavigator.putExtra("stepLength", 	Float.parseFloat(et01.getText().toString()) * 0.415f);
 		// Start intent for navigation
