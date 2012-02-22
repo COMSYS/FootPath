@@ -106,7 +106,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 			
 			float[] avg = mvdAverage(mvs);
 			float x_sum = avg[0];
-			yAvg = avg[1]*-1;
+			yAvg = avg[0]*-1;
 			float y_sum = avg[1];
 			int x_len = mvs.length;
 			int y_len = mvs[0].length;
