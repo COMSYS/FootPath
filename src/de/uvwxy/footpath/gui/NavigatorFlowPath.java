@@ -178,8 +178,9 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		}
 	}
 
-	long tsLastStep = 0;
-
+	private long tsLastStep = 0;
+	private int speed;
+	
 	@Override
 	public void processMVData(long now_ms, float[][][] mvds) {
 		long tsNow = System.currentTimeMillis();
@@ -187,10 +188,22 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		
 		mvdHeatMap(mvds, ++hmPtr);
 		
-		int speed = getSpeed(heatMaps);
+//		speed = (int) ToolBox.lowpassFilter(speed, getSpeed(heatMaps), 0.01f);
+		speed = getSpeed(heatMaps);
+		Log.i("FLOWPATH" , "Speed: " + speed);
 		
-		
-		if (speed >= 3 && (tsNow - tsLastStep > STEPMAX)) {
+		if (speed >= 6 && (tsNow - tsLastStep > STEPMAX)) {
+			// fix compas direction due to screen orientation.
+			
+			posBestFit.addStep(compassValue);
+			posFirstFit.addStep(compassValue);
+			posBestFit.addStep(compassValue);
+			posFirstFit.addStep(compassValue);
+
+			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress());
+			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
+
+		} else if (speed >= 3 && (tsNow - tsLastStep > STEPMAX)) {
 			// fix compas direction due to screen orientation.
 			
 			
@@ -201,6 +214,8 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
 
 		}
+		
+		
 		tsLastStep = tsNow;
 	}
 	
@@ -266,8 +281,8 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		int s1 = 0;
 		int s2 = 0;
 
-		for (int y = 0; y < y_len; y++) {
-			for (int x = 0; x < x_len; x++) {
+		for (int x = 0; x < x_len; x++) {
+			for (int y = 0; y < y_len; y++) {
 
 				int v = accumulatedMap[x][y];
 				rowSum += v;

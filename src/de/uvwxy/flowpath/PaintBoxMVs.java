@@ -113,16 +113,16 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 
 			drawAvgVector(canvas, p, x_sum, y_sum, x_len * 8, y_len * 8);
 
-			drawHistogramm(canvas, p, y_sum);
+			drawHistogramm(canvas, p, x_sum);
 
 			float[][][] f = mvdFields(mvs, 4, 3);
-			paintFields(canvas, p, f, 16.0f, 300, 300);
+			paintFields(canvas, p, f, 16.0f, 0, 300);
 
 			mvdHeatMap(mvs, ++hmPtr);
 			
 			
-			paintHeatMap(canvas, p, heatMaps[hmPtr % numOfHeatMaps], 400, 280, size);
-			paintHeatMaps(canvas, p, heatMaps, 660, 280, size);
+			paintHeatMap(canvas, p, heatMaps[hmPtr % numOfHeatMaps], 20, 280, size);
+			paintHeatMaps(canvas, p, heatMaps, 20+size+4, 280, size);
 		}
 		tsLast = System.currentTimeMillis();
 	}
@@ -174,8 +174,9 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 		int s1 = 0;
 		int s2 = 0;
 
-		for (int y = 0; y < y_len; y++) {
-			for (int x = 0; x < x_len; x++) {
+		
+		for (int x = 0; x < x_len; x++) {
+			for (int y = 0; y < y_len; y++) {
 
 				int v = accumulatedMap[x][y];
 				rowSum += v;
@@ -220,18 +221,15 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 
 		p.setTextSize(32);
 		p.setColor(Color.BLUE);
-		c.drawLine(xoffset - 1, yoffset + +s0 * f, xoffset + size + 2, yoffset
-				+ s0 * f, p);
+		c.drawLine(xoffset + s0 * f, yoffset, xoffset + s0 * f, yoffset + size, p);
 		c.drawText("" + (s0 - 16) * -1, xoffset, yoffset, p);
 
 		p.setColor(Color.YELLOW);
-		c.drawLine(xoffset - 1, yoffset + +s1 * f, xoffset + size + 2, yoffset
-				+ s1 * f, p);
+		c.drawLine(xoffset + s1 * f, yoffset, xoffset + s1 * f, yoffset + size, p);
 		c.drawText("" + (s1 - 16) * -1, xoffset + 32, yoffset, p);
 
 		p.setColor(Color.RED);
-		c.drawLine(xoffset - 1, yoffset + +s2 * f, xoffset + size + 2, yoffset
-				+ s2 * f, p);
+		c.drawLine(xoffset + s2 * f, yoffset, xoffset + s2 * f, yoffset + size, p);
 		c.drawText("" + (s2 - 16) * -1, xoffset + 64, yoffset, p);
 
 		String action = "UNDEFINED";
