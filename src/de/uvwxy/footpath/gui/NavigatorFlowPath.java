@@ -264,8 +264,8 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		if (accumulatedMap == null)
 			accumulatedMap = new int[x_len][y_len];
 
-		for (int x = 0; x < x_len; x++) {
-			for (int y = 0; y < y_len; y++) {
+		for (int x = 0; x < 32; x++) {
+			for (int y = 0; y < 32; y++) {
 				// reset map, as it is only created once
 				accumulatedMap[x][y] = 0;
 				for (int i = 0; i < numOfHeatMaps; i++) {
