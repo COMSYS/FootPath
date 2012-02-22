@@ -175,8 +175,8 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 		int s2 = 0;
 
 		
-		for (int x = 0; x < 32; x++) {
-			for (int y = 0; y < 32; y++) {
+		for (int x = 0; x < x_len; x++) {
+			for (int y = 0; y < y_len; y++) {
 
 				int v = accumulatedMap[x][y];
 				rowSum += v;
