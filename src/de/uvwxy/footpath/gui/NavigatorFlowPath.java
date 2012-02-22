@@ -21,7 +21,7 @@ import de.uvwxy.footpath.graph.LatLonPos;
  */
 public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrigger{
 	// TODO: this value is crap, like MC Donalds
-	private static final int STEPMAX = 100;
+	private static final int STEPMAX = 250;
 	
 	private FlowPathInterface flowPathInterface = FlowPathInterface
 			.getInterface();
@@ -156,7 +156,7 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		tf[2] = (float) z;
 		
 		compDirs = compFilter(compDirs, tf, 0.1f);
-		double fixedCompDir = compDirs[0] + 90;
+		double fixedCompDir = compDirs[0];
 
 		if (fixedCompDir > 360)
 			fixedCompDir -= 360;
@@ -248,7 +248,7 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 				int mvy = (int) mvs[x][y][1];
 				mvx += 16;
 				mvy += 16;
-				heatMaps[ptr%numOfHeatMaps][mvx][mvy]++;
+				heatMaps[ptr%numOfHeatMaps][mvy][mvx]++;
 			}
 		}
 	}
@@ -281,8 +281,8 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		int s1 = 0;
 		int s2 = 0;
 
-		for (int x = 0; x < x_len; x++) {
-			for (int y = 0; y < y_len; y++) {
+		for (int y = 0; y < y_len; y++) {
+			for (int x = 0; x < x_len; x++) {
 
 
 				int v = accumulatedMap[x][y];

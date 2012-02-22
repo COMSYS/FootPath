@@ -175,8 +175,8 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 		int s2 = 0;
 
 		
-		for (int x = 0; x < x_len; x++) {
-			for (int y = 0; y < y_len; y++) {
+		for (int y = 0; y < y_len; y++) {
+			for (int x = 0; x < x_len; x++) {
 
 				int v = accumulatedMap[x][y];
 				rowSum += v;
@@ -221,15 +221,15 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 
 		p.setTextSize(32);
 		p.setColor(Color.BLUE);
-		c.drawLine(xoffset + s0 * f, yoffset, xoffset + s0 * f, yoffset + size, p);
+		c.drawLine(xoffset, yoffset+s0*f, xoffset+size, yoffset +s0*f, p);
 		c.drawText("" + (s0 - 16) * -1, xoffset, yoffset, p);
 
 		p.setColor(Color.YELLOW);
-		c.drawLine(xoffset + s1 * f, yoffset, xoffset + s1 * f, yoffset + size, p);
+		c.drawLine(xoffset, yoffset+s1*f, xoffset+size, yoffset +s1*f, p);
 		c.drawText("" + (s1 - 16) * -1, xoffset + 32, yoffset, p);
 
 		p.setColor(Color.RED);
-		c.drawLine(xoffset + s2 * f, yoffset, xoffset + s2 * f, yoffset + size, p);
+		c.drawLine(xoffset, yoffset+s2*f, xoffset+size, yoffset +s2*f, p);
 		c.drawText("" + (s2 - 16) * -1, xoffset + 64, yoffset, p);
 
 		String action = "UNDEFINED";
@@ -327,7 +327,7 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 				int mvy = (int) mvs[x][y][1];
 				mvx += 16;
 				mvy += 16;
-				heatMaps[ptr%numOfHeatMaps][mvx][mvy]++;
+				heatMaps[ptr%numOfHeatMaps][mvy][mvx]++;
 			}
 		}
 	}

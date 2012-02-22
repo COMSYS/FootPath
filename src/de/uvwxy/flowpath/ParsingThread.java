@@ -40,7 +40,7 @@ public class ParsingThread extends Thread {
 	}
 
 	private int frame_count = 0;
-	private int periodicity = 1;
+	private int periodicity = 3;
 
 	@Override
 	public void run() {
@@ -50,7 +50,7 @@ public class ParsingThread extends Thread {
 			// ISOBoxParser boxParser = new ISOBoxParser(in);
 			try {
 				frame_count++;
-				if (frame_count % periodicity == 0) {
+				if (frame_count % periodicity != 0) {
 
 					mvs = parser.parseH263Frame();
 

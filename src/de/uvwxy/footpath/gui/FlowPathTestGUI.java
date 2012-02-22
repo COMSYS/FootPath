@@ -174,7 +174,7 @@ public class FlowPathTestGUI extends Activity {
 		sh01.setSizeFromLayout();
 		sh01.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-		svMVs = new PaintBoxMVs(this,this);
+		svMVs = new PaintBoxMVs(this, this);
 
 		RelativeLayout layout = (RelativeLayout) findViewById(R.id.RelativeLayout01);
 		SurfaceView svOld = (SurfaceView) findViewById(R.id.svMVPaint);
@@ -415,8 +415,7 @@ public class FlowPathTestGUI extends Activity {
 							+ DELIM + "l1" + DELIM + "l2";
 					fwFrames.appendLineToFile(data);
 				}
-				
-				
+
 				if (compLogging) {
 					data = "time(millis)" + DELIM + "azimuth" + DELIM + "pitch"
 							+ DELIM + "roll";
@@ -442,7 +441,7 @@ public class FlowPathTestGUI extends Activity {
 
 				if (gpsLogging) {
 					data = "time(millis)" + DELIM + "lat" + DELIM + "long"
-							+ DELIM + "alti";
+							+ DELIM + "alti" + DELIM + "speed(m/s)";
 					fwGPS.appendLineToFile(data);
 				}
 
@@ -592,9 +591,9 @@ public class FlowPathTestGUI extends Activity {
 			if (isLogging) {
 				// gpsFirstStamp has been set after the first Acc/Comp reading
 				long ts = System.currentTimeMillis();
-				fwGPS.appendLineToFile("" + ts + ";" + location.getLatitude()
-						+ ";" + location.getLongitude() + ";"
-						+ location.getAltitude());
+				fwGPS.appendLineToFile("" + ts + DELIM + location.getLatitude()
+						+ DELIM + location.getLongitude() + DELIM + location.getAltitude()
+						+ DELIM + location.getSpeed());
 			}
 		}
 
@@ -609,17 +608,16 @@ public class FlowPathTestGUI extends Activity {
 
 	};
 
-	public void logFrame(float avg, int l0, int l1, int l2){
+	public void logFrame(float avg, int l0, int l1, int l2) {
 		long ts = System.currentTimeMillis();
-		if (frameLogging && isLogging){
-			String data = "" + ts + DELIM + avg + DELIM
-					+ l0 + DELIM + l1 + DELIM + l2;
+		if (frameLogging && isLogging) {
+			String data = "" + ts + DELIM + avg + DELIM + l0 + DELIM + l1
+					+ DELIM + l2;
 			fwFrames.appendLineToFile(data);
-			
-			
+
 		}
 	}
-	
+
 	private float[] compFilter(float[] oldv, float[] newv, float factor) {
 		if (oldv == null || newv == null || factor == 0 || oldv.length != 3
 				|| newv.length != 3)
