@@ -22,7 +22,7 @@ import de.uvwxy.footpath.graph.LatLonPos;
 public class NavigatorFlowPath extends Navigator implements StepTrigger,
 		MVDTrigger {
 	// TODO: this value is crap, like MC Donalds
-	private static final int STEPMAX = 250;
+	private static final int STEPMAX = 500;
 
 	private FlowPathInterface flowPathInterface = FlowPathInterface
 			.getInterface();
@@ -182,8 +182,11 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger,
 	}
 
 	private long tsLastStep = 0;
-	private int speed;
+	private int speed[];
 	private long tsLastMove = 0;
+	
+	private int[] lastSpeeds = {0,0,0};
+	private int numSpeeds = 0;
 
 	@Override
 	public void processMVData(long now_ms, float[][][] mvds) {
@@ -195,20 +198,22 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger,
 		// speed = (int) ToolBox.lowpassFilter(speed, getSpeed(heatMaps),
 		// 0.01f);
 		speed = getSpeed(heatMaps);
-		Log.i("FLOWPATH", "Speed: " + speed + " " + (tsNow - tsLastMove));
+		
+		lastSpeeds[0] += speed[0];
+		lastSpeeds[1] += speed[1];
+		lastSpeeds[2] += speed[2];
+		numSpeeds++;
+		
+		Log.i("FLOWPATH", "Speed: " + lastSpeeds[0]/numSpeeds + " " + lastSpeeds[1]/numSpeeds + " " + lastSpeeds[2]/numSpeeds  + " " + (tsNow - tsLastMove));
 
-//		if (speed >= 11 && (tsNow - tsLastMove > STEPMAX)) {
-//			// fix compas direction due to screen orientation.
-//
-//			posBestFit.addStep(compassValue);
-//			posFirstFit.addStep(compassValue);
-//			posBestFit.addStep(compassValue);
-//			posFirstFit.addStep(compassValue);
-//
-//			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress());
-//			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
-		if (speed >= 3 && (tsNow - tsLastMove > STEPMAX)) {
+		if (lastSpeeds[0]/numSpeeds < 3 && lastSpeeds[1]/numSpeeds < 3 && lastSpeeds[2]/numSpeeds < 3 ) {
+			// not moving
 
+		} else if (lastSpeeds[0]/numSpeeds >= 3 && lastSpeeds[2]/numSpeeds <= 0 && (tsNow - tsLastMove > STEPMAX)) {
+			// moving "fast"
+			
+			posBestFit.addStep(compassValue);
+			posFirstFit.addStep(compassValue);
 			posBestFit.addStep(compassValue);
 			posFirstFit.addStep(compassValue);
 
@@ -217,9 +222,31 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger,
 			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
 
 			tsLastMove = tsNow;
+			numSpeeds = 0;
+			lastSpeeds[0] = 0;
+			lastSpeeds[1] = 0;
+			lastSpeeds[2] = 0;
+		} else if ((tsNow - tsLastMove > STEPMAX)) {
+			// moving slow
+			posBestFit.addStep(compassValue);
+			posFirstFit.addStep(compassValue);
 
+			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress() + " "
+					+ (tsNow - tsLastMove));
+			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
+			tsLastMove = tsNow;
+			numSpeeds = 0;
+			lastSpeeds[0] = 0;
+			lastSpeeds[1] = 0;
+			lastSpeeds[2] = 0;
 		}
 
+		if (numSpeeds >= 60){
+			numSpeeds = 0;
+			lastSpeeds[0] = 0;
+			lastSpeeds[1] = 0;
+			lastSpeeds[2] = 0;
+		}
 		tsLastStep = tsNow;
 	}
 
@@ -256,10 +283,10 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger,
 		}
 	}
 
-	private int getSpeed(int[][][] maps) {
+	private int[] getSpeed(int[][][] maps) {
 
 		if (maps[hmPtr % numOfHeatMaps] == null)
-			return -1337;
+			return null;
 
 		int x_len = maps[hmPtr % numOfHeatMaps].length;
 		int y_len = maps[hmPtr % numOfHeatMaps][0].length;
@@ -311,19 +338,9 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger,
 		s1 = (s1 - 16) * -1;
 		s2 = (s2 - 16) * -1;
 
-		int NOTMOVING = 3;
-		int SLOWFORWARD = 7;
-		int MEDIUMFORWARD = 10;
-
-		if (s0 < NOTMOVING && s1 < NOTMOVING && s2 < NOTMOVING) {
-			return 0;
-		} else if (s0 < SLOWFORWARD) {
-		} else if (s0 < MEDIUMFORWARD) {
-		} else if (s0 >= MEDIUMFORWARD) {
-		}
 		// c.drawText(action, xoffset, yoffset + 64, p);
-
-		return s0;
+		int[] ret = {s0,s1,s2};
+		return ret;
 	}
 
 	private float[] compFilter(float[] oldv, float[] newv, float factor) {
