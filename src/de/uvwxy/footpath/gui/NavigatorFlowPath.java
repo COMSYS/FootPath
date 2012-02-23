@@ -1,7 +1,5 @@
 package de.uvwxy.footpath.gui;
 
-import java.util.LinkedList;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -150,16 +148,10 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger,
 	private float[] tf = { 0f, 0f, 0f };
 	private float[] compDirs = { 0f, 0f, 0f };
 
-	private long tsLastCompy = 0;
-
 	@Override
 	public void dataHookComp(long now_ms, double x, double y, double z) {
 		if (log) {
 			logger.logRawCompass(now_ms, x, y, z);
-		}
-
-		if (tsLastCompy == 0) {
-			tsLastCompy = now_ms;
 		}
 		// compassValue = ToolBox.lowpassFilter(compassValue, x, 0.5);
 		tf[0] = (float) x;
@@ -171,68 +163,7 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger,
 
 		if (fixedCompDir > 360)
 			fixedCompDir -= 360;
-		
-		// limit compy saving rate to 20fps
-		if (now_ms - tsLastCompy >= 1000 / 20) {
-			compyList.add(new Compy(compassValue, now_ms));
-
-			tsLastCompy = now_ms;
-		}
-
-	}
-
-	LinkedList<Compy> compyList = new LinkedList<Compy>();
-
-	private class Compy {
-
-		public Compy(double comp, long ts) {
-			this.comp = comp;
-			this.ts = ts;
-		}
-
-		public double comp;
-		public long ts;
-	}
-
-	private Compy getClosestCompy(int frame) {
-		int minDiffI = -1;
-		long minDiffValue = Long.MAX_VALUE;
-		Log.i("FLOWPATH", "list size: " + compyList.size());
-		for (int i = 0; i < compyList.size(); i++) {
-			// Log.i("FLOWPATH", "getting c");
-			Compy c = compyList.get(i);
-			if (c != null) {
-				long d = Math.abs(c.ts - (long)(((frame * (1000 / 20))+1.5) + tsDiff));
-				// Log.i("FLOWPATH", "checking smaller value");
-				if (d < minDiffValue) {
-					Log.i("FLOWPATH", "found smaller value " + d);
-					minDiffValue = d;
-					minDiffI = i;
-				}
-			}
-		}
-
-		if (minDiffI != -1) {
-			Compy ret = compyList.get(minDiffI);
-
-			compyList.remove(minDiffI);
-			compassValue = ret.comp;
-			return ret;
-		} else {
-			Log.i("FLOWPATH", "blub");
-			return null;
-		}
-	}
-	
-	private long getNearesTSCompy(){
-		Compy c = null;
-		c = compyList.getLast();
-		
-		if ( c!= null ) {
-			return c.ts;
-		}
-		
-		return Long.MAX_VALUE;
+		compassValue = fixedCompDir;
 	}
 
 	@Override
@@ -250,19 +181,13 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger,
 		}
 	}
 
+	private long tsLastStep = 0;
 	private int speed;
 	private long tsLastMove = 0;
 
-	// save ts of first frame arriving with vectors
-	private long tsDiff = 0;
-	private int rFrame = 0;
-
 	@Override
 	public void processMVData(long now_ms, float[][][] mvds) {
-		if (rFrame == 0)
-			tsDiff = now_ms;
-
-		rFrame++;
+		long tsNow = System.currentTimeMillis();
 		totalStepsWalked++;
 
 		mvdHeatMap(mvds, ++hmPtr);
@@ -270,37 +195,32 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger,
 		// speed = (int) ToolBox.lowpassFilter(speed, getSpeed(heatMaps),
 		// 0.01f);
 		speed = getSpeed(heatMaps);
-		// Log.i("FLOWPATH", "Speed: " + speed + " " + (tsNow - tsLastMove));
+		Log.i("FLOWPATH", "Speed: " + speed + " " + (tsNow - tsLastMove));
 
-		// if (speed >= 11 && (tsNow - tsLastMove > STEPMAX)) {
-		// // fix compas direction due to screen orientation.
-		//
-		// posBestFit.addStep(compassValue);
-		// posFirstFit.addStep(compassValue);
-		// posBestFit.addStep(compassValue);
-		// posFirstFit.addStep(compassValue);
-		//
-		// Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress());
-		// Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
-		if (speed >= 3 && (now_ms - tsLastMove > STEPMAX)) {
-			Compy c = getClosestCompy(rFrame);
+//		if (speed >= 11 && (tsNow - tsLastMove > STEPMAX)) {
+//			// fix compas direction due to screen orientation.
+//
+//			posBestFit.addStep(compassValue);
+//			posFirstFit.addStep(compassValue);
+//			posBestFit.addStep(compassValue);
+//			posFirstFit.addStep(compassValue);
+//
+//			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress());
+//			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
+		if (speed >= 3 && (tsNow - tsLastMove > STEPMAX)) {
 
-			if (c != null) {
+			posBestFit.addStep(compassValue);
+			posFirstFit.addStep(compassValue);
 
-				posBestFit.addStep(c.comp);
-				posFirstFit.addStep(c.comp);
-				
-				Log.i("FLOWPATH", "ts diff: " + (c.ts- now_ms) + ", youngest: " + (now_ms - getNearesTSCompy()));
+			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress() + " "
+					+ (tsNow - tsLastMove));
+			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
 
-				Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress()
-						+ " " + (now_ms - tsLastMove));
-				Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
-
-				tsLastMove = now_ms;
-			}
+			tsLastMove = tsNow;
 
 		}
 
+		tsLastStep = tsNow;
 	}
 
 	private int numOfHeatMaps = 5;
