@@ -19,16 +19,17 @@ import de.uvwxy.footpath.graph.LatLonPos;
  * @author Paul Smith
  * 
  */
-public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrigger{
+public class NavigatorFlowPath extends Navigator implements StepTrigger,
+		MVDTrigger {
 	// TODO: this value is crap, like MC Donalds
 	private static final int STEPMAX = 250;
-	
+
 	private FlowPathInterface flowPathInterface = FlowPathInterface
 			.getInterface();
 
 	private Button btnStartNav = null;
 	boolean fpOk = false;
-	
+
 	// #########################################################################
 	// ############################## Functions ################################
 	// #########################################################################
@@ -36,8 +37,8 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 	private OnClickListener onClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
-			if (view.equals(btnStartNav)){
-				if (!fpOk){
+			if (view.equals(btnStartNav)) {
+				if (!fpOk) {
 					fpOk = flowPathInterface.startFlowpath(sh01);
 					btnStartNav.setText("Stop");
 				} else {
@@ -47,7 +48,7 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 			}
 		}
 	};
-	
+
 	// #########################################################################
 	// ######################## Activity Life Cycle ############################
 	// #########################################################################
@@ -59,11 +60,13 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		// route calculation and so on..
 		super.onCreate(savedInstanceState);
 
-		double a = getSharedPreferences(Calibrator.CALIB_DATA,0).getFloat("a", 0.5f);
-		double peak = getSharedPreferences(Calibrator.CALIB_DATA,0).getFloat("peak", 0.5f);
-		int step_timeout_ms = getSharedPreferences(Calibrator.CALIB_DATA,0).getInt("timeout", 666);
-		
-		
+		double a = getSharedPreferences(Calibrator.CALIB_DATA, 0).getFloat("a",
+				0.5f);
+		double peak = getSharedPreferences(Calibrator.CALIB_DATA, 0).getFloat(
+				"peak", 0.5f);
+		int step_timeout_ms = getSharedPreferences(Calibrator.CALIB_DATA, 0)
+				.getInt("timeout", 666);
+
 		btnStartNav = (Button) findViewById(R.id.btnStartNav);
 		btnStartNav.setOnClickListener(onClickListener);
 		// Use StepDetection to obtain compass data. Ignore Step triggers
@@ -72,11 +75,11 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		// Has to be initialized, because it is loaded in onResume in Parent
 		// class
 		stepDetection = new StepDetection(this, this, a, peak, step_timeout_ms);
-	
+
 		flowPathInterface.addMVDTrigger(this);
 		setNavigating(true);
 	}
-	
+
 	/**
 	 * Reset the GUI on resume. Capture has been stopped before.
 	 */
@@ -84,7 +87,7 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 	protected void onResume() {
 		super.onResume();
 	}
-	
+
 	/**
 	 * GUI is no longer visible, stop everything.
 	 */
@@ -93,7 +96,6 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		super.onPause();
 		flowPathInterface.stopFlowPath();
 	}
-	
 
 	/**
 	 * Bye Bye. Stop logging!
@@ -103,58 +105,59 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		super.onDestroy();
 		flowPathInterface.stopFlowPath();
 	}
-	
+
 	// #########################################################################
 	// ########################## Step/Data Callbacks ##########################
 	// #########################################################################
-	
-	
+
 	@Override
 	public void trigger(long now_ms, double compDir) {
 		if (!isNavigating) {
 			// Destination was reached
 			return;
 		}
-		
-		if(log){
+
+		if (log) {
 			logger.logStep(now_ms, compDir);
 		}
-		
+
 		// Do not use steps for navigation!
 		// posBestFit.addStep(compDir);
 		// posFirstFit.addStep(compDir);
-		
+
 		// Log.i("FOOTPATH", "posBestFit: " + posBestFit.getProgress());
 		// Log.i("FOOTPATH", "posFirstFit: " + posFirstFit.getProgress());
-		if(log){
+		if (log) {
 			// Write location to file after detected step
 			LatLonPos bestPos = getPosition(confBestFit);
 			LatLonPos firstPos = getPosition(confFirstFit);
-			logger.logPosition(now_ms, bestPos.getLat(), bestPos.getLon(), posBestFit.getProgress()/this.navPathLen
-					, firstPos.getLat(), firstPos.getLon(), posFirstFit.getProgress()/this.navPathLen);
+			logger.logPosition(now_ms, bestPos.getLat(), bestPos.getLon(),
+					posBestFit.getProgress() / this.navPathLen,
+					firstPos.getLat(), firstPos.getLon(),
+					posFirstFit.getProgress() / this.navPathLen);
 		}
 	}
-	
+
 	@Override
-	public void dataHookAcc(long now_ms, double x, double y, double z){
-		if(log){
+	public void dataHookAcc(long now_ms, double x, double y, double z) {
+		if (log) {
 			logger.logRawAcc(now_ms, x, y, z);
 		}
 	}
-	
-	private float[] tf = {0f,0f,0f};
-	private float[] compDirs  = {0f,0f,0f};
-	
+
+	private float[] tf = { 0f, 0f, 0f };
+	private float[] compDirs = { 0f, 0f, 0f };
+
 	@Override
-	public void dataHookComp(long now_ms, double x, double y, double z){
-		if(log){
+	public void dataHookComp(long now_ms, double x, double y, double z) {
+		if (log) {
 			logger.logRawCompass(now_ms, x, y, z);
 		}
-//		compassValue = ToolBox.lowpassFilter(compassValue,  x, 0.5);
+		// compassValue = ToolBox.lowpassFilter(compassValue, x, 0.5);
 		tf[0] = (float) x;
 		tf[1] = (float) y;
 		tf[2] = (float) z;
-		
+
 		compDirs = compFilter(compDirs, tf, 0.1f);
 		double fixedCompDir = compDirs[0];
 
@@ -162,16 +165,16 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 			fixedCompDir -= 360;
 		compassValue = fixedCompDir;
 	}
-	
+
 	@Override
-	public void timedDataHook(long now_ms, double[] acc, double[] comp){
+	public void timedDataHook(long now_ms, double[] acc, double[] comp) {
 		double varZ = getVarianceOfZ();
 		zVarHistory.add(new Double(acc[2]));
-		
-		if(log){
+
+		if (log) {
 			logger.logTimedVariance(now_ms, varZ);
 		}
-		if(log){
+		if (log) {
 			// Write Compass and Accelerometer data
 			logger.logTimedAcc(now_ms, acc[2]);
 			logger.logTimedCompass(now_ms, comp[0]);
@@ -180,45 +183,46 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 
 	private long tsLastStep = 0;
 	private int speed;
-	
+	private long tsLastMove = 0;
+
 	@Override
 	public void processMVData(long now_ms, float[][][] mvds) {
 		long tsNow = System.currentTimeMillis();
 		totalStepsWalked++;
-		
+
 		mvdHeatMap(mvds, ++hmPtr);
-		
-//		speed = (int) ToolBox.lowpassFilter(speed, getSpeed(heatMaps), 0.01f);
+
+		// speed = (int) ToolBox.lowpassFilter(speed, getSpeed(heatMaps),
+		// 0.01f);
 		speed = getSpeed(heatMaps);
-		Log.i("FLOWPATH" , "Speed: " + speed);
-		
-		if (speed >= 6 && (tsNow - tsLastStep > STEPMAX)) {
-			// fix compas direction due to screen orientation.
-			
-			posBestFit.addStep(compassValue);
-			posFirstFit.addStep(compassValue);
+		Log.i("FLOWPATH", "Speed: " + speed + " " + (tsNow - tsLastMove));
+
+//		if (speed >= 11 && (tsNow - tsLastMove > STEPMAX)) {
+//			// fix compas direction due to screen orientation.
+//
+//			posBestFit.addStep(compassValue);
+//			posFirstFit.addStep(compassValue);
+//			posBestFit.addStep(compassValue);
+//			posFirstFit.addStep(compassValue);
+//
+//			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress());
+//			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
+		if (speed >= 3 && (tsNow - tsLastMove > STEPMAX)) {
+
 			posBestFit.addStep(compassValue);
 			posFirstFit.addStep(compassValue);
 
-			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress());
+			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress() + " "
+					+ (tsNow - tsLastMove));
 			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
 
-		} else if (speed >= 3 && (tsNow - tsLastStep > STEPMAX)) {
-			// fix compas direction due to screen orientation.
-			
-			
-			posBestFit.addStep(compassValue);
-			posFirstFit.addStep(compassValue);
-
-			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress());
-			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
+			tsLastMove = tsNow;
 
 		}
-		
-		
+
 		tsLastStep = tsNow;
 	}
-	
+
 	private int numOfHeatMaps = 5;
 	private int[][][] heatMaps = new int[numOfHeatMaps][][];
 	private int hmPtr = 0;
@@ -228,36 +232,35 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 
 	private int[][] accumulatedMap = null;
 
-	
 	private void mvdHeatMap(float[][][] mvs, int ptr) {
 		int x_len = mvs.length;
 		int y_len = mvs[0].length;
 
-		if (heatMaps[ptr%numOfHeatMaps] == null)
-			heatMaps[ptr%numOfHeatMaps] = new int[32][32];
+		if (heatMaps[ptr % numOfHeatMaps] == null)
+			heatMaps[ptr % numOfHeatMaps] = new int[32][32];
 
 		for (int x = 0; x < 32; x++) {
 			for (int y = 0; y < 32; y++) {
-				heatMaps[ptr%numOfHeatMaps][x][y] = 0;
+				heatMaps[ptr % numOfHeatMaps][x][y] = 0;
 			}
 		}
-		
+
 		for (int x = 0; x < x_len; x++) {
 			for (int y = 0; y < y_len; y++) {
 				int mvx = (int) mvs[x][y][0];
 				int mvy = (int) mvs[x][y][1];
 				mvx += 16;
 				mvy += 16;
-				heatMaps[ptr%numOfHeatMaps][mvy][mvx]++;
+				heatMaps[ptr % numOfHeatMaps][mvy][mvx]++;
 			}
 		}
 	}
-	
+
 	private int getSpeed(int[][][] maps) {
-		
-		if (maps[hmPtr % numOfHeatMaps]==null)
+
+		if (maps[hmPtr % numOfHeatMaps] == null)
 			return -1337;
-		
+
 		int x_len = maps[hmPtr % numOfHeatMaps].length;
 		int y_len = maps[hmPtr % numOfHeatMaps][0].length;
 
@@ -284,7 +287,6 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		for (int y = 0; y < y_len; y++) {
 			for (int x = 0; x < x_len; x++) {
 
-
 				int v = accumulatedMap[x][y];
 				rowSum += v;
 
@@ -299,18 +301,17 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 				if (s2 == 0 && rowSum > (numMVs / 4) * 3) {
 					s2 = y;
 				}
-				
+
 			}
 
 		}
-
 
 		// speed "normalization" positive forward..
 		s0 = (s0 - 16) * -1;
 		s1 = (s1 - 16) * -1;
 		s2 = (s2 - 16) * -1;
-		
-		int NOTMOVING = 2;
+
+		int NOTMOVING = 3;
 		int SLOWFORWARD = 7;
 		int MEDIUMFORWARD = 10;
 
@@ -320,11 +321,11 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger, MVDTrig
 		} else if (s0 < MEDIUMFORWARD) {
 		} else if (s0 >= MEDIUMFORWARD) {
 		}
-//		c.drawText(action, xoffset, yoffset + 64, p);
-		
+		// c.drawText(action, xoffset, yoffset + 64, p);
+
 		return s0;
 	}
-	
+
 	private float[] compFilter(float[] oldv, float[] newv, float factor) {
 		if (oldv == null || newv == null || factor == 0 || oldv.length != 3
 				|| newv.length != 3)
