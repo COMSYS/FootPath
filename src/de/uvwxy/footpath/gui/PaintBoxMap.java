@@ -21,11 +21,11 @@ import android.graphics.RectF;
 import android.os.Environment;
 import android.util.Log;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath.ToolBox;
-import de.uvwxy.footpath.core.Positioner;
-import de.uvwxy.footpath.graph.GraphEdge;
-import de.uvwxy.footpath.graph.LatLonPos;
-import de.uvwxy.paintbox.PaintBox;
+import de.uvwxy.footpath2.map.GraphEdge;
+import de.uvwxy.footpath2.map.LatLonPos;
+import de.uvwxy.footpath2.matching.Positioner;
+import de.uvwxy.footpath2.tools.PaintBox;
+import de.uvwxy.footpath2.tools.ToolBox;
 
 /**
  * 

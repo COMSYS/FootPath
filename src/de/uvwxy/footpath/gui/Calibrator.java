@@ -10,8 +10,8 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath.core.StepDetection;
-import de.uvwxy.footpath.core.StepTrigger;
+import de.uvwxy.footpath2.movement.StepDetection;
+import de.uvwxy.footpath2.movement.StepTrigger;
 
 /**
  * This Activity is used to calibrate the parameters concerning step detection

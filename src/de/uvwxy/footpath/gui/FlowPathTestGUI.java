@@ -29,11 +29,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import de.uvwxy.flowpath.FileWriter;
-import de.uvwxy.flowpath.FlowPathConfig;
-import de.uvwxy.flowpath.FlowPathInterface;
-import de.uvwxy.flowpath.PaintBoxMVs;
 import de.uvwxy.footpath.R;
+import de.uvwxy.footpath2.movement.h263.FileWriter;
+import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
+import de.uvwxy.footpath2.movement.h263.FlowPathInterface;
+import de.uvwxy.footpath2.movement.h263.PaintBoxMVs;
 
 /**
  * This activity gives the user the possibility of recording sensor, WIFI and

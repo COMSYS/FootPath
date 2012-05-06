@@ -1,7 +1,7 @@
 package de.uvwxy.footpath.gui;
 
 import android.graphics.Bitmap;
-import de.uvwxy.footpath.graph.LatLonPos;
+import de.uvwxy.footpath2.map.LatLonPos;
 /**
  * 
  * @author Paul Smith

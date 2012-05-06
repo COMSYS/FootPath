@@ -4,8 +4,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import de.uvwxy.footpath.ToolBox;
-import de.uvwxy.paintbox.PaintBox;
+import de.uvwxy.footpath2.tools.PaintBox;
+import de.uvwxy.footpath2.tools.ToolBox;
 
 /**
  * 

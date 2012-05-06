@@ -5,14 +5,14 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import de.uvwxy.flowpath.FlowPathConfig;
-import de.uvwxy.flowpath.FlowPathInterface;
-import de.uvwxy.flowpath.MVDTrigger;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath.ToolBox;
-import de.uvwxy.footpath.core.StepDetection;
-import de.uvwxy.footpath.core.StepTrigger;
-import de.uvwxy.footpath.graph.LatLonPos;
+import de.uvwxy.footpath2.map.LatLonPos;
+import de.uvwxy.footpath2.movement.StepDetection;
+import de.uvwxy.footpath2.movement.StepTrigger;
+import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
+import de.uvwxy.footpath2.movement.h263.FlowPathInterface;
+import de.uvwxy.footpath2.movement.h263.MVDTrigger;
+import de.uvwxy.footpath2.tools.ToolBox;
 
 /**
  * 

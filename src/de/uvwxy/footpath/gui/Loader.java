@@ -36,9 +36,9 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import de.uvwxy.footpath.R;
 import de.uvwxy.footpath.Rev;
-import de.uvwxy.footpath.graph.Graph;
-import de.uvwxy.footpath.graph.GraphNode;
-import de.uvwxy.footpath.graph.LatLonPos;
+import de.uvwxy.footpath2.map.Map;
+import de.uvwxy.footpath2.map.GraphNode;
+import de.uvwxy.footpath2.map.LatLonPos;
 
 /**
  * 
@@ -51,7 +51,7 @@ public class Loader extends Activity {
 	public static final String FOOTPATH_BASE_DIR = Environment.getExternalStorageDirectory() + "/footpath/";
 	
 	// GRAPH
-	private static Graph g;					// Holds the data structure
+	private static Map g;					// Holds the data structure
 	private String nodeFrom;				// Node name to start from, i.e. "5052"
 	private int closestNodeID;				// Node ID if closest node was found via GPS
 	private String nodeTo;					// Node name to navigate to
@@ -495,7 +495,7 @@ public class Loader extends Activity {
 		longToast("Loading can take a while...\n\n Please wait...");
 		
 		// TODO: We create a new graph, do we need to clean up sth.?
-		g = new Graph();
+		g = new Map();
 		
 		// Add new layer(s) of ways from XML-file from sdcard
 		for (String file : filePaths){
@@ -530,7 +530,7 @@ public class Loader extends Activity {
 	
 	private void staticLoadGraphFromResource(){
 //		 Old Static Code:
-		 g = new Graph();
+		 g = new Map();
 //		 And add layer(s) of ways
 		 try {
 		 g.addToGraphFromXMLResourceParser(this.getResources().getXml(R.xml.stone_henge_demo));
@@ -555,7 +555,7 @@ public class Loader extends Activity {
 	}
 
 	// Navigator needs static access to graph
-	public static Graph getGraph(){
+	public static Map getGraph(){
 		return g;
 	}
 	
