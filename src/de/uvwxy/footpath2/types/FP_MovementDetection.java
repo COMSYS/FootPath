@@ -1,0 +1,7 @@
+package de.uvwxy.footpath2.types;
+
+public enum FP_MovementDetection {
+	MOVEMENT_DETECTION_STEPS,
+	MOVEMENT_DETECTION_VIDEO_WHEELCHAIR,
+	MOVEMENT_DETECTION_SOUND_SEGWAY
+}
