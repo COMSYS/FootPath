@@ -98,7 +98,7 @@ public class Loader extends Activity {
 				nodeTo = (String) spTo.getSelectedItem();
 				iNodeTo = position;
 			}
-
+		
 		}
 
 		@Override

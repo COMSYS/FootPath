@@ -3011,7 +3011,7 @@ public class H263Parser {
 		fisPtr++;
 		return ret;
 	}
-	
+
 	private int lastByte = -1;
 	/**
 	 * lastByte == -1 -> lastByte is not set yet.
