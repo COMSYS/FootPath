@@ -39,6 +39,7 @@ import de.uvwxy.footpath.Rev;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.map.GraphNode;
 import de.uvwxy.footpath2.map.LatLonPos;
+import de.uvwxy.footpath2.tools.FileNameFilterFromStringArray;
 
 /**
  * 
