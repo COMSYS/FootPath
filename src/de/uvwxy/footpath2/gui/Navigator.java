@@ -24,7 +24,7 @@ import de.uvwxy.footpath2.matching.NPConfig;
 import de.uvwxy.footpath2.matching.Positioner;
 import de.uvwxy.footpath2.matching.Positioner_OnlineBestFit;
 import de.uvwxy.footpath2.matching.Positioner_OnlineFirstFit;
-import de.uvwxy.footpath2.movement.StepDetection;
+import de.uvwxy.footpath2.movement.steps.StepDetection;
 import de.uvwxy.footpath2.tools.DataLogger;
 /**
  * 

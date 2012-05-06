@@ -12,7 +12,12 @@ import android.content.Context;
 import android.content.res.Resources.NotFoundException;
 import android.location.Location;
 import de.uvwxy.footpath2.map.Map;
+import de.uvwxy.footpath2.matching.BestFit;
+import de.uvwxy.footpath2.matching.MatchingAlgorithm;
+import de.uvwxy.footpath2.movement.MovementDetection;
+import de.uvwxy.footpath2.movement.steps.StepDetection;
 import de.uvwxy.footpath2.types.FP_LocationProvider;
+import de.uvwxy.footpath2.types.FP_MatchingAlgorithm;
 import de.uvwxy.footpath2.types.FP_MovementDetection;
 
 /**
@@ -24,7 +29,9 @@ import de.uvwxy.footpath2.types.FP_MovementDetection;
 public class FootPath {
 	Context context;
 	Map map;
-	
+	MovementDetection movementDetection;
+	MatchingAlgorithm matchingAlgorithm;
+
 	public FootPath(Context context) {
 		// TODO:
 		this.context = context;
@@ -38,6 +45,7 @@ public class FootPath {
 
 		// movement input and location output setup
 		setMovementDetection(FP_MovementDetection.MOVEMENT_DETECTION_STEPS);
+		setMatchingAlgorithm(FP_MatchingAlgorithm.MATCHING_BEST_FIT);
 		setLocationProvider(FP_LocationProvider.LOCATION_PROVIDER_FOOTPATH);
 
 		setDestination(null);
@@ -45,11 +53,41 @@ public class FootPath {
 		setLocation(null);
 
 		// starting, stopping, resetting of navigation
-		start();
-		stop();
-		reset();
-
+		_a_start();
+		_c_stop();
+		
 		return;
+	}
+
+	public void setMovementDetection(FP_MovementDetection movementType) {
+		switch (movementType) {
+		case MOVEMENT_DETECTION_STEPS:
+			movementDetection = new StepDetection(context);
+			break;
+		case MOVEMENT_DETECTION_SOUND_SEGWAY:
+			break;
+		case MOVEMENT_DETECTION_VIDEO_WHEELCHAIR:
+			break;
+		}
+	}
+
+	public void setMatchingAlgorithm(FP_MatchingAlgorithm matchingType) {
+		switch (matchingType) {
+		case MATCHING_BEST_FIT:
+			matchingAlgorithm = new BestFit();
+			movementDetection.registerOnStepListener(matchingAlgorithm);
+			break;
+		case MATCHING_FIRST_FIT:
+			break;
+		case MATCHING_MULTI_FIT:
+			break;
+		}
+
+	}
+
+	public void setLocationProvider(FP_LocationProvider providerType) {
+		// TODO:
+
 	}
 
 	public void loadMapDataFromAsset(String uri) {
@@ -60,7 +98,8 @@ public class FootPath {
 	public void loadMapDataFromXMLResource(int resID) {
 		// TODO:
 		try {
-			map.addToGraphFromXMLResourceParser(context.getResources().getXml(resID));
+			map.addToGraphFromXMLResourceParser(context.getResources().getXml(
+					resID));
 		} catch (NotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -98,15 +137,6 @@ public class FootPath {
 
 	}
 
-	public void setMovementDetection(FP_MovementDetection movementDetectionSteps) {
-		// TODO:
-	}
-
-	public void setLocationProvider(FP_LocationProvider provider) {
-		// TODO:
-
-	}
-
 	public void setDestination(Location l) {
 		// TODO:
 
@@ -117,20 +147,21 @@ public class FootPath {
 
 	}
 
-	public int start() {
+	public void _a_start() {
 		// TODO:
-
-		return 0;
+		movementDetection._a_startMovementDetection();
 	}
 
-	public int stop() {
-		// TODO:
-
-		return 0;
+	public void _b1_pause() {
+		movementDetection._b1_pauseMovementDetection();
 	}
 
-	public int reset() {
-		// TODO:
+	public void _b2_unpause() {
+		movementDetection._b2_unPauseMovementDetection();
+	}
+
+	public int _c_stop() {
+		movementDetection._c_stopMovementDetection();
 
 		return 0;
 	}

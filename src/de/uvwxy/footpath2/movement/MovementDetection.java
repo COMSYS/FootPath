@@ -24,22 +24,22 @@ public abstract class MovementDetection {
 		return running;
 	}
 
-	public void _a_startMovementDetection() {
+	public synchronized void _a_startMovementDetection() {
 		running = true;
 
 	};
 
-	public void _b1_pauseMovementDetection() {
+	public synchronized void _b1_pauseMovementDetection() {
 		running = false;
 
 	};
 
-	public void _b2_unPauseMovementDetection() {
+	public synchronized void _b2_unPauseMovementDetection() {
 		running = true;
 
 	};
 
-	public void _c_stopMovementDetection() {
+	public synchronized void _c_stopMovementDetection() {
 		running = false;
 
 	};

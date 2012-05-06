@@ -7,11 +7,11 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import de.uvwxy.footpath.R;
 import de.uvwxy.footpath2.map.LatLonPos;
-import de.uvwxy.footpath2.movement.StepDetection;
 import de.uvwxy.footpath2.movement.StepTrigger;
 import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
 import de.uvwxy.footpath2.movement.h263.FlowPathInterface;
 import de.uvwxy.footpath2.movement.h263.MVDTrigger;
+import de.uvwxy.footpath2.movement.steps.StepDetection;
 import de.uvwxy.footpath2.tools.ToolBox;
 
 /**

@@ -2,6 +2,10 @@ package de.uvwxy.footpath2.movement;
 
 import java.util.LinkedList;
 
+import de.uvwxy.footpath2.tools.Loggable;
+
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 
 /**
@@ -11,11 +15,11 @@ import android.hardware.SensorEventListener;
  * @author Paul Smith
  * 
  */
-public class SensorEventManager {
-
+public class SensorEventManager implements Loggable, SensorEventListener {
 	private boolean running = false;
 	private SensorEventManager thisInstance = null;
-	private LinkedList<SensorEventListener> sensorEventListenerList;
+	private LinkedList<SensorEventListener> linearAccelerometerEventListenerList;
+	private SensorHistory linearAccelerometerHistory = new SensorHistory();
 
 	public SensorEventManager getInstance() {
 		if (thisInstance == null) {
@@ -27,18 +31,20 @@ public class SensorEventManager {
 	private SensorEventManager() {
 	}
 
-	public void registerOnStepListener(SensorEventListener sel) {
-		if (sensorEventListenerList == null) {
-			sensorEventListenerList = new LinkedList<SensorEventListener>();
+	public void addLinearAccelerometerListener(SensorEventListener sel) {
+		if (linearAccelerometerEventListenerList == null) {
+			linearAccelerometerEventListenerList = new LinkedList<SensorEventListener>();
 		}
-		sensorEventListenerList.add(sel);
+		// TODO: if running start lin acc events if first listener
+		linearAccelerometerEventListenerList.add(sel);
 	}
 
-	public void removeOnStepListener(SensorEventListener sel) {
-		if (sensorEventListenerList == null || sel == null) {
+	public void removeLinearAccelerometerListener(SensorEventListener sel) {
+		if (linearAccelerometerEventListenerList == null || sel == null) {
 			return;
 		}
-		sensorEventListenerList.remove(sel);
+		// TODO: remove lin acc events if last listener
+		linearAccelerometerEventListenerList.remove(sel);
 	}
 
 	public synchronized boolean isRunning() {
@@ -59,5 +65,36 @@ public class SensorEventManager {
 
 	public synchronized void _c_stopSensorUpdates() {
 		running = false;
+	}
+
+	@Override
+	public void exportData(String path) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onSensorChanged(SensorEvent event) {
+		long now = System.currentTimeMillis();
+		// WARNING: DONT FORGET THIS!!
+		event.timestamp = now;
+
+		switch (event.sensor.getType()) {
+		case Sensor.TYPE_LINEAR_ACCELERATION:
+			linearAccelerometerHistory.add(new SensorTriple(event.values, now,
+					event.sensor.getType()));
+			for (SensorEventListener sel : linearAccelerometerEventListenerList) {
+				if (sel != null) {
+					sel.onSensorChanged(event);
+				}
+			}
+			break;
+		}
 	};
 }
