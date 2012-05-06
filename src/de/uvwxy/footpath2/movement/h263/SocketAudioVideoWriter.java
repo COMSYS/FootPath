@@ -6,7 +6,7 @@ import java.io.IOException;
 import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.SurfaceHolder;
-import de.uvwxy.footpath.gui.FlowPathTestGUI;
+import de.uvwxy.footpath2.gui.FlowPathTestGUI;
 
 /**
  * Start video capture and write video stream to TCP/IP socket.

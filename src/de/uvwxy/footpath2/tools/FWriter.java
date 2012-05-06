@@ -1,4 +1,4 @@
-package de.uvwxy.footpath.log;
+package de.uvwxy.footpath2.tools;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import de.uvwxy.footpath.gui.NavigatorFootPath;
+import de.uvwxy.footpath2.gui.NavigatorFootPath;
 
 import android.os.Environment;
 import android.util.Log;

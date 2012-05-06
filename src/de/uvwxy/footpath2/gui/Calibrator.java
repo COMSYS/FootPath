@@ -1,4 +1,4 @@
-package de.uvwxy.footpath.gui;
+package de.uvwxy.footpath2.gui;
 
 import android.app.Activity;
 import android.content.SharedPreferences;

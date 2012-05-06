@@ -7,7 +7,7 @@ import android.graphics.Paint;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import de.uvwxy.footpath.gui.FlowPathTestGUI;
+import de.uvwxy.footpath2.gui.FlowPathTestGUI;
 
 /**
  * HANDLES: Display of MVD data / Speed

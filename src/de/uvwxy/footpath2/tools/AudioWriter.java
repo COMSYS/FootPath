@@ -1,9 +1,9 @@
-package de.uvwxy.footpath.log;
+package de.uvwxy.footpath2.tools;
 
 import java.io.File;
 import java.io.IOException;
 
-import de.uvwxy.footpath.gui.NavigatorFootPath;
+import de.uvwxy.footpath2.gui.NavigatorFootPath;
 
 import android.media.MediaRecorder;
 import android.os.Environment;

@@ -1,4 +1,4 @@
-package de.uvwxy.footpath.gui;
+package de.uvwxy.footpath2.gui;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -17,8 +17,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ZoomControls;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath.log.AudioWriter;
-import de.uvwxy.footpath.log.DataLogger;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.map.GraphEdge;
 import de.uvwxy.footpath2.map.GraphNode;
@@ -29,6 +27,8 @@ import de.uvwxy.footpath2.matching.Positioner_OnlineBestFit;
 import de.uvwxy.footpath2.matching.Positioner_OnlineFirstFit;
 import de.uvwxy.footpath2.movement.StepDetection;
 import de.uvwxy.footpath2.movement.StepTrigger;
+import de.uvwxy.footpath2.tools.AudioWriter;
+import de.uvwxy.footpath2.tools.DataLogger;
 import de.uvwxy.footpath2.tools.ToolBox;
 /**
  * 

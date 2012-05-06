@@ -1,4 +1,4 @@
-package de.uvwxy.footpath.log;
+package de.uvwxy.footpath2.tools;
 
 import java.io.FileNotFoundException;
 import java.util.List;
