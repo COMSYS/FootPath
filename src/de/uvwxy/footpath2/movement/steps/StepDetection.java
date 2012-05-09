@@ -13,12 +13,14 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.os.Handler;
+import android.util.Log;
 import de.uvwxy.footpath2.movement.MovementDetection;
 import de.uvwxy.footpath2.movement.SensorHistory;
 import de.uvwxy.footpath2.movement.SensorTriple;
+import de.uvwxy.footpath2.tools.DrawToCanvas;
 
 public class StepDetection extends MovementDetection implements
-		SensorEventListener {
+		SensorEventListener, DrawToCanvas {
 	private static final String PREF_ID = "SENSOR_STEP_HISTORY_SETTINS";
 	private Handler mHandler = new Handler();
 	private long delayMillis = 1000 / 30;
@@ -89,9 +91,9 @@ public class StepDetection extends MovementDetection implements
 	@Override
 	public void onSensorChanged(SensorEvent event) {
 		if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-			// TODO: filtering here?
 			linAccHistory.add(new SensorTriple(event.values, event.timestamp,
 					event.sensor.getType()));
+			
 		}
 	}
 
@@ -143,10 +145,6 @@ public class StepDetection extends MovementDetection implements
 		editor.commit();
 	}
 
-	public boolean add(SensorTriple sensor) {
-		return linAccHistory.add(sensor);
-	}
-
 	public long getLastStepTimeDelta() {
 		return System.currentTimeMillis() - jumps.getLast().ts;
 	}
@@ -193,7 +191,6 @@ public class StepDetection extends MovementDetection implements
 
 	public void drawToCanvas(Canvas canvas, Location center, Rect boundingBox,
 			double pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
-
 		long max = System.currentTimeMillis();
 		drawSteps(canvas, boundingBox, pixelsPerMeterOrMaxValue, pLine, pDots,
 				max);

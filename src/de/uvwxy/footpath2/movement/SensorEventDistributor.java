@@ -1,12 +1,15 @@
 package de.uvwxy.footpath2.movement;
 
 import java.util.LinkedList;
+import java.util.List;
 
-import de.uvwxy.footpath2.tools.Loggable;
-
+import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.util.Log;
+import de.uvwxy.footpath2.tools.Loggable;
 
 /**
  * The current idea behind yet another SensorEventManager is that we can here,
@@ -20,10 +23,21 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 	private static SensorEventDistributor thisInstance = null;
 	private LinkedList<SensorEventListener> linearAccelerometerEventListenerList;
 	private SensorHistory linearAccelerometerHistory = new SensorHistory();
-
+	private static SensorManager sm;
+	private List<Sensor> lSensor;
+	private static Context context;
+	
 	public static SensorEventDistributor getInstance() {
 		if (thisInstance == null) {
 			thisInstance = new SensorEventDistributor();
+		}
+		return thisInstance;
+	}
+	
+	public static SensorEventDistributor getInstance(Context context) {
+		if (thisInstance == null) {
+			thisInstance = new SensorEventDistributor();
+			SensorEventDistributor.context = context;
 		}
 		return thisInstance;
 	}
@@ -50,21 +64,41 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 	public synchronized boolean isRunning() {
 		return running;
 	}
+	
+	private void initSensorsForExistingListeners(){
+		for (int i = 0; i < lSensor.size(); i++) {
+			// Specifiy required sensor(s)
+			switch(lSensor.get(i).getType()){
+			case Sensor.TYPE_LINEAR_ACCELERATION:
+				Log.i("FOOTPATH", "Registering Linear Acceleration Sensor");
+				sm.registerListener(this, lSensor.get(i),
+						SensorManager.SENSOR_DELAY_GAME);
+				break;
+			}
+		}
+	}
 
 	public synchronized void _a_startSensorUpdates() {
 		running = true;
+		
+		sm = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+		lSensor = sm.getSensorList(Sensor.TYPE_ALL);
+		initSensorsForExistingListeners();
 	};
 
 	public synchronized void _b1_pauseSensorUpdates() {
 		running = false;
+		sm.unregisterListener(this);
 	};
 
 	public synchronized void _b2_unPauseSensorUpdates() {
 		running = true;
+		initSensorsForExistingListeners();
 	};
 
 	public synchronized void _c_stopSensorUpdates() {
 		running = false;
+		sm.unregisterListener(this);
 	}
 
 	@Override
@@ -84,7 +118,7 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 		long now = System.currentTimeMillis();
 		// WARNING: DONT FORGET THIS!!
 		event.timestamp = now;
-
+		
 		switch (event.sensor.getType()) {
 		case Sensor.TYPE_LINEAR_ACCELERATION:
 			linearAccelerometerHistory.add(new SensorTriple(event.values, now,

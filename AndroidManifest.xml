@@ -45,6 +45,7 @@
                 android:screenOrientation="portrait" >
             </activity>
         </activity>
+        <activity android:name="de.uvwxy.footpath2.gui.StepDetectionConfig"></activity>
     </application>
 
     <uses-sdk android:minSdkVersion="7" />

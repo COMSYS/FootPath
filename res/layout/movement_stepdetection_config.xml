@@ -71,7 +71,6 @@
             android:id="@+id/lblStandingTimeOut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-           
             android:layout_below="@id/lblJumpPeak"
             android:text="Standing Timeout:" />
 

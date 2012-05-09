@@ -3,6 +3,7 @@ package de.uvwxy.footpath2.gui;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
@@ -11,12 +12,14 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.uvwxy.footpath.R;
+import de.uvwxy.footpath2.movement.SensorEventDistributor;
+import de.uvwxy.footpath2.movement.steps.StepDetection;
+import de.uvwxy.footpath2.tools.PaintBoxDrawToCanvas;
 
 /**
- * Author: paul
- * Date: May 9, 2012 2:13:56 PM
+ * Author: paul Date: May 9, 2012 2:13:56 PM
  */
-public class FootPathConfig extends Activity {
+public class StepDetectionConfig extends Activity {
 	private SeekBar sbPeakControl = null;
 	private SeekBar sbJumpPeakControl = null;
 	private SeekBar sbStepTimeOutControl = null;
@@ -25,7 +28,10 @@ public class FootPathConfig extends Activity {
 	private TextView lblStepTimeOut = null;
 	private TextView lblJumpPeak = null;
 	private TextView lblStandingTimeOut = null;
-	private PaintBoxMovementStepDetection svSensors = null;
+	private PaintBoxDrawToCanvas paintBoxDTC = null;
+
+	private SensorEventDistributor sensorEventDistributor;
+	private StepDetection stepDetection;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -40,12 +46,12 @@ public class FootPathConfig extends Activity {
 		LayoutParams lpHistory = svOldHistory.getLayoutParams();
 
 		// create PaintBoxes
-		svSensors = new PaintBoxMovementStepDetection(this, 3000);
+		paintBoxDTC = new PaintBoxDrawToCanvas(this);
 
 		// and remove surface views from layout
 		linLayoutHistory.removeView(svOldHistory);
 		// add surface views with cloned parameters to layout
-		linLayoutHistory.addView(svSensors, lpHistory);
+		linLayoutHistory.addView(paintBoxDTC, lpHistory);
 
 		sbStepTimeOutControl = (SeekBar) findViewById(R.id.sbStepTimeOutControl);
 		sbPeakControl = (SeekBar) findViewById(R.id.sbPeakControl);
@@ -70,40 +76,45 @@ public class FootPathConfig extends Activity {
 
 	public void onResume() {
 		super.onResume();
-		if (pipeFeeder != null) {
-			pipeFeeder.registerSensors();
-			svSensors.setPipeFeeder(pipeFeeder);
+		if (stepDetection != null) {
+			sensorEventDistributor._b2_unPauseSensorUpdates();
+			stepDetection._b2_unPauseMovementDetection();
+			Log.i("FOOTPATH2", "Test");
 		}
-		
 		seekbarOnChangeListener.onProgressChanged(sbJumpPeakControl,
-				(int)(pipeFeeder.locationPipe.stepDetectionHistory.getJumpPeak()*100), false);
+				(int) (stepDetection.getJumpPeak() * 100), false);
 		seekbarOnChangeListener.onProgressChanged(sbPeakControl,
-				(int)(pipeFeeder.locationPipe.stepDetectionHistory.getPeak()*100), false);
+				(int) (stepDetection.getPeak() * 100), false);
 		seekbarOnChangeListener.onProgressChanged(sbStepTimeOutControl,
-				(int)(pipeFeeder.locationPipe.stepDetectionHistory.getStepTimeOut()), false);
+				(int) (stepDetection.getStepTimeOut()), false);
 		seekbarOnChangeListener.onProgressChanged(sbStandingTimeOutControl,
-				(int)(pipeFeeder.locationPipe.stepDetectionHistory.getStandingTimeOut()), false);
+				(int) (stepDetection.getStandingTimeOut()), false);
 	}
 
 	public void onPause() {
 		super.onPause();
-		if (pipeFeeder != null) {
-			pipeFeeder.unregisterSensors();
+		if (stepDetection != null) {
+			stepDetection._b1_pauseMovementDetection();
+			sensorEventDistributor._b1_pauseSensorUpdates();
 		}
 	}
 
 	public void onDestroy() {
 		super.onDestroy();
-		if (pipeFeeder != null) {
-			pipeFeeder.unregisterSensors();
+		if (stepDetection != null) {
+			stepDetection._c_stopMovementDetection();
+			sensorEventDistributor._c_stopSensorUpdates();
 		}
 	}
 
 	private void initTest() {
-		if (pipeFeeder == null) {
-			pipeFeeder = new PipeFeeder(this);
-			svSensors.setPipeFeeder(pipeFeeder);
-			pipeFeeder.initSensors();
+		if (stepDetection == null) {
+			sensorEventDistributor = SensorEventDistributor.getInstance(this);
+			stepDetection = new StepDetection(this);
+			paintBoxDTC.setCanvasPainter(stepDetection);
+			sensorEventDistributor
+					.addLinearAccelerometerListener(stepDetection);
+			sensorEventDistributor._a_startSensorUpdates();
 		}
 	}
 
@@ -113,22 +124,18 @@ public class FootPathConfig extends Activity {
 		public void onProgressChanged(SeekBar seekBar, int progress,
 				boolean fromUser) {
 			if (seekBar.equals(sbPeakControl)) {
-				pipeFeeder.locationPipe.stepDetectionHistory
-						.setPeak(progress / 100.0);
+				stepDetection.setPeak(progress / 100.0);
 				lblPeak.setText("Peak: (" + progress / 100.0 + ")");
 				seekBar.setProgress(progress);
 			} else if (seekBar.equals(sbStepTimeOutControl)) {
-				pipeFeeder.locationPipe.stepDetectionHistory
-						.setStepTimeout(progress);
+				stepDetection.setStepTimeout(progress);
 				lblStepTimeOut.setText("Step timeout: (" + progress + ")");
 			} else if (seekBar.equals(sbStandingTimeOutControl)) {
-				pipeFeeder.locationPipe.stepDetectionHistory
-						.setStandingTimeout(progress);
+				stepDetection.setStandingTimeout(progress);
 				lblStandingTimeOut.setText("Standing timeout: (" + progress
 						+ ")");
 			} else if (seekBar.equals(sbJumpPeakControl)) {
-				pipeFeeder.locationPipe.stepDetectionHistory
-						.setJumpPeak(progress / 100.0);
+				stepDetection.setJumpPeak(progress / 100.0);
 				lblJumpPeak.setText("Jump Peak: (" + progress / 100.0 + ")");
 			}
 			seekBar.setProgress(progress);
