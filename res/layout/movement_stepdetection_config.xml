@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llStepTestMain"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentLeft="true" >
+
+    <RelativeLayout
+        android:id="@+id/llStepSettings"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/lblPeak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/sbPeakControl"
+            
+            android:layout_alignParentTop="true"
+            android:gravity="center_vertical"
+            android:text="Peak: " />
+
+        <SeekBar
+            android:id="@+id/sbPeakControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/sbStepTimeOutControl"
+
+            android:max="300"
+            android:progress="80" />
+
+        <TextView
+            android:id="@+id/lblStepTimeOut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/sbStepTimeOutControl"
+
+            android:layout_below="@id/lblPeak"
+            android:text="StepTimeOut: " />
+
+        <SeekBar
+            android:id="@+id/sbStepTimeOutControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:layout_below="@id/sbPeakControl"
+            android:layout_toRightOf="@+id/lblStandingTimeOut"
+            android:max="2000"
+            android:progress="666" />
+
+        <TextView
+            android:id="@+id/lblJumpPeak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/sbJumpPeakControl"
+       
+            android:layout_below="@id/lblStepTimeOut"
+            android:text="Jump Peak:" />
+
+        <SeekBar
+            android:id="@+id/sbJumpPeakControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+      
+            android:layout_below="@id/sbStepTimeOutControl"
+            android:layout_toRightOf="@+id/lblStandingTimeOut"
+            android:max="2000"
+            android:progress="800" />
+
+        <TextView
+            android:id="@+id/lblStandingTimeOut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+           
+            android:layout_below="@id/lblJumpPeak"
+            android:text="Standing Timeout:" />
+
+        <SeekBar
+            android:id="@+id/sbStandingTimeOutControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+ 
+            android:layout_below="@id/sbJumpPeakControl"
+            android:layout_toRightOf="@+id/lblStandingTimeOut"
+            android:max="25000"
+            android:progress="1200" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/llPaintBoxHistory"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true" android:layout_below="@id/llStepSettings">
+
+        <SurfaceView
+            android:id="@+id/svPaintBoxHistory"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+</RelativeLayout>
