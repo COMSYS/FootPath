@@ -2,8 +2,8 @@ package de.uvwxy.footpath2.matching;
 
 import java.util.LinkedList;
 
-import de.uvwxy.footpath2.gui.Navigator;
-import de.uvwxy.footpath2.gui.NavigatorFootPath;
+import de.uvwxy.footpath2.gui.old.Navigator;
+import de.uvwxy.footpath2.gui.old.NavigatorFootPath;
 import de.uvwxy.footpath2.map.GraphEdge;
 
 /**

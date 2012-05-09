@@ -1,4 +1,4 @@
-package de.uvwxy.footpath2.gui;
+package de.uvwxy.footpath2.gui.old;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -10,7 +10,6 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath2.movement.StepTrigger;
 import de.uvwxy.footpath2.movement.steps.StepDetection;
 
 /**
@@ -19,7 +18,7 @@ import de.uvwxy.footpath2.movement.steps.StepDetection;
  * @author Paul Smith
  *
  */
-public class Calibrator extends Activity implements StepTrigger {
+public class Calibrator extends Activity {
 	public static final String CALIB_DATA = "CALIBDATA";
 	private StepDetection stepDetection;
 	
@@ -47,11 +46,11 @@ public class Calibrator extends Activity implements StepTrigger {
 				tvPeak.setText("Set peak value: (" + peak + ")");
 			} else if(arg0.equals(sbFilter)){
 				a = sbFilter.getProgress()/100.0f;
-				stepDetection.setA(a);
+				//stepDetection.setA(a);
 				tvFilter.setText("Set filter value: (" + a + ")");
 			} else if(arg0.equals(sbTimeout)){
 				step_timeout_ms = sbTimeout.getProgress();
-				stepDetection.setStep_timeout_ms(step_timeout_ms);
+				//stepDetection.setStep_timeout_ms(step_timeout_ms);
 				tvTimeout.setText("Set step timeout: (" + step_timeout_ms + ")");
 			}
 		}
@@ -90,17 +89,6 @@ public class Calibrator extends Activity implements StepTrigger {
 	    editor.commit();
 	}
 
-	@Override
-	public void dataHookAcc(long nowMs, double x, double y, double z) {}
-
-	@Override
-	public void dataHookComp(long nowMs, double x, double y, double z) {}
-
-	@Override
-	public void timedDataHook(long nowMs, double[] acc, double[] comp) {svHistory.addTriple(nowMs, acc);}
-
-	@Override
-	public void trigger(long nowMs, double compDir) {svHistory.addStepTS(nowMs);}
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -118,7 +106,7 @@ public class Calibrator extends Activity implements StepTrigger {
 
 		// Load settings after creation of GUI-elements, to set their values
 		loadSettings();
-		stepDetection = new StepDetection(this, this, a, peak, step_timeout_ms);
+		//stepDetection = new StepDetection(this, this, a, peak, step_timeout_ms);
 		// Add OnSeekBarChangeListener after creation of step detection, because object is used
 		sbPeak.setOnSeekBarChangeListener(sbListener);
 		sbFilter.setOnSeekBarChangeListener(sbListener);
@@ -128,12 +116,12 @@ public class Calibrator extends Activity implements StepTrigger {
 		SurfaceView svOld = (SurfaceView) findViewById(R.id.svHistory);			// get SurfaceView defined in xml
 		LayoutParams lpHistory = svOld.getLayoutParams();						// get its layout params
 		
-		long samples_per_second = 1000/stepDetection.INTERVAL_MS;
+	//long samples_per_second = 1000/stepDetection.INTERVAL_MS;
 		int history_in_seconds = 4;
-		int samples_per_history = (int)(history_in_seconds * samples_per_second);
+		//int samples_per_history = (int)(history_in_seconds * samples_per_second);
 		
 		// create PaintBox (-24.0 to 24.0, 100 entries)
-		svHistory = new PaintBoxHistory(this, 48.0, samples_per_history, history_in_seconds);
+		//svHistory = new PaintBoxHistory(this, 48.0, samples_per_history, history_in_seconds);
 				
 		linLayout.removeView(svOld);								// and remove surface view from layout
 		linLayout.addView(svHistory, lpHistory);					// add surface view clone to layout
@@ -144,7 +132,7 @@ public class Calibrator extends Activity implements StepTrigger {
 	public void onPause() {
 		super.onPause();
 		saveSettings();
-		stepDetection.unload();
+		//stepDetection.unload();
 	}
 
 	@Override
@@ -156,7 +144,7 @@ public class Calibrator extends Activity implements StepTrigger {
 	public void onResume() {
 		super.onResume();
 		loadSettings();
-		stepDetection.load();
+		//stepDetection.load();
 	}
 
 }

@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="de.uvwxy.footpath2.gui.Calibrator"
+            android:name="de.uvwxy.footpath2.gui.old.Calibrator"
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >

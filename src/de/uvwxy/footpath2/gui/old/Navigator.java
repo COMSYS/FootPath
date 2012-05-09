@@ -1,4 +1,4 @@
-package de.uvwxy.footpath2.gui;
+package de.uvwxy.footpath2.gui.old;
 
 import java.util.LinkedList;
 import java.util.Stack;
@@ -16,10 +16,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ZoomControls;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath2.map.Map;
+import de.uvwxy.footpath2.gui.Loader;
 import de.uvwxy.footpath2.map.GraphEdge;
 import de.uvwxy.footpath2.map.GraphNode;
 import de.uvwxy.footpath2.map.LatLonPos;
+import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.matching.NPConfig;
 import de.uvwxy.footpath2.matching.Positioner;
 import de.uvwxy.footpath2.matching.Positioner_OnlineBestFit;
@@ -463,12 +464,12 @@ public abstract class Navigator extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		stepDetection.unload();
+		//stepDetection.unload();
 		if(log){
 			// Log to info file
-			logger.logInfo("a: " + stepDetection.getA());
+		//	logger.logInfo("a: " + stepDetection.getA());
 			logger.logInfo("peak: " + stepDetection.getPeak());
-			logger.logInfo("step timeout (ms): " + stepDetection.getStep_timeout_ms());
+		//	logger.logInfo("step timeout (ms): " + stepDetection.getStep_timeout_ms());
 			logger.logInfo("Recognised steps: " + this.totalStepsWalked);
 			logger.logInfo("Estimated stepsize: " + this.getEstimatedStepLength());
 			logger.logInfo("Output of columns:");
@@ -504,7 +505,7 @@ public abstract class Navigator extends Activity {
 		
 		}
 		
-		stepDetection.load();
+		//stepDetection.load();
 	}
 
 	

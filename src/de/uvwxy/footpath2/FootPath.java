@@ -10,11 +10,13 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
 import android.content.res.Resources.NotFoundException;
+import android.hardware.SensorEventListener;
 import android.location.Location;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.matching.BestFit;
 import de.uvwxy.footpath2.matching.MatchingAlgorithm;
 import de.uvwxy.footpath2.movement.MovementDetection;
+import de.uvwxy.footpath2.movement.SensorEventDistributor;
 import de.uvwxy.footpath2.movement.steps.StepDetection;
 import de.uvwxy.footpath2.types.FP_LocationProvider;
 import de.uvwxy.footpath2.types.FP_MatchingAlgorithm;
@@ -29,6 +31,7 @@ import de.uvwxy.footpath2.types.FP_MovementDetection;
 public class FootPath {
 	Context context;
 	Map map;
+	SensorEventDistributor sensorEventManager = SensorEventDistributor.getInstance();
 	MovementDetection movementDetection;
 	MatchingAlgorithm matchingAlgorithm;
 
@@ -63,6 +66,7 @@ public class FootPath {
 		switch (movementType) {
 		case MOVEMENT_DETECTION_STEPS:
 			movementDetection = new StepDetection(context);
+			sensorEventManager.addLinearAccelerometerListener((SensorEventListener)movementDetection);
 			break;
 		case MOVEMENT_DETECTION_SOUND_SEGWAY:
 			break;
@@ -149,18 +153,22 @@ public class FootPath {
 
 	public void _a_start() {
 		// TODO:
+		sensorEventManager._a_startSensorUpdates();
 		movementDetection._a_startMovementDetection();
 	}
 
 	public void _b1_pause() {
+		sensorEventManager._b1_pauseSensorUpdates();
 		movementDetection._b1_pauseMovementDetection();
 	}
 
 	public void _b2_unpause() {
+		sensorEventManager._b2_unPauseSensorUpdates();
 		movementDetection._b2_unPauseMovementDetection();
 	}
 
 	public int _c_stop() {
+		sensorEventManager._c_stopSensorUpdates();
 		movementDetection._c_stopMovementDetection();
 
 		return 0;

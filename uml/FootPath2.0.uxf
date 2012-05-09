@@ -395,7 +395,7 @@ fg=</panel_attributes>
     <coordinates>
       <x>72</x>
       <y>288</y>
-      <w>36</w>
+      <w>38</w>
       <h>150</h>
     </coordinates>
     <panel_attributes>lt=&lt;
@@ -522,11 +522,12 @@ m1=        1</panel_attributes>
     <coordinates>
       <x>570</x>
       <y>672</y>
-      <w>132</w>
+      <w>264</w>
       <h>60</h>
     </coordinates>
-    <panel_attributes>SensorEventManager
-</panel_attributes>
+    <panel_attributes>SensorEventDistributor
+--
++addLinearAccelerometerListener(...)</panel_attributes>
     <additional_attributes/>
   </element>
   <group>

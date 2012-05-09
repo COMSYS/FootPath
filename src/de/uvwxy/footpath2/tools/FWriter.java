@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import de.uvwxy.footpath2.gui.NavigatorFootPath;
+import de.uvwxy.footpath2.gui.old.NavigatorFootPath;
 
 import android.os.Environment;
 import android.util.Log;

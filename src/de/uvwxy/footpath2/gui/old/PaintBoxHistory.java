@@ -1,4 +1,4 @@
-package de.uvwxy.footpath2.gui;
+package de.uvwxy.footpath2.gui.old;
 
 import android.content.Context;
 import android.graphics.Canvas;

@@ -1,4 +1,4 @@
-package de.uvwxy.footpath2.gui;
+package de.uvwxy.footpath2.gui.old;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -7,19 +7,17 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import de.uvwxy.footpath.R;
 import de.uvwxy.footpath2.map.LatLonPos;
-import de.uvwxy.footpath2.movement.StepTrigger;
 import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
 import de.uvwxy.footpath2.movement.h263.FlowPathInterface;
 import de.uvwxy.footpath2.movement.h263.MVDTrigger;
 import de.uvwxy.footpath2.movement.steps.StepDetection;
-import de.uvwxy.footpath2.tools.ToolBox;
 
 /**
  * 
  * @author Paul Smith
  * 
  */
-public class NavigatorFlowPath extends Navigator implements StepTrigger,
+public class NavigatorFlowPath extends Navigator implements
 		MVDTrigger {
 	// TODO: this value is crap, like MC Donalds
 	private static final int STEPMAX = 500;
@@ -74,7 +72,7 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger,
 		// BUT: Is still needed for logging, see below.
 		// Has to be initialized, because it is loaded in onResume in Parent
 		// class
-		stepDetection = new StepDetection(this, this, a, peak, step_timeout_ms);
+//		stepDetection = new StepDetection(this, this, a, peak, step_timeout_ms);
 
 		flowPathInterface.addMVDTrigger(this);
 		setNavigating(true);
@@ -108,78 +106,78 @@ public class NavigatorFlowPath extends Navigator implements StepTrigger,
 
 	// #########################################################################
 	// ########################## Step/Data Callbacks ##########################
-	// #########################################################################
-
-	@Override
-	public void trigger(long now_ms, double compDir) {
-		if (!isNavigating) {
-			// Destination was reached
-			return;
-		}
-
-		if (log) {
-			logger.logStep(now_ms, compDir);
-		}
-
-		// Do not use steps for navigation!
-		// posBestFit.addStep(compDir);
-		// posFirstFit.addStep(compDir);
-
-		// Log.i("FOOTPATH", "posBestFit: " + posBestFit.getProgress());
-		// Log.i("FOOTPATH", "posFirstFit: " + posFirstFit.getProgress());
-		if (log) {
-			// Write location to file after detected step
-			LatLonPos bestPos = getPosition(confBestFit);
-			LatLonPos firstPos = getPosition(confFirstFit);
-			logger.logPosition(now_ms, bestPos.getLat(), bestPos.getLon(),
-					posBestFit.getProgress() / this.navPathLen,
-					firstPos.getLat(), firstPos.getLon(),
-					posFirstFit.getProgress() / this.navPathLen);
-		}
-	}
-
-	@Override
-	public void dataHookAcc(long now_ms, double x, double y, double z) {
-		if (log) {
-			logger.logRawAcc(now_ms, x, y, z);
-		}
-	}
+//	// #########################################################################
+//
+//	@Override
+//	public void trigger(long now_ms, double compDir) {
+//		if (!isNavigating) {
+//			// Destination was reached
+//			return;
+//		}
+//
+//		if (log) {
+//			logger.logStep(now_ms, compDir);
+//		}
+//
+//		// Do not use steps for navigation!
+//		// posBestFit.addStep(compDir);
+//		// posFirstFit.addStep(compDir);
+//
+//		// Log.i("FOOTPATH", "posBestFit: " + posBestFit.getProgress());
+//		// Log.i("FOOTPATH", "posFirstFit: " + posFirstFit.getProgress());
+//		if (log) {
+//			// Write location to file after detected step
+//			LatLonPos bestPos = getPosition(confBestFit);
+//			LatLonPos firstPos = getPosition(confFirstFit);
+//			logger.logPosition(now_ms, bestPos.getLat(), bestPos.getLon(),
+//					posBestFit.getProgress() / this.navPathLen,
+//					firstPos.getLat(), firstPos.getLon(),
+//					posFirstFit.getProgress() / this.navPathLen);
+//		}
+//	}
+////
+//	@Override
+//	public void dataHookAcc(long now_ms, double x, double y, double z) {
+//		if (log) {
+//			logger.logRawAcc(now_ms, x, y, z);
+//		}
+//	}
 
 	private float[] tf = { 0f, 0f, 0f };
 	private float[] compDirs = { 0f, 0f, 0f };
 
-	@Override
-	public void dataHookComp(long now_ms, double x, double y, double z) {
-		if (log) {
-			logger.logRawCompass(now_ms, x, y, z);
-		}
-		// compassValue = ToolBox.lowpassFilter(compassValue, x, 0.5);
-		tf[0] = (float) x;
-		tf[1] = (float) y;
-		tf[2] = (float) z;
-
-		compDirs = compFilter(compDirs, tf, 0.1f);
-		double fixedCompDir = compDirs[0];
-
-		if (fixedCompDir > 360)
-			fixedCompDir -= 360;
-		compassValue = fixedCompDir;
-	}
-
-	@Override
-	public void timedDataHook(long now_ms, double[] acc, double[] comp) {
-		double varZ = getVarianceOfZ();
-		zVarHistory.add(new Double(acc[2]));
-
-		if (log) {
-			logger.logTimedVariance(now_ms, varZ);
-		}
-		if (log) {
-			// Write Compass and Accelerometer data
-			logger.logTimedAcc(now_ms, acc[2]);
-			logger.logTimedCompass(now_ms, comp[0]);
-		}
-	}
+//	@Override
+//	public void dataHookComp(long now_ms, double x, double y, double z) {
+//		if (log) {
+//			logger.logRawCompass(now_ms, x, y, z);
+//		}
+//		// compassValue = ToolBox.lowpassFilter(compassValue, x, 0.5);
+//		tf[0] = (float) x;
+//		tf[1] = (float) y;
+//		tf[2] = (float) z;
+//
+//		compDirs = compFilter(compDirs, tf, 0.1f);
+//		double fixedCompDir = compDirs[0];
+//
+//		if (fixedCompDir > 360)
+//			fixedCompDir -= 360;
+//		compassValue = fixedCompDir;
+//	}
+//
+//	@Override
+//	public void timedDataHook(long now_ms, double[] acc, double[] comp) {
+//		double varZ = getVarianceOfZ();
+//		zVarHistory.add(new Double(acc[2]));
+//
+//		if (log) {
+//			logger.logTimedVariance(now_ms, varZ);
+//		}
+//		if (log) {
+//			// Write Compass and Accelerometer data
+//			logger.logTimedAcc(now_ms, acc[2]);
+//			logger.logTimedCompass(now_ms, comp[0]);
+//		}
+//	}
 
 	private long tsLastStep = 0;
 	private int speed[];

@@ -1,41 +1,16 @@
-package de.uvwxy.footpath2.gui;
+package de.uvwxy.footpath2.gui.old;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Stack;
-
-import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.SurfaceView;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ZoomControls;
-import de.uvwxy.footpath.R;
-import de.uvwxy.footpath2.map.Map;
-import de.uvwxy.footpath2.map.GraphEdge;
-import de.uvwxy.footpath2.map.GraphNode;
 import de.uvwxy.footpath2.map.LatLonPos;
-import de.uvwxy.footpath2.matching.NPConfig;
-import de.uvwxy.footpath2.matching.Positioner;
-import de.uvwxy.footpath2.matching.Positioner_OnlineBestFit;
-import de.uvwxy.footpath2.matching.Positioner_OnlineFirstFit;
-import de.uvwxy.footpath2.movement.StepTrigger;
 import de.uvwxy.footpath2.movement.steps.StepDetection;
-import de.uvwxy.footpath2.tools.AudioWriter;
-import de.uvwxy.footpath2.tools.DataLogger;
 import de.uvwxy.footpath2.tools.ToolBox;
 /**
  * 
  * @author Paul Smith
  *
  */
-public class NavigatorFootPath extends Navigator implements StepTrigger {
+public class NavigatorFootPath extends Navigator {
 	
 	
 
@@ -56,7 +31,7 @@ public class NavigatorFootPath extends Navigator implements StepTrigger {
 		double peak = getSharedPreferences(Calibrator.CALIB_DATA,0).getFloat("peak", 0.5f);
 		int step_timeout_ms = getSharedPreferences(Calibrator.CALIB_DATA,0).getInt("timeout", 666);
 		
-		stepDetection = new StepDetection(this, this, a, peak, step_timeout_ms);
+//		stepDetection = new StepDetection(this, this, a, peak, step_timeout_ms);
 
 		
 		
@@ -69,7 +44,7 @@ public class NavigatorFootPath extends Navigator implements StepTrigger {
 	// ########################## Step/Data Callbacks ##########################
 	// #########################################################################
 	
-	@Override
+//	@Override
 	public void trigger(long now_ms, double compDir) {
 		totalStepsWalked++;
 		if (!isNavigating) {
@@ -95,38 +70,38 @@ public class NavigatorFootPath extends Navigator implements StepTrigger {
 		}
 	}
 	
-	@Override
-	public void dataHookAcc(long now_ms, double x, double y, double z){
-		// add values to history (for variance)
-		addTriple(x, y, z);
-		if(log){
-			logger.logRawAcc(now_ms, x, y, z);
-		}
-	}
-	
-	@Override
-	public void dataHookComp(long now_ms, double x, double y, double z){
-		if(log){
-			logger.logRawCompass(now_ms, x, y, z);
-		}
-		compassValue = ToolBox.lowpassFilter(compassValue,  x, 0.5);
-	}
-	
-	@Override
-	public void timedDataHook(long now_ms, double[] acc, double[] comp){
-		double varZ = getVarianceOfZ();
-		zVarHistory.add(new Double(acc[2]));
-		
-		if(log){
-			logger.logTimedVariance(now_ms, varZ);
-		}
-		if(log){
-			// Write Compass and Accelerometer data
-			logger.logTimedAcc(now_ms, acc[2]);
-			logger.logTimedCompass(now_ms, comp[0]);
-		}
-	}
-	
+//	@Override
+//	public void dataHookAcc(long now_ms, double x, double y, double z){
+//		// add values to history (for variance)
+//		addTriple(x, y, z);
+//		if(log){
+//			logger.logRawAcc(now_ms, x, y, z);
+//		}
+//	}
+//	
+//	@Override
+//	public void dataHookComp(long now_ms, double x, double y, double z){
+//		if(log){
+//			logger.logRawCompass(now_ms, x, y, z);
+//		}
+//		compassValue = ToolBox.lowpassFilter(compassValue,  x, 0.5);
+//	}
+//	
+//	@Override
+//	public void timedDataHook(long now_ms, double[] acc, double[] comp){
+//		double varZ = getVarianceOfZ();
+//		zVarHistory.add(new Double(acc[2]));
+//		
+//		if(log){
+//			logger.logTimedVariance(now_ms, varZ);
+//		}
+//		if(log){
+//			// Write Compass and Accelerometer data
+//			logger.logTimedAcc(now_ms, acc[2]);
+//			logger.logTimedCompass(now_ms, comp[0]);
+//		}
+//	}
+//	
 
 	// #########################################################################
 	// ############################## Functions ################################

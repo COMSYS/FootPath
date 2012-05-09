@@ -15,20 +15,20 @@ import android.hardware.SensorEventListener;
  * @author Paul Smith
  * 
  */
-public class SensorEventManager implements Loggable, SensorEventListener {
+public class SensorEventDistributor implements Loggable, SensorEventListener {
 	private boolean running = false;
-	private SensorEventManager thisInstance = null;
+	private static SensorEventDistributor thisInstance = null;
 	private LinkedList<SensorEventListener> linearAccelerometerEventListenerList;
 	private SensorHistory linearAccelerometerHistory = new SensorHistory();
 
-	public SensorEventManager getInstance() {
+	public static SensorEventDistributor getInstance() {
 		if (thisInstance == null) {
-			thisInstance = new SensorEventManager();
+			thisInstance = new SensorEventDistributor();
 		}
 		return thisInstance;
 	}
 
-	private SensorEventManager() {
+	private SensorEventDistributor() {
 	}
 
 	public void addLinearAccelerometerListener(SensorEventListener sel) {
