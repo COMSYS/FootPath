@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/tvSelectBelow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select an OSM/XML file below:"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Button
+        android:id="@+id/btnLoad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="Load" 
+        android:onClick="loadFile"/>
+
+    <TextView
+        android:id="@+id/tvSelectedFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/btnLoad"
+        android:layout_toLeftOf="@+id/btnLoad"
+        android:text="Selected File:"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Button
+        android:id="@+id/btnUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/tvSelectBelow"
+        android:layout_toRightOf="@+id/tvSelectedFile"
+        android:text="Up"
+        android:onClick="goFolderUp" />
+
+    <TextView
+        android:id="@+id/tvCurrentDirectory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/btnUp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/tvSelectBelow"
+        android:layout_toLeftOf="@+id/btnUp"
+        android:text="Current directory:" />
+
+    <ListView
+        android:id="@+id/lvFileSelector"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btnLoad"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/btnUp" >
+    </ListView>
+
+</RelativeLayout>

@@ -31,13 +31,14 @@ import de.uvwxy.footpath2.types.FP_MovementDetection;
 public class FootPath {
 	Context context;
 	Map map;
-	SensorEventDistributor sensorEventManager = SensorEventDistributor.getInstance();
+	SensorEventDistributor sensorEventDistributor;
 	MovementDetection movementDetection;
 	MatchingAlgorithm matchingAlgorithm;
 
 	public FootPath(Context context) {
 		// TODO:
 		this.context = context;
+		sensorEventDistributor = SensorEventDistributor.getInstance(context);
 		map = new Map();
 	}
 
@@ -66,7 +67,7 @@ public class FootPath {
 		switch (movementType) {
 		case MOVEMENT_DETECTION_STEPS:
 			movementDetection = new StepDetection(context);
-			sensorEventManager.addLinearAccelerometerListener((SensorEventListener)movementDetection);
+			sensorEventDistributor.addLinearAccelerometerListener((SensorEventListener)movementDetection);
 			break;
 		case MOVEMENT_DETECTION_SOUND_SEGWAY:
 			break;
@@ -153,22 +154,22 @@ public class FootPath {
 
 	public void _a_start() {
 		// TODO:
-		sensorEventManager._a_startSensorUpdates();
+		sensorEventDistributor._a_startSensorUpdates();
 		movementDetection._a_startMovementDetection();
 	}
 
 	public void _b1_pause() {
-		sensorEventManager._b1_pauseSensorUpdates();
+		sensorEventDistributor._b1_pauseSensorUpdates();
 		movementDetection._b1_pauseMovementDetection();
 	}
 
 	public void _b2_unpause() {
-		sensorEventManager._b2_unPauseSensorUpdates();
+		sensorEventDistributor._b2_unPauseSensorUpdates();
 		movementDetection._b2_unPauseMovementDetection();
 	}
 
 	public int _c_stop() {
-		sensorEventManager._c_stopSensorUpdates();
+		sensorEventDistributor._c_stopSensorUpdates();
 		movementDetection._c_stopMovementDetection();
 
 		return 0;
