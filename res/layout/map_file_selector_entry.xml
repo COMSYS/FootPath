@@ -5,31 +5,34 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <TextView
+        android:id="@+id/lblFileName"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/ivIcon"
+        android:text="lblFileName"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/lblFileInfo"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/lblFileName"
+        android:layout_below="@+id/lblFileName"
+        android:layout_toRightOf="@+id/ivIcon"
+        android:text="lblFileInfo"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
     <ImageView
         android:id="@+id/ivIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/icon" android:layout_marginLeft="4dp" android:layout_marginTop="4dp" android:layout_marginRight="4dp"/>
-
-    <TextView
-        android:id="@+id/lblFileName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/ivIcon"
-        android:layout_toRightOf="@+id/ivIcon"
-        android:text="lblFileName"
-        android:textAppearance="?android:attr/textAppearanceMedium" android:layout_marginRight="4dp"/>
-
-    <TextView
-        android:id="@+id/lblFileInfo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/ivIcon"
-        android:layout_alignLeft="@+id/lblFileName"
-        android:layout_alignRight="@+id/lblFileName"
-        android:layout_below="@+id/lblFileName"
-        android:text="lblFileInfo"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:layout_alignBottom="@+id/lblFileInfo"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginTop="4dp"
+        android:src="@drawable/icon" />
 
 </RelativeLayout>
