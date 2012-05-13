@@ -2,6 +2,7 @@ package de.uvwxy.footpath2;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -13,6 +14,8 @@ import android.content.res.Resources.NotFoundException;
 import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.util.Log;
+import de.uvwxy.footpath2.map.GraphNode;
+import de.uvwxy.footpath2.map.LocationHistory;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.matching.BestFit;
 import de.uvwxy.footpath2.matching.MatchingAlgorithm;
@@ -35,7 +38,8 @@ public class FootPath {
 	private SensorEventDistributor sensorEventDistributor;
 	private MovementDetection movementDetection;
 	private MatchingAlgorithm matchingAlgorithm;
-
+	
+	
 	public FootPath(Context context) {
 		this.context = context;
 		sensorEventDistributor = SensorEventDistributor.getInstance(context);
@@ -52,14 +56,14 @@ public class FootPath {
 		setMatchingAlgorithm(FP_MatchingAlgorithm.MATCHING_BEST_FIT);
 		setLocationProvider(FP_LocationProvider.LOCATION_PROVIDER_FOOTPATH);
 
-		setDestination(null);
+		setDestination("room1");
 		// set location (possibility: also later during navigation (Wifi, etc))
-		setLocation(null);
+		setLocation("room2");
 
 		// starting, stopping, resetting of navigation
 		_a_start();
 		_c_stop();
-		
+
 		return;
 	}
 
@@ -67,7 +71,7 @@ public class FootPath {
 		switch (movementType) {
 		case MOVEMENT_DETECTION_STEPS:
 			movementDetection = new StepDetection(context);
-			sensorEventDistributor.addLinearAccelerometerListener((SensorEventListener)movementDetection);
+			sensorEventDistributor.addLinearAccelerometerListener((SensorEventListener) movementDetection);
 			break;
 		case MOVEMENT_DETECTION_SOUND_SEGWAY:
 			break;
@@ -103,8 +107,7 @@ public class FootPath {
 	public void loadMapDataFromXMLResource(int resID) {
 		// TODO:
 		try {
-			map.addToGraphFromXMLResourceParser(context.getResources().getXml(
-					resID));
+			map.addToGraphFromXMLResourceParser(context.getResources().getXml(resID));
 		} catch (NotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -136,6 +139,27 @@ public class FootPath {
 			e.printStackTrace();
 		}
 	}
+	
+	public LocationHistory getPath(String location, String destination, boolean staircase, boolean elevator,
+			boolean outside){
+		LocationHistory ret = new LocationHistory();
+		Stack<GraphNode> buf = map.getShortestPath(location, destination, staircase, elevator, outside);
+		for(GraphNode n : buf){
+			Location x = new Location(n.getName());
+			x.setLatitude(n.getLat());
+			x.setLongitude(n.getLon());
+			ret.add(x);
+		}
+		return ret;
+	}
+
+	public void setDestination(String room) {
+		
+	}
+
+	public void setLocation(String room) {
+
+	}
 
 	public void setDestination(Location l) {
 		// TODO:
@@ -147,10 +171,10 @@ public class FootPath {
 
 	}
 
-	public String[] getRoomList(){
+	public String[] getRoomList() {
 		return map.getRoomList();
 	}
-	
+
 	public void _a_start() {
 		// TODO:
 		sensorEventDistributor._a_startSensorUpdates();
