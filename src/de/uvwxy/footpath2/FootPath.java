@@ -38,8 +38,7 @@ public class FootPath {
 	private SensorEventDistributor sensorEventDistributor;
 	private MovementDetection movementDetection;
 	private MatchingAlgorithm matchingAlgorithm;
-	
-	
+
 	public FootPath(Context context) {
 		this.context = context;
 		sensorEventDistributor = SensorEventDistributor.getInstance(context);
@@ -139,22 +138,25 @@ public class FootPath {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public LocationHistory getPath(String location, String destination, boolean staircase, boolean elevator,
-			boolean outside){
+			boolean outside) {
+		Log.i("FOOTPATH", "Trying to find path from " + location + " to "+ destination);
 		LocationHistory ret = new LocationHistory();
 		Stack<GraphNode> buf = map.getShortestPath(location, destination, staircase, elevator, outside);
-		for(GraphNode n : buf){
-			Location x = new Location(n.getName());
-			x.setLatitude(n.getLat());
-			x.setLongitude(n.getLon());
-			ret.add(x);
+		if (buf != null) {
+			for (GraphNode n : buf) {
+				Location x = new Location(n.getName());
+				x.setLatitude(n.getLat());
+				x.setLongitude(n.getLon());
+				ret.add(x);
+			}
 		}
 		return ret;
 	}
 
 	public void setDestination(String room) {
-		
+
 	}
 
 	public void setLocation(String room) {

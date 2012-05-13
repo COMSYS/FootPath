@@ -678,11 +678,12 @@ public class Map {
 	// Dykstra's algorithm
 	public synchronized Stack<GraphNode> getShortestPath(GraphNode from, GraphNode to, boolean staircase,
 			boolean elevator, boolean outside) {
-
 		if (from == null || to == null) {
 			return null;
 		}
 
+		Log.i("FOOTPATH", "Looking up path from " + from.getName() + " to " + to.getName());
+		
 		int remaining_nodes = array_nodes_by_id.length;
 		GraphNode[] previous = new GraphNode[array_nodes_by_id.length];
 		double[] dist = new double[array_nodes_by_id.length];
@@ -742,6 +743,8 @@ public class Map {
 				}
 			}
 		}
+		
+		Log.i("FOOTPATH", "Looking up path from " + from.getName() + " to " + to.getName() + " failed!");
 		return null;
 	}
 
@@ -962,6 +965,7 @@ public class Map {
 		while (!(o < u)) {
 			m = (u + o) / 2;
 			if (name.equals(array_nodes_by_name[m].getName())) {
+				Log.i("FOOTPATH", "Room " + array_nodes_by_name[m].getName() + " found!");
 				return array_nodes_by_name[m];
 			}
 			if (name.compareTo(array_nodes_by_name[m].getName()) < 0) {
@@ -970,7 +974,8 @@ public class Map {
 				u = m + 1;
 			}
 		}
-
+		
+		Log.i("FOOTPATH", "Room " + name + " not found!");
 		return null;
 	}
 
