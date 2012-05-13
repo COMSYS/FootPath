@@ -638,7 +638,14 @@ public class Map {
 				}
 			}
 		}
+		initNodes();
+	}
 
+	private void initNodes() {
+		// Create arrays for binary search
+		array_nodes_by_id = sortNodesById(nodes);
+		array_nodes_by_name = sortNodesByName(nodes);
+		
 		// Add edges to node, faster look up for neighbors
 		for (GraphEdge edge : edges) {
 			GraphNode n0 = edge.getNode0();
@@ -650,14 +657,6 @@ public class Map {
 				n1.getLocEdges().add(edge);
 			}
 		}
-
-		initNodes();
-	}
-
-	private void initNodes() {
-		// Create arrays for binary search
-		array_nodes_by_id = sortNodesById(nodes);
-		array_nodes_by_name = sortNodesByName(nodes);
 	}
 
 	public synchronized Stack<GraphNode> getShortestPath(String from, String to, boolean staircase, boolean elevator,

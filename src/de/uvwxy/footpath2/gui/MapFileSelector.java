@@ -24,6 +24,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.uvwxy.footpath.R;
+import de.uvwxy.footpath2.tools.FileNameFilterFromStringArray;
 
 /**
  * Author: paul Date: May 11, 2012 7:10:40 PM
@@ -184,6 +185,11 @@ public class MapFileSelector extends Activity {
 		}
 
 		private synchronized void filter() {
+			// TODO: use this code:
+			// String[] endingsToFilter = {"osm","xml"};
+			// FileNameFilterFromStringArray fileFilter = new FileNameFilterFromStringArray(endingsToFilter);
+			// File[] files = searchFolder.listFiles(fileFilter);
+			
 			Log.i("FOOTPATH", "size: " + files.size());
 			LinkedList<File> toRemove = new LinkedList<File>();
 
