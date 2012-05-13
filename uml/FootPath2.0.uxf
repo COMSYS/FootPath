@@ -27,6 +27,9 @@ footPath()
 +setMovementDetection(int detection)  / / standard StepDetection
 +setLocationProvider(int provider)
 
+/ / get list of rooms:
++getRoomList : String[]
+
 / / set destination
 +setDestination(Location l)
 / / set location (possibility: also later during navigation (Wifi, etc))

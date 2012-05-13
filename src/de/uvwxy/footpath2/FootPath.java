@@ -41,10 +41,6 @@ public class FootPath {
 		sensorEventDistributor = SensorEventDistributor.getInstance(context);
 		map = new Map();
 	}
-	
-	public Map getMap(){
-		return map;
-	}
 
 	private void exampleUsage() {
 
@@ -151,6 +147,10 @@ public class FootPath {
 
 	}
 
+	public String[] getRoomList(){
+		return map.getRoomList();
+	}
+	
 	public void _a_start() {
 		// TODO:
 		sensorEventDistributor._a_startSensorUpdates();
