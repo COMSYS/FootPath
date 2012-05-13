@@ -42,6 +42,7 @@ public class Map {
 	private GraphNode[] array_nodes_by_name;
 
 	public Map() {
+		Log.i("FOOTPATH", "Creating empty map");
 		nodes = new LinkedList<GraphNode>();
 		edges = new LinkedList<GraphEdge>();
 	}
@@ -402,7 +403,7 @@ public class Map {
 				nodes.add(firstNode); // add last node to graph if not present
 			}
 		}
-
+		initNodes();
 		return true;
 	} // -> addToGraphFromXMLFile(String filePath) { ... }
 
@@ -680,7 +681,7 @@ public class Map {
 				nodes.add(firstNode); // add last node to graph if not present
 			}
 		}
-
+		initNodes();
 		return ret;
 	}
 
@@ -715,9 +716,7 @@ public class Map {
 				}
 			}
 		}
-		// Create arrays for binary search
-		array_nodes_by_id = sortNodesById(nodes);
-		array_nodes_by_name = sortNodesByName(nodes);
+
 		// Add edges to node, faster look up for neighbors
 		for (GraphEdge edge : edges) {
 			GraphNode n0 = edge.getNode0();
@@ -729,6 +728,14 @@ public class Map {
 				n1.getLocEdges().add(edge);
 			}
 		}
+		
+		initNodes();
+	}
+	
+	private void initNodes(){
+		// Create arrays for binary search
+		array_nodes_by_id = sortNodesById(nodes);
+		array_nodes_by_name = sortNodesByName(nodes);
 	}
 
 	public Stack<GraphNode> getShortestPath(String from, String to,
@@ -873,6 +880,9 @@ public class Map {
 
 	// return node pos via binary search
 	private int getNodePosInIdArray(GraphNode node) {
+		if (array_nodes_by_id == null){
+			initNodes();
+		}
 		int u = 0;
 		int o = array_nodes_by_id.length - 1;
 		int m = 0;
@@ -893,6 +903,9 @@ public class Map {
 
 	// This is the faster version which can be used after parsing the data
 	public GraphNode getNode(int id) {
+		if (array_nodes_by_id == null){
+			initNodes();
+		}
 		int u = 0;
 		int o = array_nodes_by_id.length - 1;
 		int m = 0;
@@ -922,6 +935,9 @@ public class Map {
 
 	// return all names of nodes != null in a String array
 	public String[] getRoomList() {
+		if (array_nodes_by_name == null){
+			initNodes();
+		}
 		String[] retArray = new String[array_nodes_by_name.length];
 		for (int i = 0; i < retArray.length; i++) {
 			retArray[i] = array_nodes_by_name[i].getName();
@@ -1026,6 +1042,9 @@ public class Map {
 
 	// returns the node with the given name, binary search
 	public GraphNode getNodeFromName(String name) {
+		if (array_nodes_by_name == null){
+			initNodes();
+		}
 		int u = 0;
 		int o = array_nodes_by_name.length - 1;
 		int m = 0;

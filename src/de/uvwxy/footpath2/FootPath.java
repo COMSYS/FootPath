@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.res.Resources.NotFoundException;
 import android.hardware.SensorEventListener;
 import android.location.Location;
+import android.util.Log;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.matching.BestFit;
 import de.uvwxy.footpath2.matching.MatchingAlgorithm;
@@ -36,7 +37,6 @@ public class FootPath {
 	MatchingAlgorithm matchingAlgorithm;
 
 	public FootPath(Context context) {
-		// TODO:
 		this.context = context;
 		sensorEventDistributor = SensorEventDistributor.getInstance(context);
 		map = new Map();
@@ -122,24 +122,19 @@ public class FootPath {
 
 	}
 
-	public void loadMapDataFromXML(String uri) {
-		// TODO:
+	public void loadMapDataFromXMLFile(String uri) {
+		Log.i("FOOTPATH", "Loading map data from " + uri);
 		try {
 			map.addToGraphFromXMLFile(uri);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	public void setDestination(Location l) {

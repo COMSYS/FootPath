@@ -36,9 +36,11 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 	 */
 	public static SensorEventDistributor getInstance(Context context) {
 		if (thisInstance == null) {
+			Log.i("FOOTPATH", "Creating SensorEventDistributorInstance");
 			thisInstance = new SensorEventDistributor();
 			SensorEventDistributor.context = context;
 		}
+		Log.i("FOOTPATH", "Returned SensorEventDistributor");
 		return thisInstance;
 	}
 
