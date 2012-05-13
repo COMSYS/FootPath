@@ -30,16 +30,20 @@ import de.uvwxy.footpath2.types.FP_MovementDetection;
  * 
  */
 public class FootPath {
-	Context context;
-	Map map;
-	SensorEventDistributor sensorEventDistributor;
-	MovementDetection movementDetection;
-	MatchingAlgorithm matchingAlgorithm;
+	private Context context;
+	private Map map;
+	private SensorEventDistributor sensorEventDistributor;
+	private MovementDetection movementDetection;
+	private MatchingAlgorithm matchingAlgorithm;
 
 	public FootPath(Context context) {
 		this.context = context;
 		sensorEventDistributor = SensorEventDistributor.getInstance(context);
 		map = new Map();
+	}
+	
+	public Map getMap(){
+		return map;
 	}
 
 	private void exampleUsage() {
