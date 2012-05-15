@@ -15,7 +15,8 @@ import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.util.Log;
 import de.uvwxy.footpath2.map.GraphNode;
-import de.uvwxy.footpath2.map.LocationHistory;
+import de.uvwxy.footpath2.map.IndoorLocation;
+import de.uvwxy.footpath2.map.IndoorLocationHistory;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.matching.BestFit;
 import de.uvwxy.footpath2.matching.MatchingAlgorithm;
@@ -139,14 +140,14 @@ public class FootPath {
 		}
 	}
 
-	public LocationHistory getPath(String location, String destination, boolean staircase, boolean elevator,
+	public IndoorLocationHistory getPath(String location, String destination, boolean staircase, boolean elevator,
 			boolean outside) {
 		Log.i("FOOTPATH", "Trying to find path from " + location + " to "+ destination);
-		LocationHistory ret = new LocationHistory();
+		IndoorLocationHistory ret = new IndoorLocationHistory();
 		Stack<GraphNode> buf = map.getShortestPath(location, destination, staircase, elevator, outside);
 		if (buf != null) {
 			for (GraphNode n : buf) {
-				Location x = new Location(n.getName());
+				IndoorLocation x = new IndoorLocation(n.getName(), "FootPath");
 				x.setLatitude(n.getLat());
 				x.setLongitude(n.getLon());
 				ret.add(x);

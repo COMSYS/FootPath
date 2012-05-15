@@ -2,6 +2,10 @@ package de.uvwxy.footpath2.gui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
@@ -14,12 +18,13 @@ import android.widget.Toast;
 import de.uvwxy.footpath.R;
 import de.uvwxy.footpath2.movement.SensorEventDistributor;
 import de.uvwxy.footpath2.movement.steps.StepDetection;
-import de.uvwxy.footpath2.tools.PaintBoxDrawToCanvas;
+import de.uvwxy.footpath2.tools.DrawToCanvasWrapper;
+import de.uvwxy.footpath2.tools.PaintBoxDrawToCanvasWrapper;
 
 /**
  * Author: paul Date: May 9, 2012 2:13:56 PM
  */
-public class StepDetectionConfig extends Activity {
+public class StepDetectionConfig extends Activity implements DrawToCanvasWrapper{
 	private SeekBar sbPeakControl = null;
 	private SeekBar sbJumpPeakControl = null;
 	private SeekBar sbStepTimeOutControl = null;
@@ -28,7 +33,7 @@ public class StepDetectionConfig extends Activity {
 	private TextView lblStepTimeOut = null;
 	private TextView lblJumpPeak = null;
 	private TextView lblStandingTimeOut = null;
-	private PaintBoxDrawToCanvas paintBoxDTC = null;
+	private PaintBoxDrawToCanvasWrapper paintBoxDTC = null;
 
 	private SensorEventDistributor sensorEventDistributor;
 	private StepDetection stepDetection;
@@ -46,7 +51,7 @@ public class StepDetectionConfig extends Activity {
 		LayoutParams lpHistory = svOldHistory.getLayoutParams();
 
 		// create PaintBoxes
-		paintBoxDTC = new PaintBoxDrawToCanvas(this);
+		paintBoxDTC = new PaintBoxDrawToCanvasWrapper(this);
 
 		// and remove surface views from layout
 		linLayoutHistory.removeView(svOldHistory);
@@ -111,7 +116,7 @@ public class StepDetectionConfig extends Activity {
 		if (stepDetection == null) {
 			sensorEventDistributor = SensorEventDistributor.getInstance(this);
 			stepDetection = new StepDetection(this);
-			paintBoxDTC.setCanvasPainter(stepDetection);
+			paintBoxDTC.setCanvasPainter(this);
 			sensorEventDistributor
 					.addLinearAccelerometerListener(stepDetection);
 			sensorEventDistributor._a_startSensorUpdates();
@@ -161,5 +166,18 @@ public class StepDetectionConfig extends Activity {
 
 		Toast toast = Toast.makeText(context, msg, duration);
 		toast.show();
+	}
+
+	@Override
+	public void drawToCanvas(Canvas canvas) {
+		Rect bb = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+		Paint black = new Paint();
+		canvas.drawRect(bb, black);
+		
+		Paint pLine = new Paint();
+		Paint pDots = new Paint();
+		pLine.setColor(Color.RED);
+		pDots.setColor(Color.GREEN);
+		stepDetection.drawToCanvas(canvas, null, bb, 9, pLine, pDots);
 	}
 }

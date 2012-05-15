@@ -19,7 +19,7 @@ import android.os.Environment;
  * @author Paul Smith
  * 
  */
-public class LocationHistory extends LinkedList<Location> {
+public class IndoorLocationHistory extends LinkedList<IndoorLocation> {
 	private static final long serialVersionUID = 3297314826220855327L;
 	private static final double ARC_DISTANCE_PER_DEGREE = 60 * 1852;
 
@@ -49,14 +49,7 @@ public class LocationHistory extends LinkedList<Location> {
 		return res;
 	}
 
-	/**
-	 * Modified from the Grid class
-	 * 
-	 * @param gpsLocation
-	 *            GPS location to be converted
-	 * @return Corresponding grid location
-	 */
-	private int[] convertToPixelLocation(Location gpsLocation, Location center,
+	private int[] convertToPixelLocation(IndoorLocation gpsLocation, IndoorLocation center,
 			double pixelsPerMeter) {
 		int[] res = { 0, 0 };
 		if (gpsLocation != null && center != null) {
@@ -71,16 +64,9 @@ public class LocationHistory extends LinkedList<Location> {
 		return res;
 	}
 
-	/**
-	 * Modified from the Grid class
-	 * 
-	 * @param gridLocation
-	 *            Grid location to be converted
-	 * @return Corresponding GPS location
-	 */
-	private Location convertPixelToGPSLocation(double x, double y,
-			Location center, double pixelsPerMeter) {
-		Location res = new Location("Grid");
+	private IndoorLocation convertPixelToGPSLocation(double x, double y,
+			IndoorLocation center, double pixelsPerMeter) {
+		IndoorLocation res = new IndoorLocation("Grid", null);
 
 		x /= pixelsPerMeter;
 		y /= pixelsPerMeter;
@@ -100,7 +86,7 @@ public class LocationHistory extends LinkedList<Location> {
 		return res;
 	}
 
-	public synchronized void drawToCanvas(Canvas canvas, Location center, Rect boundingBox,
+	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox,
 			double pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
 		int w = boundingBox.width() / 2 + boundingBox.left;
 		int h = boundingBox.height() / 2 + boundingBox.top;
@@ -111,8 +97,8 @@ public class LocationHistory extends LinkedList<Location> {
 
 		for (int i = 0; i < this.size() - 1; i++) {
 			// draw line between nodes
-			Location a = this.get(i);
-			Location b = this.get(i + 1);
+			IndoorLocation a = this.get(i);
+			IndoorLocation b = this.get(i + 1);
 			int[] apix = convertToPixelLocation(a, center,
 					pixelsPerMeterOrMaxValue);
 			int[] bpix = convertToPixelLocation(b, center,
@@ -123,10 +109,13 @@ public class LocationHistory extends LinkedList<Location> {
 
 		for (int i = 0; i < this.size(); i++) {
 			// draw nodes
-			Location a = this.get(i);
+			IndoorLocation a = this.get(i);
 			int[] apix = convertToPixelLocation(a, center,
 					pixelsPerMeterOrMaxValue);
 			canvas.drawCircle(w + apix[0], h + apix[1], 2, pDots);
+			if(a.getName()!= null){
+				canvas.drawText(a.getName(),w + apix[0], h + apix[1], pDots);
+			}
 		}
 
 	}
