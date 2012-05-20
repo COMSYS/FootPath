@@ -24,7 +24,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath2.tools.FileNameFilterFromStringArray;
 
 /**
  * Author: paul Date: May 11, 2012 7:10:40 PM
@@ -50,6 +49,7 @@ public class MapFileSelector extends Activity {
 	// ####################################################################
 	// Application Life Cycle
 	// ####################################################################
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_file_selector);
@@ -84,26 +84,35 @@ public class MapFileSelector extends Activity {
 		// Activity came from background
 		lvFileSelector.setEmptyView(findViewById(R.id.rlFileSelectorLine));
 
+		File file;
 		if (initPath != null) {
-			lvFileSelectorAdapter = new FileListAdapter(this,
-					new File(initPath));
+			file = new File(initPath);
 		} else {
-			lvFileSelectorAdapter = new FileListAdapter(this, new File(
-					Environment.getExternalStorageDirectory() + "/"));
+			file = new File(Environment.getExternalStorageDirectory() + "/");
 		}
+
+		// is this path readable/does it exist?!
+		if (!file.canRead()) {
+			// nope.
+			Toast.makeText(this, "path not found: " + initPath, Toast.LENGTH_LONG).show();
+			finish();
+			return;
+		}
+
+		lvFileSelectorAdapter = new FileListAdapter(this, file);
+
 		lvFileSelectorAdapter.notifyDataSetChanged();
 		lvFileSelector.setAdapter(lvFileSelectorAdapter);
 		lvFileSelector.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				File clicked = lvFileSelectorAdapter.getItem(position);
 				if (clicked.isDirectory()) {
 					lvFileSelectorAdapter.goToDir(clicked);
 					lvFileSelectorAdapter.notifyDataSetChanged();
 				} else {
 					selectedFile = clicked;
-					tvSelectedFile.setText("Selected File:\n"
-							+ clicked.getName());
+					tvSelectedFile.setText("Selected File:\n" + clicked.getName());
 					btnLoad.setEnabled(true);
 				}
 
@@ -153,8 +162,8 @@ public class MapFileSelector extends Activity {
 	}
 
 	private class FileListAdapter extends BaseAdapter {
-		private Context context;
-		private LayoutInflater inflater;
+		private final Context context;
+		private final LayoutInflater inflater;
 		private File dir;
 		private LinkedList<File> files = new LinkedList<File>();
 
@@ -179,8 +188,7 @@ public class MapFileSelector extends Activity {
 			files = new LinkedList<File>(Arrays.asList(dir.listFiles()));
 			filter();
 			sort();
-			tvCurrentDirectory.setText("Current directory:\n"
-					+ dir.getAbsolutePath() + "/");
+			tvCurrentDirectory.setText("Current directory:\n" + dir.getAbsolutePath() + "/");
 
 		}
 
@@ -189,7 +197,7 @@ public class MapFileSelector extends Activity {
 			// String[] endingsToFilter = {"osm","xml"};
 			// FileNameFilterFromStringArray fileFilter = new FileNameFilterFromStringArray(endingsToFilter);
 			// File[] files = searchFolder.listFiles(fileFilter);
-			
+
 			Log.i("FOOTPATH", "size: " + files.size());
 			LinkedList<File> toRemove = new LinkedList<File>();
 
@@ -246,8 +254,7 @@ public class MapFileSelector extends Activity {
 			Comparator<File> alphabetical_sort = new Comparator<File>() {
 				@Override
 				public int compare(File object1, File object2) {
-					return object1.getName().compareToIgnoreCase(
-							object2.getName());
+					return object1.getName().compareToIgnoreCase(object2.getName());
 				}
 			};
 			Comparator<File> file_dir_sort = new Comparator<File>() {
@@ -298,10 +305,8 @@ public class MapFileSelector extends Activity {
 		}
 
 		@Override
-		public synchronized View getView(int position, View convertView,
-				ViewGroup parent) {
-			View entry = inflater.inflate(R.layout.map_file_selector_entry,
-					parent, false);
+		public synchronized View getView(int position, View convertView, ViewGroup parent) {
+			View entry = inflater.inflate(R.layout.map_file_selector_entry, parent, false);
 
 			ivIcon = (ImageView) entry.findViewById(R.id.ivIcon);
 			lblFileInfo = (TextView) entry.findViewById(R.id.lblFileInfo);

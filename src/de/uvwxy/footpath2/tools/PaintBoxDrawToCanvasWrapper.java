@@ -4,10 +4,10 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 
 public class PaintBoxDrawToCanvasWrapper extends PaintBox {
 	private DrawToCanvasWrapper canvasPainter;
+	private final Paint p = new Paint();
 
 	public PaintBoxDrawToCanvasWrapper(Context context) {
 		super(context);
@@ -23,9 +23,8 @@ public class PaintBoxDrawToCanvasWrapper extends PaintBox {
 			canvasPainter.drawToCanvas(canvas);
 
 		} else {
-			Paint p =  new Paint();
 			p.setColor(Color.RED);
-			canvas.drawText("Loading", getWidth() / 2, getHeight() / 2,p);
+			canvas.drawText("Loading", getWidth() / 2, getHeight() / 2, p);
 		}
 	}
 

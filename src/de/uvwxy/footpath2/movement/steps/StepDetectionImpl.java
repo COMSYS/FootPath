@@ -1,6 +1,7 @@
 package de.uvwxy.footpath2.movement.steps;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -27,8 +28,8 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	private double jumpPeak = 10;
 	private final int colorStep = Color.MAGENTA;
 	private final int colorJump = Color.YELLOW;
-	private final LinkedList<Step> steps = new LinkedList<Step>();
-	private final LinkedList<Jump> jumps = new LinkedList<Jump>();
+	private final List<Step> steps = new LinkedList<Step>();
+	private final List<Jump> jumps = new LinkedList<Jump>();
 	private final SensorHistory linAccHistory = new SensorHistory();
 
 	private int step_timeout_ms = 666;
@@ -231,7 +232,12 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	 */
 	@Override
 	public long getLastStepTimeDelta() {
-		return System.currentTimeMillis() - jumps.getLast().ts;
+		int size = jumps.size();
+		if (jumps.size() == 0) {
+			return -1;
+		}
+		Jump last = jumps.get(size - 1);
+		return System.currentTimeMillis() - last.ts;
 	}
 
 	/*
@@ -264,6 +270,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		return currentMovement;
 	}
 
+	// SENSOR VALUE FIELD IS 2 HERE FOR ONLY _ONE_ AXIS! TODO!
 	private boolean checkForStep(double peakSize, double lim) {
 		// Add value to values_history
 
@@ -342,8 +349,9 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 
 		float x0, x1;
 		int i = steps.size() - 1;
-		long diff = max - steps.getLast().ts;
-		Step temp = steps.getLast();
+		Step last = steps.get(i);
+		long diff = max - last.ts;
+		Step temp = last;
 		while ((diff) <= linAccHistory.getBackLogMillis()) {
 			x0 = (-diff * pixelsPerMilli) + boundingBox.right;
 
@@ -366,18 +374,21 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 
 	private void drawJumps(Canvas canvas, Rect boundingBox, double pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots,
 			long max) {
-		if (jumps.size() == 0) {
+		int size = jumps.size();
+		if (size == 0) {
 			return;
 		}
+
 		int height = boundingBox.height();
 		int width = boundingBox.width();
 
 		float pixelsPerMilli = width / linAccHistory.getBackLogMillis();
 
 		float x0, x1;
-		int i = jumps.size() - 1;
-		long diff = max - jumps.getLast().ts;
-		Jump temp = jumps.getLast();
+		int i = size - 1;
+		Jump last = jumps.get(i);
+		long diff = max - last.ts;
+		Jump temp = jumps.get(i);
 		while ((diff) <= linAccHistory.getBackLogMillis()) {
 			x0 = (-diff * pixelsPerMilli) + boundingBox.right;
 
@@ -413,14 +424,16 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 				// configuration
 				if (checkForStep(jumpPeak, 10 * jumpPeak)) {
 					// jump if no jumps before or outside of intervals
-					if (jumps.size() == 0 || t - jumps.getLast().ts > step_timeout_ms) {
+					int size = jumps.size();
+					if (size == 0 || t - jumps.get(size - 1).ts > step_timeout_ms) {
 						// detected a jump
 						jumps.add(new Jump(t));
 						currentMovement = MovementType.JUMPING;
 					}
 				} else if (checkForStep(stepPeak, jumpPeak)) {
 					// step if no steps before or outside of interval
-					if (steps.size() == 0 || t - steps.getLast().ts > step_timeout_ms) {
+					int size = steps.size();
+					if (size == 0 || (size > 0 && t - steps.get(size - 1).ts > step_timeout_ms)) {
 						// detected a step
 						steps.add(new Step(t));
 						currentMovement = MovementType.WALKING;
@@ -431,7 +444,8 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 				// standing_timeout_ms intervall
 
 				if (currentMovement != MovementType.STANDING) {
-					if (steps.size() != 0 && standing_timeout_ms <= (t - steps.getLast().ts)) {
+					int size = steps.size();
+					if (size != 0 && standing_timeout_ms <= (t - steps.get(size - 1).ts)) {
 						currentMovement = MovementType.STANDING;
 					}
 				}

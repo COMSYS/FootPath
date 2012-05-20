@@ -8,58 +8,52 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-
 /**
- * This class should provide an interface to easily obtain movement readings
- * from the camera. This should facilitate a simple means of integrating
- * flowpath into another project/navigator gui instance.
+ * This class should provide an interface to easily obtain movement readings from the camera. This should facilitate a
+ * simple means of integrating flowpath into another project/navigator gui instance.
  * 
  * @author Paul Smith
  * 
  */
 public class FlowPathInterface {
 	private static final FlowPathInterface singleton = new FlowPathInterface();
-	
+
 	private ParcelFileDescriptor[] fds = null;
-	
-	private FlowPathInterface(){
+
+	private FlowPathInterface() {
 		// Set Constructor to private so no further object instantiation
 		// -> FlowPathInterface has to be singleton
 	}
-	
-	public static FlowPathInterface getInterface(){
+
+	public static FlowPathInterface getInterface() {
 		return singleton;
 	}
-	
+
 	SocketAudioVideoWriter avwCapture;
-	
+
 	private ParsingThread parsingThread = null;
 
-
-
-
 	LinkedList<MVDTrigger> mvdTriggers = new LinkedList<MVDTrigger>();
-	
-		
-	public void addMVDTrigger(MVDTrigger t){
+
+	public void addMVDTrigger(MVDTrigger t) {
 		mvdTriggers.add(t);
 	}
 
-	protected void notifyTriggersWithMVD(long now_ms, float[][][] mvds){
+	protected void notifyTriggersWithMVD(long now_ms, float[][][] mvds) {
 		if (mvds == null)
 			return;
-		
-		for (MVDTrigger t : mvdTriggers){
-			if (t != null){
+
+		for (MVDTrigger t : mvdTriggers) {
+			if (t != null) {
 				t.processMVData(now_ms, mvds);
 			}
 		}
 	}
-	
+
 	public boolean startFlowpath(SurfaceHolder sh) {
-		
+
 		try {
-			// The first ParcelFileDescriptor in the returned array is the read 
+			// The first ParcelFileDescriptor in the returned array is the read
 			// side; the second is the write side.
 			fds = ParcelFileDescriptor.createPipe();
 		} catch (IOException e1) {
@@ -67,10 +61,8 @@ public class FlowPathInterface {
 			e1.printStackTrace();
 			return false;
 		}
-		
-		
-		
-//		startServer(++FlowPathConfig.port);
+
+		// startServer(++FlowPathConfig.port);
 
 		// create audio writer + start it
 		avwCapture = new SocketAudioVideoWriter(fds[1].getFileDescriptor(), sh);
@@ -88,23 +80,22 @@ public class FlowPathInterface {
 
 		avwCapture.startCapture();
 
-//		while (sckSrvCon == null) {
-//			try {
-//				Thread.sleep(50);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}
+		// while (sckSrvCon == null) {
+		// try {
+		// Thread.sleep(50);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
+		// }
 
-		
 		FileInputStream x = new FileInputStream(fds[0].getFileDescriptor());
-		
-//		InputStream sckIn = null;
-//		try {
-//			sckIn = sckSrvCon.getInputStream();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
+
+		// InputStream sckIn = null;
+		// try {
+		// sckIn = sckSrvCon.getInputStream();
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
 
 		parsingThread = new ParsingThread(x);
 		parsingThread.setRunning(true);
@@ -114,52 +105,52 @@ public class FlowPathInterface {
 	}
 
 	public void stopFlowPath() {
-		if(parsingThread.isRunning())
+		if (parsingThread.isRunning())
 			parsingThread.setRunning(false);
 
 		avwCapture.stopCapture();
 		avwCapture.unregisterCapture();
 
-//		try {
-//			sckSrvCon.close();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
+		// try {
+		// sckSrvCon.close();
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
 	}
 
 	public String getStats() {
 		return parsingThread.getParser().getStats();
 	}
-	
-	// SOCKET STUFF:
-//	private ServerThread st = new ServerThread();
-//	// server socket + functions:
-//	private ServerSocket sckSrvListen = null;
-//	private Socket sckSrvCon = null;
 
-//	private class ServerThread extends Thread {
-//		public void run() {
-//			accept();
-//		}
-//	}
-//
-//	private void accept() {
-//		try {
-//			sckSrvCon = sckSrvListen.accept();
-//			sckSrvCon.setTcpNoDelay(true);
-////			sckSrvCon.setReceiveBufferSize(128);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
-//
-//	private void startServer(int port) {
-//		try {
-//			sckSrvListen = new ServerSocket(port);
-//			st = new ServerThread();
-//			st.start();
-//		} catch (IOException e3) {
-//			e3.printStackTrace();
-//		}
-//	}
+	// SOCKET STUFF:
+	// private ServerThread st = new ServerThread();
+	// // server socket + functions:
+	// private ServerSocket sckSrvListen = null;
+	// private Socket sckSrvCon = null;
+
+	// private class ServerThread extends Thread {
+	// public void run() {
+	// accept();
+	// }
+	// }
+	//
+	// private void accept() {
+	// try {
+	// sckSrvCon = sckSrvListen.accept();
+	// sckSrvCon.setTcpNoDelay(true);
+	// // sckSrvCon.setReceiveBufferSize(128);
+	// } catch (IOException e) {
+	// e.printStackTrace();
+	// }
+	// }
+	//
+	// private void startServer(int port) {
+	// try {
+	// sckSrvListen = new ServerSocket(port);
+	// st = new ServerThread();
+	// st.start();
+	// } catch (IOException e3) {
+	// e3.printStackTrace();
+	// }
+	// }
 }

@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Stack;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -34,8 +35,8 @@ import android.util.Log;
  * 
  */
 public class Map {
-	private LinkedList<GraphNode> nodes;
-	private LinkedList<GraphEdge> edges;
+	private final List<GraphNode> nodes;
+	private final List<GraphEdge> edges;
 
 	private GraphNode[] array_nodes_by_id;
 	private GraphNode[] array_nodes_by_name;
@@ -645,7 +646,7 @@ public class Map {
 		// Create arrays for binary search
 		array_nodes_by_id = sortNodesById(nodes);
 		array_nodes_by_name = sortNodesByName(nodes);
-		
+
 		// Add edges to node, faster look up for neighbors
 		for (GraphEdge edge : edges) {
 			GraphNode n0 = edge.getNode0();
@@ -682,7 +683,7 @@ public class Map {
 		}
 
 		Log.i("FOOTPATH", "Looking up path from " + from.getName() + " to " + to.getName());
-		
+
 		int remaining_nodes = array_nodes_by_id.length;
 		GraphNode[] previous = new GraphNode[array_nodes_by_id.length];
 		double[] dist = new double[array_nodes_by_id.length];
@@ -742,7 +743,7 @@ public class Map {
 				}
 			}
 		}
-		
+
 		Log.i("FOOTPATH", "Looking up path from " + from.getName() + " to " + to.getName() + " failed!");
 		return null;
 	}
@@ -973,7 +974,7 @@ public class Map {
 				u = m + 1;
 			}
 		}
-		
+
 		Log.i("FOOTPATH", "Room " + name + " not found!");
 		return null;
 	}
@@ -1032,7 +1033,7 @@ public class Map {
 	}
 
 	// creates an array, containing only nodes _with_ a name, sorted ascending
-	private GraphNode[] sortNodesByName(LinkedList<GraphNode> nodes) {
+	private GraphNode[] sortNodesByName(List<GraphNode> nodes) {
 		GraphNode[] node_array;
 		GraphNode temp = null;
 		int num_nulls = 0;
@@ -1070,7 +1071,7 @@ public class Map {
 	}
 
 	// creates an array,sorted by id ascending
-	private GraphNode[] sortNodesById(LinkedList<GraphNode> nodes) {
+	private GraphNode[] sortNodesById(List<GraphNode> nodes) {
 		GraphNode[] node_array;
 		GraphNode temp = null;
 		int c = 0;

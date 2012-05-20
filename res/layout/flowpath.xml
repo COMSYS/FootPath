@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/lbl01"
-        android:layout_toRightOf="@+id/btn02"
+        android:layout_toRightOf="@+id/btn01"
         android:text="h263"
         android:width="96dp" >
     </EditText>
@@ -29,7 +29,7 @@
         android:id="@+id/lbl01"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/Button01"
+        android:layout_below="@+id/btn01"
         android:text="Please enter id"
         android:textSize="24px" >
     </TextView>

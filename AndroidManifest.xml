@@ -4,6 +4,8 @@
     android:versionCode="3"
     android:versionName="1.0" >
 
+    <uses-sdk android:minSdkVersion="9" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.GET_TASKS" />
 
@@ -45,11 +47,11 @@
                 android:screenOrientation="portrait" >
             </activity>
         </activity>
-        <activity android:name="de.uvwxy.footpath2.gui.StepDetectionConfig"></activity>
-        <activity android:name="de.uvwxy.footpath2.gui.MapFileSelector"></activity>
+        <activity android:name="de.uvwxy.footpath2.gui.StepDetectionConfig" >
+        </activity>
+        <activity android:name="de.uvwxy.footpath2.gui.MapFileSelector" >
+        </activity>
     </application>
-
-    <uses-sdk android:minSdkVersion="7" />
 
     <uses-permission android:name="android.permission.INTERNET" >
     </uses-permission>
