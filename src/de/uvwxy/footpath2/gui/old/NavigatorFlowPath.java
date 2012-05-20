@@ -10,7 +10,7 @@ import de.uvwxy.footpath2.map.LatLonPos;
 import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
 import de.uvwxy.footpath2.movement.h263.FlowPathInterface;
 import de.uvwxy.footpath2.movement.h263.MVDTrigger;
-import de.uvwxy.footpath2.movement.steps.StepDetection;
+import de.uvwxy.footpath2.movement.steps.StepDetectionImpl;
 
 /**
  * 

@@ -3,7 +3,7 @@ package de.uvwxy.footpath2.gui.old;
 import android.os.Bundle;
 import android.util.Log;
 import de.uvwxy.footpath2.map.LatLonPos;
-import de.uvwxy.footpath2.movement.steps.StepDetection;
+import de.uvwxy.footpath2.movement.steps.StepDetectionImpl;
 import de.uvwxy.footpath2.tools.ToolBox;
 /**
  * 

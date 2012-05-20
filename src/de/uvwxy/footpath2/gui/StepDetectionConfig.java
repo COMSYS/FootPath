@@ -17,7 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import de.uvwxy.footpath.R;
 import de.uvwxy.footpath2.movement.SensorEventDistributor;
-import de.uvwxy.footpath2.movement.steps.StepDetection;
+import de.uvwxy.footpath2.movement.steps.StepDetectionImpl;
 import de.uvwxy.footpath2.tools.DrawToCanvasWrapper;
 import de.uvwxy.footpath2.tools.PaintBoxDrawToCanvasWrapper;
 
@@ -36,7 +36,7 @@ public class StepDetectionConfig extends Activity implements DrawToCanvasWrapper
 	private PaintBoxDrawToCanvasWrapper paintBoxDTC = null;
 
 	private SensorEventDistributor sensorEventDistributor;
-	private StepDetection stepDetection;
+	private StepDetectionImpl stepDetection;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -115,7 +115,7 @@ public class StepDetectionConfig extends Activity implements DrawToCanvasWrapper
 	private void initTest() {
 		if (stepDetection == null) {
 			sensorEventDistributor = SensorEventDistributor.getInstance(this);
-			stepDetection = new StepDetection(this);
+			stepDetection = new StepDetectionImpl(this);
 			paintBoxDTC.setCanvasPainter(this);
 			sensorEventDistributor
 					.addLinearAccelerometerListener(stepDetection);

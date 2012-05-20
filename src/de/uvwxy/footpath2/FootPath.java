@@ -22,7 +22,7 @@ import de.uvwxy.footpath2.matching.BestFit;
 import de.uvwxy.footpath2.matching.MatchingAlgorithm;
 import de.uvwxy.footpath2.movement.MovementDetection;
 import de.uvwxy.footpath2.movement.SensorEventDistributor;
-import de.uvwxy.footpath2.movement.steps.StepDetection;
+import de.uvwxy.footpath2.movement.steps.StepDetectionImpl;
 import de.uvwxy.footpath2.types.FP_LocationProvider;
 import de.uvwxy.footpath2.types.FP_MatchingAlgorithm;
 import de.uvwxy.footpath2.types.FP_MovementDetection;
@@ -34,9 +34,9 @@ import de.uvwxy.footpath2.types.FP_MovementDetection;
  * 
  */
 public class FootPath {
-	private Context context;
-	private Map map;
-	private SensorEventDistributor sensorEventDistributor;
+	private final Context context;
+	private final Map map;
+	private final SensorEventDistributor sensorEventDistributor;
 	private MovementDetection movementDetection;
 	private MatchingAlgorithm matchingAlgorithm;
 
@@ -70,13 +70,15 @@ public class FootPath {
 	public void setMovementDetection(FP_MovementDetection movementType) {
 		switch (movementType) {
 		case MOVEMENT_DETECTION_STEPS:
-			movementDetection = new StepDetection(context);
+			movementDetection = new StepDetectionImpl(context);
 			sensorEventDistributor.addLinearAccelerometerListener((SensorEventListener) movementDetection);
 			break;
 		case MOVEMENT_DETECTION_SOUND_SEGWAY:
 			break;
 		case MOVEMENT_DETECTION_VIDEO_WHEELCHAIR:
 			break;
+		default:
+			throw new IllegalArgumentException(movementType.toString());
 		}
 	}
 
@@ -90,8 +92,9 @@ public class FootPath {
 			break;
 		case MATCHING_MULTI_FIT:
 			break;
+		default:
+			throw new IllegalArgumentException(matchingType.toString());
 		}
-
 	}
 
 	public void setLocationProvider(FP_LocationProvider providerType) {
@@ -142,7 +145,7 @@ public class FootPath {
 
 	public IndoorLocationHistory getPath(String location, String destination, boolean staircase, boolean elevator,
 			boolean outside) {
-		Log.i("FOOTPATH", "Trying to find path from " + location + " to "+ destination);
+		Log.i("FOOTPATH", "Trying to find path from " + location + " to " + destination);
 		IndoorLocationHistory ret = new IndoorLocationHistory();
 		Stack<GraphNode> buf = map.getShortestPath(location, destination, staircase, elevator, outside);
 		if (buf != null) {

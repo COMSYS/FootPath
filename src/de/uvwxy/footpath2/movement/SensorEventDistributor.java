@@ -12,8 +12,8 @@ import android.util.Log;
 import de.uvwxy.footpath2.tools.Loggable;
 
 /**
- * The current idea behind yet another SensorEventManager is that we can here,
- * globally filter/modify/log the sensor data.
+ * The current idea behind yet another SensorEventManager is that we can here, globally filter/modify/log the sensor
+ * data.
  * 
  * @author Paul Smith
  * 
@@ -21,17 +21,17 @@ import de.uvwxy.footpath2.tools.Loggable;
 public class SensorEventDistributor implements Loggable, SensorEventListener {
 	private boolean running = false;
 	private static SensorEventDistributor thisInstance = null;
-	private LinkedList<SensorEventListener> linearAccelerometerEventListenerList;
-	private SensorHistory linearAccelerometerHistory = new SensorHistory();
+	private List<SensorEventListener> linearAccelerometerEventListenerList;
+	private final SensorHistory linearAccelerometerHistory = new SensorHistory();
 	private static SensorManager sm;
 	private List<Sensor> lSensor;
 	private static Context context;
 
 	/**
-	 * Initialize the SensorEventDistributor. Only the first provided context is
-	 * considered.
+	 * Initialize the SensorEventDistributor. Only the first provided context is considered.
 	 * 
-	 * @param context for accessing of SensorService
+	 * @param context
+	 *            for accessing of SensorService
 	 * @return a singleton SensorEventDistributor
 	 */
 	public static SensorEventDistributor getInstance(Context context) {
@@ -44,6 +44,9 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 		return thisInstance;
 	}
 
+	/**
+	 * singleton.
+	 */
 	private SensorEventDistributor() {
 	}
 
@@ -51,8 +54,8 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 		if (linearAccelerometerEventListenerList == null) {
 			linearAccelerometerEventListenerList = new LinkedList<SensorEventListener>();
 		}
-		if (running){
-			// TODO: if running start lin acc events if first listener			
+		if (running) {
+			// TODO: if running start lin acc events if first listener
 		}
 		linearAccelerometerEventListenerList.add(sel);
 	}
@@ -61,9 +64,9 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 		if (linearAccelerometerEventListenerList == null || sel == null) {
 			return;
 		}
-		if (linearAccelerometerEventListenerList.size()==0){
+		if (linearAccelerometerEventListenerList.size() == 0) {
 			// TODO: remove lin acc events if last listener
-			
+
 		}
 
 		linearAccelerometerEventListenerList.remove(sel);
@@ -79,8 +82,7 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 			switch (lSensor.get(i).getType()) {
 			case Sensor.TYPE_LINEAR_ACCELERATION:
 				Log.i("FOOTPATH", "Registering Linear Acceleration Sensor");
-				sm.registerListener(this, lSensor.get(i),
-						SensorManager.SENSOR_DELAY_GAME);
+				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_GAME);
 				break;
 			}
 		}
@@ -129,8 +131,7 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 
 		switch (event.sensor.getType()) {
 		case Sensor.TYPE_LINEAR_ACCELERATION:
-			linearAccelerometerHistory.add(new SensorTriple(event.values, now,
-					event.sensor.getType()));
+			linearAccelerometerHistory.add(new SensorTriple(event.values, now, event.sensor.getType()));
 			for (SensorEventListener sel : linearAccelerometerEventListenerList) {
 				if (sel != null) {
 					sel.onSensorChanged(event);
