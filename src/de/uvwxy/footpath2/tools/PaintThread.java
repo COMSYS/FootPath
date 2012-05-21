@@ -31,7 +31,8 @@ class PaintThread extends Thread {
 			try {
 				c = surfaceHolder.lockCanvas(null);
 				synchronized (surfaceHolder) {
-					pBox.onDraw(c);
+					if (c != null)
+						pBox.onDraw(c);
 				}
 			} finally {
 				if (c != null) {
