@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 public abstract class MovementDetection {
 	private boolean running = false;
-	private LinkedList<StepEventListener> onStepListenerList;
+	protected LinkedList<StepEventListener> onStepListenerList;
 
 	public void registerOnStepListener(StepEventListener osl) {
 		if (onStepListenerList == null) {
@@ -24,24 +24,12 @@ public abstract class MovementDetection {
 		return running;
 	}
 
-	public synchronized void _a_startMovementDetection() {
-		running = true;
+	public abstract void _a_startMovementDetection();
 
-	};
+	public abstract void _b1_pauseMovementDetection();
 
-	public synchronized void _b1_pauseMovementDetection() {
-		running = false;
+	public abstract void _b2_unPauseMovementDetection();
 
-	};
-
-	public synchronized void _b2_unPauseMovementDetection() {
-		running = true;
-
-	};
-
-	public synchronized void _c_stopMovementDetection() {
-		running = false;
-
-	};
+	public abstract void _c_stopMovementDetection();
 
 }

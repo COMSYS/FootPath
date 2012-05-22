@@ -14,9 +14,11 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.os.Handler;
+import android.util.Log;
 import de.uvwxy.footpath2.movement.MovementDetection;
 import de.uvwxy.footpath2.movement.SensorHistory;
 import de.uvwxy.footpath2.movement.SensorTriple;
+import de.uvwxy.footpath2.movement.StepEventListener;
 import de.uvwxy.footpath2.tools.DrawToCanvas;
 
 public class StepDetectionImpl extends MovementDetection implements SensorEventListener, DrawToCanvas, StepDetection {
@@ -39,6 +41,8 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	private final float[][] stepDetectionWindow = new float[vhSize][];
 	private int vhPointer = 0;
 
+	private float[] bearing;
+	
 	private MovementType currentMovement = MovementType.STANDING;
 
 	private final Context context;
@@ -61,7 +65,6 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	 */
 	@Override
 	public synchronized void _a_startMovementDetection() {
-		super._a_startMovementDetection();
 		// TODO: linAccHistory do sth
 		handlerStepDetection.run();
 	};
@@ -73,7 +76,6 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	 */
 	@Override
 	public synchronized void _b1_pauseMovementDetection() {
-		super._b1_pauseMovementDetection();
 		// TODO: linAccHistory do sth
 		mHandler.removeCallbacks(handlerStepDetection);
 
@@ -86,7 +88,6 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	 */
 	@Override
 	public synchronized void _b2_unPauseMovementDetection() {
-		super._b2_unPauseMovementDetection();
 		// TODO: linAccHistory do sth
 		mHandler.removeCallbacks(handlerStepDetection);
 		mHandler.postDelayed(handlerStepDetection, delayMillis);
@@ -99,7 +100,6 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	 */
 	@Override
 	public synchronized void _c_stopMovementDetection() {
-		super._c_stopMovementDetection();
 		// TODO: linAccHistory do sth
 		mHandler.removeCallbacks(handlerStepDetection);
 
@@ -125,7 +125,8 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	public void onSensorChanged(SensorEvent event) {
 		if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
 			linAccHistory.add(new SensorTriple(event.values, event.timestamp, event.sensor.getType()));
-
+		} else if (event.sensor.getType() == Sensor.TYPE_ORIENTATION){
+			bearing = event.values;
 		}
 	}
 
@@ -420,6 +421,8 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 
 				long t = System.currentTimeMillis();
 
+				// TODO: we can remove jump detection again i suppose
+				
 				// Fixed Peak size.. bad bad bad! .. i.e. no per user/device
 				// configuration
 				if (checkForStep(jumpPeak, 10 * jumpPeak)) {
@@ -437,6 +440,12 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 						// detected a step
 						steps.add(new Step(t));
 						currentMovement = MovementType.WALKING;
+						Log.i("FOOTPATH", "StepDetectionImpl: detected step, distributing");
+						for(StepEventListener l : onStepListenerList){
+							//l.onStepUpdate(bearing, steplength, timestamp, estimatedStepLengthError, estimatedBearingError)
+							// TODO: Documentation 0.0 = not defined similar to accuracy in Location
+							l.onStepUpdate(bearing[0], 0.0, t, 0.0, 0.0);
+						}
 					}
 				}
 

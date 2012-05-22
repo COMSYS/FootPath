@@ -13,7 +13,6 @@ import de.uvwxy.footpath2.map.GraphEdge;
  * 
  */
 public class Positioner_OnlineBestFit extends Positioner {
-	private Navigator nav = null;
 	private NPConfig conf = null;
 	private List<GraphEdge> edges = null;
 	private double[][] c = null;
@@ -27,9 +26,9 @@ public class Positioner_OnlineBestFit extends Positioner {
 	private double progress = 0.0;
 
 	public Positioner_OnlineBestFit(Navigator nav, LinkedList<GraphEdge> edges, NPConfig conf) {
-		this.nav = nav;
+//		this.nav = nav;
 		this.edges = edges;
-		this.conf = conf;
+//		this.conf = conf;
 
 		c = new double[edges.size()][2];
 		// Setup c:
@@ -139,6 +138,8 @@ public class Positioner_OnlineBestFit extends Positioner {
 		for (int i = 0; i < edgeIndex; i++) {
 			tmp -= edges.get(i).getLen();
 		}
+		
+		
 		conf.setNpCurLen(tmp);
 
 		conf.setNpPointer(edgeIndex);

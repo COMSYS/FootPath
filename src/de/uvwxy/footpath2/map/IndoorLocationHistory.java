@@ -52,7 +52,8 @@ public class IndoorLocationHistory {
 		}
 		return res;
 	}
-
+	
+	//TODO: crate a class for these functions!! call them from there
 	private int[] convertToPixelLocation(IndoorLocation gpsLocation, IndoorLocation center, double pixelsPerMeter) {
 		int[] res = { 0, 0 };
 		if (gpsLocation != null && center != null) {

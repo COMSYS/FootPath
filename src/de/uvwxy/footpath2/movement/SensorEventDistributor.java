@@ -15,6 +15,9 @@ import de.uvwxy.footpath2.tools.Loggable;
  * The current idea behind yet another SensorEventManager is that we can here, globally filter/modify/log the sensor
  * data.
  * 
+ * TODO: at the moment it seems there is a lot of code to be doubled for each new sensor. The advantage will be to
+ * implement filters here. Also we only request/supply only the registered sensors.
+ * 
  * @author Paul Smith
  * 
  */
@@ -22,7 +25,9 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 	private boolean running = false;
 	private static SensorEventDistributor thisInstance = null;
 	private List<SensorEventListener> linearAccelerometerEventListenerList;
+	private List<SensorEventListener> orientationEventListenerList;
 	private final SensorHistory linearAccelerometerHistory = new SensorHistory();
+	private final SensorHistory orientationHistory = new SensorHistory();
 	private static SensorManager sm;
 	private List<Sensor> lSensor;
 	private static Context context;
@@ -57,6 +62,7 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 		if (running) {
 			// TODO: if running start lin acc events if first listener
 		}
+		Log.i("FOOTPATH", "Adding Acc Ev Lis");
 		linearAccelerometerEventListenerList.add(sel);
 	}
 
@@ -68,8 +74,31 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 			// TODO: remove lin acc events if last listener
 
 		}
-
+		Log.i("FOOTPATH", "Removing Acc Ev Lis");
 		linearAccelerometerEventListenerList.remove(sel);
+	}
+
+	public void addOrientationListener(SensorEventListener sel) {
+		if (orientationEventListenerList == null) {
+			orientationEventListenerList = new LinkedList<SensorEventListener>();
+		}
+		if (running) {
+			// TODO: if running start orientation events if first listener
+		}
+		Log.i("FOOTPATH", "Adding orientation listener");
+		orientationEventListenerList.add(sel);
+	}
+
+	public void removeOrientationListener(SensorEventListener sel) {
+		if (orientationEventListenerList == null || sel == null) {
+			return;
+		}
+		if (orientationEventListenerList.size() == 0) {
+			// TODO: remove orientation events if last listener
+
+		}
+		Log.i("FOOTPATH", "Removing orientation listener");
+		orientationEventListenerList.remove(sel);
 	}
 
 	public synchronized boolean isRunning() {
@@ -84,13 +113,18 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 				Log.i("FOOTPATH", "Registering Linear Acceleration Sensor");
 				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_GAME);
 				break;
+			case Sensor.TYPE_ORIENTATION:
+				Log.i("FOOTPATH", "Registering Orientation Sensor");
+				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_GAME);
+				break;
+
 			}
 		}
 	}
 
 	public synchronized void _a_startSensorUpdates() {
 		running = true;
-
+		Log.i("FOOTPATH", "Starting sensor updates");
 		sm = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
 		lSensor = sm.getSensorList(Sensor.TYPE_ALL);
 		initSensorsForExistingListeners();
@@ -132,9 +166,21 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 		switch (event.sensor.getType()) {
 		case Sensor.TYPE_LINEAR_ACCELERATION:
 			linearAccelerometerHistory.add(new SensorTriple(event.values, now, event.sensor.getType()));
-			for (SensorEventListener sel : linearAccelerometerEventListenerList) {
-				if (sel != null) {
-					sel.onSensorChanged(event);
+			if (linearAccelerometerEventListenerList != null) {
+				for (SensorEventListener sel : linearAccelerometerEventListenerList) {
+					if (sel != null) {
+						sel.onSensorChanged(event);
+					}
+				}
+			}
+			break;
+		case Sensor.TYPE_ORIENTATION:
+			orientationHistory.add(new SensorTriple(event.values, now, event.sensor.getType()));
+			if (orientationEventListenerList != null) {
+				for (SensorEventListener sel : orientationEventListenerList) {
+					if (sel != null) {
+						sel.onSensorChanged(event);
+					}
 				}
 			}
 			break;

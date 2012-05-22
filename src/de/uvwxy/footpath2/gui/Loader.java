@@ -35,13 +35,12 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath.Rev;
 import de.uvwxy.footpath2.gui.old.Calibrator;
 import de.uvwxy.footpath2.gui.old.NavigatorFlowPath;
 import de.uvwxy.footpath2.gui.old.NavigatorFootPath;
-import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.map.GraphNode;
 import de.uvwxy.footpath2.map.LatLonPos;
+import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.tools.FileNameFilterFromStringArray;
 
 /**
@@ -282,7 +281,7 @@ public class Loader extends Activity {
 		cbOutside 	= (CheckBox) findViewById(R.id.cbOutside);
 		cbLog		= (CheckBox) findViewById(R.id.cbLog);
 //		cbAudio		= (CheckBox) findViewById(R.id.cbAudio);
-		this.setTitle("Footpath r(" + Rev.rev.substring(0,8) + ")");
+//		this.setTitle("Footpath r(" +  + ")");
 						
 		// Set select/click listeners
 		spFrom.setOnItemSelectedListener(spinnerListener);

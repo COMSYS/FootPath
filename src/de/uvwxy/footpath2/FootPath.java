@@ -14,6 +14,7 @@ import android.content.res.Resources.NotFoundException;
 import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.util.Log;
+import de.uvwxy.footpath.Rev;
 import de.uvwxy.footpath2.map.GraphNode;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.IndoorLocationHistory;
@@ -23,6 +24,7 @@ import de.uvwxy.footpath2.matching.MatchingAlgorithm;
 import de.uvwxy.footpath2.movement.MovementDetection;
 import de.uvwxy.footpath2.movement.SensorEventDistributor;
 import de.uvwxy.footpath2.movement.steps.StepDetectionImpl;
+import de.uvwxy.footpath2.tools.FootPathException;
 import de.uvwxy.footpath2.types.FP_LocationProvider;
 import de.uvwxy.footpath2.types.FP_MatchingAlgorithm;
 import de.uvwxy.footpath2.types.FP_MovementDetection;
@@ -39,75 +41,49 @@ public class FootPath {
 	private final SensorEventDistributor sensorEventDistributor;
 	private MovementDetection movementDetection;
 	private MatchingAlgorithm matchingAlgorithm;
+	private FP_MovementDetection settingsMovementDetection;
+	private FP_MatchingAlgorithm settingsMatchingAlgorithm;
+	private FP_LocationProvider settingsLocationProvider;
 
+	// TODO: make this simpleton?
 	public FootPath(Context context) {
 		this.context = context;
 		sensorEventDistributor = SensorEventDistributor.getInstance(context);
 		map = new Map();
 	}
 
-	private void exampleUsage() {
+	public String getRevision() {
+		return Rev.rev.substring(0, 8);
+	}
+
+	private void exampleUsage() throws FootPathException {
 
 		// initialization
 		FootPath fp = new FootPath(null);
 
 		// movement input and location output setup
-		setMovementDetection(FP_MovementDetection.MOVEMENT_DETECTION_STEPS);
-		setMatchingAlgorithm(FP_MatchingAlgorithm.MATCHING_BEST_FIT);
-		setLocationProvider(FP_LocationProvider.LOCATION_PROVIDER_FOOTPATH);
+		_b_setMovementDetection(FP_MovementDetection.MOVEMENT_DETECTION_STEPS);
+		_c_setMatchingAlgorithm(FP_MatchingAlgorithm.MATCHING_BEST_FIT);
+		_d_setInitialStepLength(0.5f);
+		_e_setLocationProvider(FP_LocationProvider.LOCATION_PROVIDER_FOOTPATH);
 
-		setDestination("room1");
+		_f1_setDestination("room1");
 		// set location (possibility: also later during navigation (Wifi, etc))
-		setLocation("room2");
+		_g1_setLocation("room2");
 
 		// starting, stopping, resetting of navigation
-		_a_start();
-		_c_stop();
+		_h_start();
+		_j_stop();
 
 		return;
 	}
 
-	public void setMovementDetection(FP_MovementDetection movementType) {
-		switch (movementType) {
-		case MOVEMENT_DETECTION_STEPS:
-			movementDetection = new StepDetectionImpl(context);
-			sensorEventDistributor.addLinearAccelerometerListener((SensorEventListener) movementDetection);
-			break;
-		case MOVEMENT_DETECTION_SOUND_SEGWAY:
-			break;
-		case MOVEMENT_DETECTION_VIDEO_WHEELCHAIR:
-			break;
-		default:
-			throw new IllegalArgumentException(movementType.toString());
-		}
-	}
-
-	public void setMatchingAlgorithm(FP_MatchingAlgorithm matchingType) {
-		switch (matchingType) {
-		case MATCHING_BEST_FIT:
-			matchingAlgorithm = new BestFit();
-			movementDetection.registerOnStepListener(matchingAlgorithm);
-			break;
-		case MATCHING_FIRST_FIT:
-			break;
-		case MATCHING_MULTI_FIT:
-			break;
-		default:
-			throw new IllegalArgumentException(matchingType.toString());
-		}
-	}
-
-	public void setLocationProvider(FP_LocationProvider providerType) {
+	public void _a1_loadMapDataFromAsset(String uri) {
 		// TODO:
 
 	}
 
-	public void loadMapDataFromAsset(String uri) {
-		// TODO:
-
-	}
-
-	public void loadMapDataFromXMLResource(int resID) {
+	public void _a2_loadMapDataFromXMLResource(int resID) {
 		// TODO:
 		try {
 			map.addToGraphFromXMLResourceParser(context.getResources().getXml(resID));
@@ -123,12 +99,12 @@ public class FootPath {
 		}
 	}
 
-	public void loadMapDataFromURL(String uri) {
+	public void _a3_loadMapDataFromURL(String uri) {
 		// TODO:
 
 	}
 
-	public void loadMapDataFromXMLFile(String uri) {
+	public void _a4_loadMapDataFromXMLFile(String uri) {
 		Log.i("FOOTPATH", "Loading map data from " + uri);
 		try {
 			map.addToGraphFromXMLFile(uri);
@@ -141,6 +117,53 @@ public class FootPath {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void _b_setMovementDetection(FP_MovementDetection movementType) {
+		settingsMovementDetection = movementType;
+		switch (movementType) {
+		case MOVEMENT_DETECTION_STEPS:
+			movementDetection = new StepDetectionImpl(context);
+			sensorEventDistributor.addLinearAccelerometerListener((SensorEventListener) movementDetection);
+			sensorEventDistributor.addOrientationListener((SensorEventListener) movementDetection);
+			break;
+		case MOVEMENT_DETECTION_SOUND_SEGWAY:
+			break;
+		case MOVEMENT_DETECTION_VIDEO_WHEELCHAIR:
+			break;
+		default:
+			throw new IllegalArgumentException(movementType.toString());
+		}
+	}
+
+	public void _c_setMatchingAlgorithm(FP_MatchingAlgorithm matchingType) {
+		settingsMatchingAlgorithm = matchingType;
+		switch (matchingType) {
+		case MATCHING_BEST_FIT:
+			matchingAlgorithm = new BestFit();
+			Log.i("FOOTPATH", "Registering BestFit for movement detection");
+			movementDetection.registerOnStepListener(matchingAlgorithm);
+			break;
+		case MATCHING_FIRST_FIT:
+			break;
+		case MATCHING_MULTI_FIT:
+			break;
+		default:
+			throw new IllegalArgumentException(matchingType.toString());
+		}
+	}
+
+	public void _d_setInitialStepLength(float f) throws FootPathException {
+		if (matchingAlgorithm != null) {
+			matchingAlgorithm.setInitialStepLength(f);
+		} else {
+			throw new FootPathException("No matching algorithm selected!");
+		}
+	}
+
+	public void _e_setLocationProvider(FP_LocationProvider providerType) {
+		// TODO:
+		settingsLocationProvider = providerType;
 	}
 
 	public IndoorLocationHistory getPath(String location, String destination, boolean staircase, boolean elevator,
@@ -159,20 +182,33 @@ public class FootPath {
 		return ret;
 	}
 
-	public void setDestination(String room) {
+	public void _fg_setPath(IndoorLocationHistory path) throws FootPathException {
+		if (matchingAlgorithm != null) {
+			if (path != null) {
+				matchingAlgorithm.setPath(path);
+			} else {
+				throw new FootPathException("Path was null, bad boy!"); // ;)
+			}
+		} else {
+			throw new FootPathException("No matching algorithm selected!");
+		}
 
 	}
 
-	public void setLocation(String room) {
+	public void _f1_setDestination(String room) {
 
 	}
 
-	public void setDestination(Location l) {
+	public void _g1_setLocation(String room) {
+
+	}
+
+	public void _f2_setDestination(Location l) {
 		// TODO:
 
 	}
 
-	public void setLocation(Location l) {
+	public void _g2_setLocation(Location l) {
 		// TODO:
 
 	}
@@ -181,26 +217,33 @@ public class FootPath {
 		return map.getRoomList();
 	}
 
-	public void _a_start() {
+	public void _h_start() throws FootPathException {
 		// TODO:
+		matchingAlgorithm.init();
 		sensorEventDistributor._a_startSensorUpdates();
 		movementDetection._a_startMovementDetection();
+		
 	}
 
-	public void _b1_pause() {
+	public void _i1_pause() {
 		sensorEventDistributor._b1_pauseSensorUpdates();
 		movementDetection._b1_pauseMovementDetection();
 	}
 
-	public void _b2_unpause() {
+	public void _i2_unpause() {
 		sensorEventDistributor._b2_unPauseSensorUpdates();
 		movementDetection._b2_unPauseMovementDetection();
 	}
 
-	public int _c_stop() {
+	public int _j_stop() {
 		sensorEventDistributor._c_stopSensorUpdates();
 		movementDetection._c_stopMovementDetection();
 
 		return 0;
+	}
+	
+	@Deprecated
+	public MatchingAlgorithm _debug_getMatchinAlgorithm(){
+		return matchingAlgorithm;
 	}
 }
