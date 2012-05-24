@@ -26,8 +26,10 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 	private static SensorEventDistributor thisInstance = null;
 	private List<SensorEventListener> linearAccelerometerEventListenerList;
 	private List<SensorEventListener> orientationEventListenerList;
+	private List<SensorEventListener> gravityEventListenerList;
 	private final SensorHistory linearAccelerometerHistory = new SensorHistory();
 	private final SensorHistory orientationHistory = new SensorHistory();
+	private final SensorHistory gravityHistory = new SensorHistory();
 	private static SensorManager sm;
 	private List<Sensor> lSensor;
 	private static Context context;
@@ -101,6 +103,29 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 		orientationEventListenerList.remove(sel);
 	}
 
+	public void addGravityListener(SensorEventListener sel) {
+		if (gravityEventListenerList == null) {
+			gravityEventListenerList = new LinkedList<SensorEventListener>();
+		}
+		if (running) {
+			// TODO: if running start lin acc events if first listener
+		}
+		Log.i("FOOTPATH", "Adding Grav Ev Lis");
+		gravityEventListenerList.add(sel);
+	}
+
+	public void removeGravityListener(SensorEventListener sel) {
+		if (gravityEventListenerList == null || sel == null) {
+			return;
+		}
+		if (gravityEventListenerList.size() == 0) {
+			// TODO: remove grav events if last listener
+
+		}
+		Log.i("FOOTPATH", "Removing Gravity Ev Lis");
+		gravityEventListenerList.remove(sel);
+	}
+
 	public synchronized boolean isRunning() {
 		return running;
 	}
@@ -115,6 +140,10 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 				break;
 			case Sensor.TYPE_ORIENTATION:
 				Log.i("FOOTPATH", "Registering Orientation Sensor");
+				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_GAME);
+				break;
+			case Sensor.TYPE_GRAVITY:
+				Log.i("FOOTPATH", "Registering Gravity Sensor");
 				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_GAME);
 				break;
 
@@ -178,6 +207,16 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 			orientationHistory.add(new SensorTriple(event.values, now, event.sensor.getType()));
 			if (orientationEventListenerList != null) {
 				for (SensorEventListener sel : orientationEventListenerList) {
+					if (sel != null) {
+						sel.onSensorChanged(event);
+					}
+				}
+			}
+			break;
+		case Sensor.TYPE_GRAVITY:
+			gravityHistory.add(new SensorTriple(event.values, now, event.sensor.getType()));
+			if (gravityEventListenerList != null) {
+				for (SensorEventListener sel : gravityEventListenerList) {
 					if (sel != null) {
 						sel.onSensorChanged(event);
 					}

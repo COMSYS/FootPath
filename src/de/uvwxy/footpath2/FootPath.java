@@ -126,6 +126,7 @@ public class FootPath {
 			movementDetection = new StepDetectionImpl(context);
 			sensorEventDistributor.addLinearAccelerometerListener((SensorEventListener) movementDetection);
 			sensorEventDistributor.addOrientationListener((SensorEventListener) movementDetection);
+			sensorEventDistributor.addGravityListener((SensorEventListener) movementDetection);
 			break;
 		case MOVEMENT_DETECTION_SOUND_SEGWAY:
 			break;
@@ -222,7 +223,7 @@ public class FootPath {
 		matchingAlgorithm.init();
 		sensorEventDistributor._a_startSensorUpdates();
 		movementDetection._a_startMovementDetection();
-		
+
 	}
 
 	public void _i1_pause() {
@@ -241,9 +242,9 @@ public class FootPath {
 
 		return 0;
 	}
-	
+
 	@Deprecated
-	public MatchingAlgorithm _debug_getMatchinAlgorithm(){
+	public MatchingAlgorithm _debug_getMatchinAlgorithm() {
 		return matchingAlgorithm;
 	}
 }

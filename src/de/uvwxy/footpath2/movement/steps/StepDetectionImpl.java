@@ -42,10 +42,11 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	private int vhPointer = 0;
 
 	private float[] bearing;
-	
+
 	private MovementType currentMovement = MovementType.STANDING;
 
 	private final Context context;
+	private float[] orientationGravityVals;
 
 	public StepDetectionImpl(Context context) {
 		super();
@@ -123,9 +124,11 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	 */
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+		if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
+			orientationGravityVals = event.values.clone();
+		} else if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
 			linAccHistory.add(new SensorTriple(event.values, event.timestamp, event.sensor.getType()));
-		} else if (event.sensor.getType() == Sensor.TYPE_ORIENTATION){
+		} else if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) { // TODO: TYPE_ORIENTATION is deprecated.
 			bearing = event.values;
 		}
 	}
@@ -271,8 +274,40 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		return currentMovement;
 	}
 
-	// SENSOR VALUE FIELD IS 2 HERE FOR ONLY _ONE_ AXIS! TODO!
+	/**
+	 * compute normalized orientation of phone<br>
+	 * the axis are the same as at the linear accelerometer
+	 * 
+	 * @return
+	 */
+	private float[] getOrientation() {
+		final float sum = orientationGravityVals[0] + orientationGravityVals[1] + orientationGravityVals[2];
+		final float[] retVal = new float[3];
+
+		retVal[0] = orientationGravityVals[0] / sum;
+		retVal[1] = orientationGravityVals[1] / sum;
+		retVal[2] = orientationGravityVals[2] / sum;
+
+		return retVal;
+	}
+
+	/**
+	 * get diffs for each axis & multiply with orientation this will be checked against the threshhold
+	 * 
+	 * @param peakSize
+	 * @param lim
+	 * @return
+	 */
 	private boolean checkForStep(double peakSize, double lim) {
+		float[] orientationVals = getOrientation();
+		// no orientation, fallback to only z-axis.
+		if (orientationVals == null) {
+			orientationVals = new float[3];
+			orientationVals[0] = 0;
+			orientationVals[1] = 0;
+			orientationVals[2] = 1;
+		}
+
 		// Add value to values_history
 
 		int lookahead = 5;
@@ -280,8 +315,18 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		for (int t = 1; t <= lookahead; t++) {
 			// catch nullpointer exception at the beginning
 			if (stepDetectionWindow[(vhPointer - 1 - t + vhSize + vhSize) % vhSize] != null) {
-				double check = stepDetectionWindow[(vhPointer - 1 - t + vhSize + vhSize) % vhSize][2]
-						- stepDetectionWindow[(vhPointer - 1 + vhSize) % vhSize][2];
+				// simple approach - use AVG of all 3 directions
+				double check_tmp[] = new double[3];
+				int pos_new = (vhPointer - 1 - t + vhSize + vhSize) % vhSize;
+				int pos_old = (vhPointer - 1 + vhSize) % vhSize;
+				check_tmp[0] = stepDetectionWindow[pos_new][0] - stepDetectionWindow[pos_old][0];
+				check_tmp[1] = stepDetectionWindow[pos_new][1] - stepDetectionWindow[pos_old][1];
+				check_tmp[2] = stepDetectionWindow[pos_new][2] - stepDetectionWindow[pos_old][2];
+
+				// sum there values
+				double check = (check_tmp[0] * orientationVals[0] + check_tmp[1] * orientationVals[1] + check_tmp[2]
+						* orientationVals[2]);
+
 				if (check >= peakSize && check < lim) {
 					// Log.i("JNR_LOCMOV", "Detected step with t = " + t
 					// + ", peakSize = " + peakSize + " < " + check);
@@ -293,7 +338,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	}
 
 	private void addSensorData(SensorTriple sensorData) {
-		stepDetectionWindow[vhPointer % vhSize] = sensorData.values;
+		stepDetectionWindow[vhPointer % vhSize] = sensorData.getValues();
 		vhPointer++;
 		vhPointer = vhPointer % vhSize;
 	}
@@ -422,7 +467,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 				long t = System.currentTimeMillis();
 
 				// TODO: we can remove jump detection again i suppose
-				
+
 				// Fixed Peak size.. bad bad bad! .. i.e. no per user/device
 				// configuration
 				if (checkForStep(jumpPeak, 10 * jumpPeak)) {
@@ -441,10 +486,15 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 						steps.add(new Step(t));
 						currentMovement = MovementType.WALKING;
 						Log.i("FOOTPATH", "StepDetectionImpl: detected step, distributing");
-						for(StepEventListener l : onStepListenerList){
-							//l.onStepUpdate(bearing, steplength, timestamp, estimatedStepLengthError, estimatedBearingError)
-							// TODO: Documentation 0.0 = not defined similar to accuracy in Location
-							l.onStepUpdate(bearing[0], 0.0, t, 0.0, 0.0);
+
+						// prevent NPE
+						if (onStepListenerList != null && onStepListenerList.size() > 0) {
+							for (StepEventListener l : onStepListenerList) {
+								// l.onStepUpdate(bearing, steplength, timestamp, estimatedStepLengthError,
+								// estimatedBearingError)
+								// TODO: Documentation 0.0 = not defined similar to accuracy in Location
+								l.onStepUpdate(bearing[0], 0.0, t, 0.0, 0.0);
+							}
 						}
 					}
 				}

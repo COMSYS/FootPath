@@ -35,7 +35,7 @@ public class SensorHistory {
 		SensorTriple tempRight = get(i + 1);
 		SensorTriple tempLeft = get(i);
 		long max = System.currentTimeMillis();
-		long diff = max - tempLeft.ts;
+		long diff = max - tempLeft.getTs();
 
 		int height = boundingBox.height();
 		int width = boundingBox.width();
@@ -46,16 +46,16 @@ public class SensorHistory {
 		float y0r, y0g, y0b, y1r, y1g, y1b, x0, x1;
 		int yoffset = height / 2 + boundingBox.top;
 		while ((diff) <= getBackLogMillis()) {
-			x1 = (-(max - tempRight.ts) * pixelsPerMilli) + boundingBox.right;
+			x1 = (-(max - tempRight.getTs()) * pixelsPerMilli) + boundingBox.right;
 			x0 = (-diff * pixelsPerMilli) + boundingBox.right;
 
-			y1r = yoffset - (tempRight.values[0] * pixelsPerValue);
-			y1g = yoffset - (tempRight.values[1] * pixelsPerValue);
-			y1b = yoffset - (tempRight.values[2] * pixelsPerValue);
+			y1r = yoffset - (tempRight.getValues()[0] * pixelsPerValue);
+			y1g = yoffset - (tempRight.getValues()[1] * pixelsPerValue);
+			y1b = yoffset - (tempRight.getValues()[2] * pixelsPerValue);
 
-			y0r = yoffset - (tempLeft.values[0] * pixelsPerValue);
-			y0g = yoffset - (tempLeft.values[1] * pixelsPerValue);
-			y0b = yoffset - (tempLeft.values[2] * pixelsPerValue);
+			y0r = yoffset - (tempLeft.getValues()[0] * pixelsPerValue);
+			y0g = yoffset - (tempLeft.getValues()[1] * pixelsPerValue);
+			y0b = yoffset - (tempLeft.getValues()[2] * pixelsPerValue);
 
 			pLine.setColor(Color.RED);
 			canvas.drawLine(x0, y0r, x1, y1r, pLine);
@@ -76,7 +76,7 @@ public class SensorHistory {
 			if (tempLeft == null || tempRight == null) {
 				break;
 			}
-			diff = max - tempLeft.ts;
+			diff = max - tempLeft.getTs();
 		}
 
 		canvas.drawText("Size: " + size() * 25 + " byte", 16, 16, pDots);
