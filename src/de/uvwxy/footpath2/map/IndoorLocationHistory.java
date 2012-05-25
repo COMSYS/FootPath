@@ -3,6 +3,7 @@ package de.uvwxy.footpath2.map;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -22,7 +23,7 @@ import android.os.Environment;
  * @author Paul Smith
  * 
  */
-public class IndoorLocationHistory {
+public class IndoorLocationHistory implements Serializable {
 	private final List<IndoorLocation> list = new LinkedList<IndoorLocation>();
 	private static final long serialVersionUID = 3297314826220855327L;
 	private static final double ARC_DISTANCE_PER_DEGREE = 60 * 1852;
@@ -52,8 +53,8 @@ public class IndoorLocationHistory {
 		}
 		return res;
 	}
-	
-	//TODO: crate a class for these functions!! call them from there
+
+	// TODO: crate a class for these functions!! call them from there
 	private int[] convertToPixelLocation(IndoorLocation gpsLocation, IndoorLocation center, double pixelsPerMeter) {
 		int[] res = { 0, 0 };
 		if (gpsLocation != null && center != null) {

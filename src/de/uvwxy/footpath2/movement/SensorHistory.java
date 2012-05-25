@@ -1,5 +1,6 @@
 package de.uvwxy.footpath2.movement;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,9 +13,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.location.Location;
 
-//unschöne vererbung! - macht man eigetlich nicht ;-)
-//public class SensorHistory extends LinkedList<SensorTriple> {
-public class SensorHistory {
+public class SensorHistory implements Serializable {
 	private final List<SensorTriple> list = new LinkedList<SensorTriple>();
 
 	private static final long serialVersionUID = 5777397679052032803L;
