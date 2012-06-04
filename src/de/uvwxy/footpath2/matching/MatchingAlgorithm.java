@@ -1,7 +1,7 @@
 package de.uvwxy.footpath2.matching;
 
 import de.uvwxy.footpath2.map.IndoorLocation;
-import de.uvwxy.footpath2.map.IndoorLocationHistory;
+import de.uvwxy.footpath2.map.IndoorLocationList;
 import de.uvwxy.footpath2.movement.StepEventListener;
 import de.uvwxy.footpath2.tools.FootPathException;
 
@@ -18,7 +18,7 @@ import de.uvwxy.footpath2.tools.FootPathException;
 public abstract class MatchingAlgorithm implements StepEventListener {
 	protected IndoorLocation currentLocation;
 	protected float initialStepLength = 0.5f;
-	protected IndoorLocationHistory path;
+	protected IndoorLocationList path;
 
 	public void setInitialStepLength(float f) {
 		initialStepLength = f;
@@ -28,7 +28,7 @@ public abstract class MatchingAlgorithm implements StepEventListener {
 		return currentLocation;
 	}
 
-	public void setPath(IndoorLocationHistory path) {
+	public void setPath(IndoorLocationList path) {
 		this.path = path;
 		currentLocation = path.getFirst();
 	}

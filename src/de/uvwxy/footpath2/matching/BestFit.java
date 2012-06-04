@@ -6,7 +6,7 @@ import java.util.List;
 import android.util.Log;
 import de.uvwxy.footpath2.map.GraphEdge;
 import de.uvwxy.footpath2.map.IndoorLocation;
-import de.uvwxy.footpath2.map.IndoorLocationHistory;
+import de.uvwxy.footpath2.map.IndoorLocationList;
 import de.uvwxy.footpath2.tools.FootPathException;
 
 /**
@@ -33,7 +33,7 @@ public class BestFit extends MatchingAlgorithm {
 
 	boolean firstStep = false;
 
-	private IndoorLocationHistory returnedPositions = new IndoorLocationHistory();
+	private IndoorLocationList returnedPositions = new IndoorLocationList();
 
 	@Override
 	public void onStepUpdate(double bearing, double steplength, long timestamp, double estimatedStepLengthError,
@@ -240,7 +240,7 @@ public class BestFit extends MatchingAlgorithm {
 	}
 
 	@Deprecated
-	public IndoorLocationHistory _debug_getLocHist() {
+	public IndoorLocationList _debug_getLocHist() {
 		return returnedPositions;
 	}
 }
