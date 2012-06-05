@@ -8,8 +8,8 @@ package de.uvwxy.footpath2.map;
  */
 public class GraphEdge {
 	private static int ID = -1337;
-	private GraphNode node0;
-	private GraphNode node1;
+	private IndoorLocation node0;
+	private IndoorLocation node1;
 	private double len;
 	private double bearing;
 	private short wheelchair;
@@ -48,7 +48,7 @@ public class GraphEdge {
 	 * @param level the level of this edge
 	 * @param isIndoor true if is indoor
 	 */
-	public GraphEdge(GraphNode node0, GraphNode node1, double len, double compDir, short wheelchair, float level, boolean isIndoor) {
+	public GraphEdge(IndoorLocation node0, IndoorLocation node1, double len, double compDir, short wheelchair, float level, boolean isIndoor) {
 		this.node0 = node0;
 		this.node1 = node1;
 		this.len = len;
@@ -62,11 +62,11 @@ public class GraphEdge {
 		return bearing;
 	}
 	
-	public GraphNode getNode0() {
+	public IndoorLocation getNode0() {
 		return node0;
 	}
 	
-	public GraphNode getNode1() {
+	public IndoorLocation getNode1() {
 		return node1;
 	}
 	
@@ -102,11 +102,11 @@ public class GraphEdge {
 		this.bearing = compDir;
 	}
 	
-	public void setNode0(GraphNode node0) {
+	public void setNode0(IndoorLocation node0) {
 		this.node0 = node0;
 	}
 	
-	public void setNode1(GraphNode node1) {
+	public void setNode1(IndoorLocation node1) {
 		this.node1 = node1;
 	}
 	
@@ -147,7 +147,7 @@ public class GraphEdge {
 				|| this.node0.equals(edge.getNode1()) && this.node1.equals(edge.getNode0());
 	}
 	
-	public boolean contains(GraphNode node){
+	public boolean contains(IndoorLocation node){
 		return getNode0().equals(node) || getNode1().equals(node);
 	}
 	

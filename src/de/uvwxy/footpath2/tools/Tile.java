@@ -1,6 +1,7 @@
 package de.uvwxy.footpath2.tools;
 
 import android.graphics.Bitmap;
+import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.LatLonPos;
 
 /**
@@ -53,7 +54,7 @@ public class Tile {
 		this.bitmap = bitmap;
 	}
 
-	public LatLonPos getLatLonPosLeftTop() {
+	public IndoorLocation getLatLonPosLeftTop() {
 		// source: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 		double lon = 0.0;
 		double lat = 0.0;
@@ -61,10 +62,14 @@ public class Tile {
 		lon = x / n * 360.0 - 180.0;
 		double lat_rad = Math.atan(Math.sinh(Math.PI * (1.0 - 2.0 * y / n)));
 		lat = lat_rad * 180.0 / Math.PI;
-		return new LatLonPos(lat, lon, -1337);
+		IndoorLocation ret = new IndoorLocation("", "");
+		ret.setLatitude(lat);
+		ret.setLongitude(lon);
+		ret.setLevel(-1337);
+		return ret;
 	}
 
-	public LatLonPos getLatLonPosRightBottom() {
+	public IndoorLocation getLatLonPosRightBottom() {
 		// source: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 		double lon = 0.0;
 		double lat = 0.0;
@@ -72,6 +77,10 @@ public class Tile {
 		lon = (x + 1) / n * 360.0 - 180.0;
 		double lat_rad = Math.atan(Math.sinh(Math.PI * (1.0 - 2.0 * (y + 1) / n)));
 		lat = lat_rad * 180.0 / Math.PI;
-		return new LatLonPos(lat, lon, -1337);
+		IndoorLocation ret = new IndoorLocation("", "");
+		ret.setLatitude(lat);
+		ret.setLongitude(lon);
+		ret.setLevel(-1337);
+		return ret;
 	}
 }

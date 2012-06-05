@@ -19,6 +19,7 @@ import de.uvwxy.footpath.R;
 import de.uvwxy.footpath2.gui.Loader;
 import de.uvwxy.footpath2.map.GraphEdge;
 import de.uvwxy.footpath2.map.GraphNode;
+import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.LatLonPos;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.matching.NPConfig;
@@ -168,14 +169,14 @@ public abstract class Navigator extends Activity {
 		return naiveStairsWidth;
 	}
 
-	public GraphNode getLastSeenNode(NPConfig conf) {
+	public IndoorLocation getLastSeenNode(NPConfig conf) {
 		GraphEdge currentEdge = getCurrentEdge(conf);
 		GraphEdge previousEdge = getPreviousEdge(conf);
 		if (previousEdge == null) { // no previous edge, thus this is the first edge
 			return getRouteBegin();
 		}
 		// last seen node is node which is in current and previous edge
-		GraphNode ret = currentEdge.getNode0();
+		IndoorLocation ret = currentEdge.getNode0();
 		if (!previousEdge.contains(ret)) {
 			ret = currentEdge.getNode1();
 		}
@@ -217,33 +218,33 @@ public abstract class Navigator extends Activity {
 		return len;
 	}
 
-	public LatLonPos getPosition() {
+	public IndoorLocation getPosition() {
 		return getPosition(conf);
 	}
 
 	// estimated(?) position of user
-	public LatLonPos getPosition(NPConfig conf) {
-		LatLonPos ret = new LatLonPos();
-		GraphNode lastSeenNode = getLastSeenNode(conf);
+	public IndoorLocation getPosition(NPConfig conf) {
+		IndoorLocation ret = new IndoorLocation("", "");
+		IndoorLocation lastSeenNode = getLastSeenNode(conf);
 		GraphEdge currentEdge = getCurrentEdge(conf);
-		GraphNode nextNode = currentEdge.getNode0().equals(lastSeenNode) ? currentEdge.getNode1() : currentEdge
+		IndoorLocation nextNode = currentEdge.getNode0().equals(lastSeenNode) ? currentEdge.getNode1() : currentEdge
 				.getNode0();
 
 		// catch route end, return destination
 		if (conf.getNpPointer() >= navPathEdges.size()) {
-			GraphNode lastNode = this.getRouteEnd();
-			ret.setLat(lastNode.getLat());
-			ret.setLon(lastNode.getLon());
+			IndoorLocation lastNode = this.getRouteEnd();
+			ret.setLatitude(lastNode.getLatitude());
+			ret.setLongitude(lastNode.getLongitude());
 			ret.setLevel(lastNode.getLevel());
 			return ret;
 		}
 
 		ret.setLevel(lastSeenNode.getLevel());
-		ret.setLat(lastSeenNode.getLat());
-		ret.setLon(lastSeenNode.getLon());
+		ret.setLatitude(lastSeenNode.getLatitude());
+		ret.setLongitude(lastSeenNode.getLongitude());
 
 		// move pos into direction; amount of traveled m on edge
-		ret.moveIntoDirection(nextNode.getPos(), conf.getNpCurLen() / navPathEdges.get(conf.getNpPointer()).getLen());
+		ret.moveIntoDirection(nextNode, conf.getNpCurLen() / navPathEdges.get(conf.getNpPointer()).getLen());
 		return ret;
 	}
 
@@ -255,7 +256,7 @@ public abstract class Navigator extends Activity {
 		return navPathEdges.get(conf.getNpPointer() - 1);
 	}
 
-	public GraphNode getRouteBegin() {
+	public IndoorLocation getRouteBegin() {
 		if (nodeFromId == 0) {
 			return g.getNodeFromName(nodeFrom);
 		} else {
@@ -263,7 +264,7 @@ public abstract class Navigator extends Activity {
 		}
 	}
 
-	public GraphNode getRouteEnd() {
+	public IndoorLocation getRouteEnd() {
 		return g.getNodeFromName(nodeTo);
 	}
 
@@ -344,7 +345,7 @@ public abstract class Navigator extends Activity {
 
 		}
 
-		Stack<GraphNode> navPathStack;
+		Stack<IndoorLocation> navPathStack;
 
 		// Get location and destination
 
@@ -378,11 +379,11 @@ public abstract class Navigator extends Activity {
 			tempEdges = new LinkedList<GraphEdge>();
 			// Get first node. This is always the 'left' node, when considering
 			// a path going from left to right.
-			GraphNode node0 = navPathStack.pop();
+			IndoorLocation node0 = navPathStack.pop();
 
 			while (!navPathStack.isEmpty()) {
 				// Get 'right' node
-				GraphNode node1 = navPathStack.pop();
+				IndoorLocation node1 = navPathStack.pop();
 				// Get Edge connecting 'left' and 'right' nodes
 				GraphEdge origEdge = g.getEdge(node0, node1);
 
@@ -393,7 +394,8 @@ public abstract class Navigator extends Activity {
 				boolean indoor = origEdge.isIndoor();
 
 				// Direction has to be recalculated
-				double dir = g.getInitialBearing(node0.getLat(), node0.getLon(), node1.getLat(), node1.getLon());
+				double dir = g.getInitialBearing(node0.getLatitude(), node0.getLongitude(), node1.getLatitude(),
+						node1.getLongitude());
 
 				// Create new edge
 				GraphEdge tempEdge = new GraphEdge(node0, node1, len, dir, wheelchair, level, indoor);
@@ -488,17 +490,17 @@ public abstract class Navigator extends Activity {
 
 				if (log) {
 					for (GraphEdge e : navPathEdges) {
-						logger.logSimpleRoute(e.getNode0().getLat(), e.getNode0().getLon());
+						logger.logSimpleRoute(e.getNode0().getLatitude(), e.getNode0().getLongitude());
 					}
 					GraphEdge e = navPathEdges.get(navPathEdges.size() - 1);
-					logger.logSimpleRoute(e.getNode1().getLat(), e.getNode1().getLon());
+					logger.logSimpleRoute(e.getNode1().getLatitude(), e.getNode1().getLongitude());
 				}
 				if (log) {
 					for (GraphEdge e : tempEdges) {
-						logger.logRoute(e.getNode0().getLat(), e.getNode0().getLon());
+						logger.logRoute(e.getNode0().getLatitude(), e.getNode0().getLongitude());
 					}
 					GraphEdge e = tempEdges.get(tempEdges.size() - 1);
-					logger.logRoute(e.getNode1().getLat(), e.getNode1().getLon());
+					logger.logRoute(e.getNode1().getLatitude(), e.getNode1().getLongitude());
 				}
 
 			}

@@ -170,12 +170,12 @@ public class FootPath {
 			boolean outside) {
 		Log.i("FOOTPATH", "Trying to find path from " + location + " to " + destination);
 		IndoorLocationList ret = new IndoorLocationList();
-		Stack<GraphNode> buf = map.getShortestPath(location, destination, staircase, elevator, outside);
+		Stack<IndoorLocation> buf = map.getShortestPath(location, destination, staircase, elevator, outside);
 		if (buf != null) {
-			for (GraphNode n : buf) {
+			for (IndoorLocation n : buf) {
 				IndoorLocation x = new IndoorLocation(n.getName(), "FootPath");
-				x.setLatitude(n.getLat());
-				x.setLongitude(n.getLon());
+				x.setLatitude(n.getLatitude());
+				x.setLongitude(n.getLongitude());
 				ret.add(x);
 			}
 		}

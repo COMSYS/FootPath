@@ -39,6 +39,7 @@ import de.uvwxy.footpath2.gui.old.Calibrator;
 import de.uvwxy.footpath2.gui.old.NavigatorFlowPath;
 import de.uvwxy.footpath2.gui.old.NavigatorFootPath;
 import de.uvwxy.footpath2.map.GraphNode;
+import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.LatLonPos;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.tools.FileNameFilterFromStringArray;
@@ -174,12 +175,14 @@ public class Loader extends Activity {
 	LocationListener locationListener = new LocationListener() {
 		// Called when a new location is found by the GPS location provider.
 		public void onLocationChanged(Location location) {
-			GraphNode closestNode;
-			LatLonPos pos;
+			IndoorLocation closestNode;
+			IndoorLocation pos;
 			String nodeName;
 			longToast("GPS location found, searching for nearest node");
 			
-			pos = new LatLonPos(location.getLatitude(),location.getLongitude(),0);
+			pos = new IndoorLocation(location);
+			pos.setLevel(0);
+			
 			// Third parameter set to false, such that only outdoor nodes are accepted
 			closestNode = g.getClosestNodeToLatLonPos(pos, 0, false, 17);
 			

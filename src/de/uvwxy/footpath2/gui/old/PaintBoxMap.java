@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.util.Log;
 import de.uvwxy.footpath.R;
 import de.uvwxy.footpath2.map.GraphEdge;
+import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.LatLonPos;
 import de.uvwxy.footpath2.matching.Positioner;
 import de.uvwxy.footpath2.tools.PaintBox;
@@ -69,10 +70,10 @@ class PaintBoxMap extends PaintBox {
 		double lonMax = Double.NEGATIVE_INFINITY;
 		for (GraphEdge edge : edges) { // edges contain only edges from path
 										// but still, almost every node is searched twice ([a,b][b,c][c,d]...)
-			double n0lat = edge.getNode0().getLat();
-			double n1lat = edge.getNode1().getLat();
-			double n0lon = edge.getNode0().getLon();
-			double n1lon = edge.getNode1().getLon();
+			double n0lat = edge.getNode0().getLatitude();
+			double n1lat = edge.getNode1().getLatitude();
+			double n0lon = edge.getNode0().getLongitude();
+			double n1lon = edge.getNode1().getLongitude();
 
 			if (n0lat < latMin) // find minimum lat
 				latMin = n0lat;
@@ -193,7 +194,7 @@ class PaintBoxMap extends PaintBox {
 			runOnce = false;
 		}
 		double localScale = gScale;
-		LatLonPos pos = navigator.getPosition(); // get position
+		IndoorLocation pos = navigator.getPosition(); // get position
 
 		globalOffsetX = getWidth() / 2.0f - getPosX(pos, localScale); // center position to screen center
 		globalOffsetY = getHeight() / 2.0f - getPosY(pos, localScale); // center position to screen center
@@ -271,8 +272,8 @@ class PaintBoxMap extends PaintBox {
 	private void drawTiles(Canvas canvas, double localScale) {
 		for (int i = 0; i < tiles.length; i++) {
 			if (tiles[i] != null) {
-				LatLonPos lt = tiles[i].getLatLonPosLeftTop();
-				LatLonPos rb = tiles[i].getLatLonPosRightBottom();
+				IndoorLocation lt = tiles[i].getLatLonPosLeftTop();
+				IndoorLocation rb = tiles[i].getLatLonPosRightBottom();
 				float left = globalOffsetX + getPosX(lt, localScale);
 				float top = globalOffsetY + getPosY(lt, localScale);
 				float right = globalOffsetX + getPosX(rb, localScale);
@@ -289,36 +290,46 @@ class PaintBoxMap extends PaintBox {
 	private void drawPath(Canvas canvas, double localScale) {
 		if (edges.size() == 1) { // special case: only one edge
 			Paint wPaint = edges.get(0).getWheelchair() < 0 ? ToolBox.redPaint() : ToolBox.greenPaint();
-			canvas.drawLine(globalOffsetX + getPosX(edges.get(0).getNode0().getPos(), localScale), globalOffsetY
-					+ getPosY(edges.get(0).getNode0().getPos(), localScale),
-					globalOffsetX + getPosX(edges.get(0).getNode1().getPos(), localScale),
-					globalOffsetY + getPosY(edges.get(0).getNode1().getPos(), localScale), wPaint);
+			canvas.drawLine(globalOffsetX + getPosX(edges.get(0).getNode0(), localScale),
+					globalOffsetY + getPosY(edges.get(0).getNode0(), localScale),
+					globalOffsetX + getPosX(edges.get(0).getNode1(), localScale),
+					globalOffsetY + getPosY(edges.get(0).getNode1(), localScale), wPaint);
 			return;
 		}
 
 		// try to find node which is not part of next edge:
 		int oldNodeId = edges.get(0).getNode0().getId(); // set oldNodeId to node0
-		LatLonPos oldNodePos;
+		IndoorLocation oldNodePos;
 		if (oldNodeId == edges.get(1).getNode0().getId() // oldNodeId is in next edge
 				|| oldNodeId == edges.get(1).getNode1().getId()) {
 			oldNodeId = edges.get(0).getNode1().getId(); // set oldNodeId to other node
-			oldNodePos = new LatLonPos(edges.get(0).getNode1().getLat(), edges.get(0).getNode1().getLon(), edges.get(0)
-					.getNode1().getLevel());
+			oldNodePos = new IndoorLocation("", "");
+			oldNodePos.setLatitude(edges.get(0).getNode1().getLatitude());
+			oldNodePos.setLongitude(edges.get(0).getNode1().getLongitude());
+			oldNodePos.setLevel(edges.get(0).getNode1().getLevel());
 		} else {
-			oldNodePos = new LatLonPos(edges.get(0).getNode0().getLat(), // node is not in next edge (is first node)
-					edges.get(0).getNode0().getLon(), edges.get(0).getNode0().getLevel()); // only update lat/lon
+			oldNodePos = new IndoorLocation("", "");
+			oldNodePos.setLatitude(edges.get(0).getNode0().getLatitude());
+			oldNodePos.setLongitude(edges.get(0).getNode0().getLongitude());
+			oldNodePos.setLevel(edges.get(0).getNode0().getLevel());// node is not in next edge (is first node) only
+																	// update lat/lon
 		}
 
-		LatLonPos newNodePos;
+		IndoorLocation newNodePos;
 		for (int i = 0; i < edges.size(); i++) {
 			int node0id = edges.get(i).getNode0().getId();
 			if (oldNodeId == node0id) {
-				newNodePos = new LatLonPos(edges.get(i).getNode1().getLat(), edges.get(i).getNode1().getLon(), edges
-						.get(i).getNode1().getLevel());
+				newNodePos = new IndoorLocation("","");
+				newNodePos.setLatitude(edges.get(i).getNode1().getLatitude());
+				newNodePos.setLongitude(edges.get(i).getNode1().getLongitude());
+				newNodePos.setLevel(edges.get(i).getNode1().getLevel());
 				oldNodeId = edges.get(i).getNode1().getId();
 			} else {
-				newNodePos = new LatLonPos(edges.get(i).getNode0().getLat(), edges.get(i).getNode0().getLon(), edges
-						.get(i).getNode0().getLevel());
+				newNodePos = new IndoorLocation("","");
+				newNodePos.setLatitude(edges.get(i).getNode0().getLatitude());
+				newNodePos.setLongitude(edges.get(i).getNode0().getLongitude());
+				newNodePos.setLevel(edges.get(i).getNode0().getLevel());
+				
 				oldNodeId = edges.get(i).getNode0().getId();
 			}
 			// set color according to accessibility (wheelchairable -> green, else red)
@@ -346,11 +357,11 @@ class PaintBoxMap extends PaintBox {
 	float globalOffsetX = 0.0f; // in case we want to "move" path in x
 	float globalOffsetY = 0.0f; // in case we want to "move" path in y
 
-	private float getPosX(LatLonPos p, double localScale) {
+	private float getPosX(IndoorLocation p, double localScale) {
 		return mercatXToScreen(p.getMercatorX(), localScale);
 	}
 
-	private float getPosY(LatLonPos p, double localScale) {
+	private float getPosY(IndoorLocation p, double localScale) {
 		return mercatYToScreen(p.getMercatorY(), localScale);
 	}
 

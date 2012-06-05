@@ -2,9 +2,7 @@ package de.uvwxy.footpath2.gui.old;
 
 import android.os.Bundle;
 import android.util.Log;
-import de.uvwxy.footpath2.map.LatLonPos;
-import de.uvwxy.footpath2.movement.steps.StepDetectionImpl;
-import de.uvwxy.footpath2.tools.ToolBox;
+import de.uvwxy.footpath2.map.IndoorLocation;
 /**
  * 
  * @author Paul Smith
@@ -63,10 +61,10 @@ public class NavigatorFootPath extends Navigator {
 		Log.i("FOOTPATH", "posFirstFit: " + posFirstFit.getProgress());
 		if(log){
 			// Write location to file after detected step
-			LatLonPos bestPos = getPosition(confBestFit);
-			LatLonPos firstPos = getPosition(confFirstFit);
-			logger.logPosition(now_ms, bestPos.getLat(), bestPos.getLon(), posBestFit.getProgress()/this.navPathLen
-					, firstPos.getLat(), firstPos.getLon(), posFirstFit.getProgress()/this.navPathLen);
+			IndoorLocation bestPos = getPosition(confBestFit);
+			IndoorLocation firstPos = getPosition(confFirstFit);
+			logger.logPosition(now_ms, bestPos.getLatitude(), bestPos.getLongitude(), posBestFit.getProgress()/this.navPathLen
+					, firstPos.getLatitude(), firstPos.getLongitude(), posFirstFit.getProgress()/this.navPathLen);
 		}
 	}
 	
