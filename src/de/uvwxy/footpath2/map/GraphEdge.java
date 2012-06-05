@@ -66,34 +66,72 @@ public class GraphEdge {
 		return node0;
 	}
 	
+	public void setNode0(IndoorLocation node0) {
+		this.node0 = node0;
+	}
+
 	public IndoorLocation getNode1() {
 		return node1;
 	}
 	
+	public void setNode1(IndoorLocation node1) {
+		this.node1 = node1;
+	}
+
 	public double getLen() {
 		return len;
 	}
 	
+	public void setLen(double len) {
+		this.len = len;
+	}
+
 	public short getWheelchair() {
 		return wheelchair;
 	}
 	
+	public void setWheelchair(short wheelchair) {
+		this.wheelchair = wheelchair;
+	}
+
 	public boolean isStairs(){
 		return isStairs;
 	}
 	
+	public void setStairs(boolean isStairs) {
+		this.isStairs = isStairs;
+	}
+
 	public boolean isElevator(){
 		return isElevator;
 	}
 	
+	public void setElevator(boolean isElevator) {
+		this.isElevator = isElevator;
+	}
+
 	public int getSteps(){
 		return numSteps;
 	}
 	
+	public void setSteps(int numSteps){
+		this.numSteps = numSteps;
+		if(numSteps>0 || numSteps==-1)
+			this.setWheelchair((short)-1);//if steps, NO wheelchair
+	}
+
 	public float getLevel() {
 		return level;
 	}
 	
+	public void setLevel(float level) {
+		this.level = level;
+	}
+
+	public void setLevel(boolean isIndoor){
+		this.isIndoor = isIndoor;
+	}
+
 	public boolean isIndoor(){
 		return isIndoor;
 	}
@@ -102,44 +140,6 @@ public class GraphEdge {
 		this.bearing = compDir;
 	}
 	
-	public void setNode0(IndoorLocation node0) {
-		this.node0 = node0;
-	}
-	
-	public void setNode1(IndoorLocation node1) {
-		this.node1 = node1;
-	}
-	
-	public void setLen(double len) {
-		this.len = len;
-	}
-	
-	public void setWheelchair(short wheelchair) {
-		this.wheelchair = wheelchair;
-	}
-	
-	public void setStairs(boolean isStairs) {
-		this.isStairs = isStairs;
-	}
-	
-	public void setElevator(boolean isElevator) {
-		this.isElevator = isElevator;
-	}
-	
-	public void setSteps(int numSteps){
-		this.numSteps = numSteps;
-		if(numSteps>0 || numSteps==-1)
-			this.setWheelchair((short)-1);//if steps, NO wheelchair
-	}
-	
-	public void setLevel(float level) {
-		this.level = level;
-	}
-	
-	public void setLevel(boolean isIndoor){
-		this.isIndoor = isIndoor;
-	}
-
 	public boolean equals(GraphEdge edge){
 		if(edge == null)
 			return false;

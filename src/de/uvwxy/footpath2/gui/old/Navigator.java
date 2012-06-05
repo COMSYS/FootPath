@@ -18,9 +18,7 @@ import android.widget.ZoomControls;
 import de.uvwxy.footpath.R;
 import de.uvwxy.footpath2.gui.Loader;
 import de.uvwxy.footpath2.map.GraphEdge;
-import de.uvwxy.footpath2.map.GraphNode;
 import de.uvwxy.footpath2.map.IndoorLocation;
-import de.uvwxy.footpath2.map.LatLonPos;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.matching.NPConfig;
 import de.uvwxy.footpath2.matching.Positioner;
@@ -394,8 +392,7 @@ public abstract class Navigator extends Activity {
 				boolean indoor = origEdge.isIndoor();
 
 				// Direction has to be recalculated
-				double dir = g.getInitialBearing(node0.getLatitude(), node0.getLongitude(), node1.getLatitude(),
-						node1.getLongitude());
+				double dir = node0.bearingTo(node1);
 
 				// Create new edge
 				GraphEdge tempEdge = new GraphEdge(node0, node1, len, dir, wheelchair, level, indoor);

@@ -47,6 +47,7 @@ public class Map {
 		edges = new LinkedList<GraphEdge>();
 	}
 
+	
 	public synchronized boolean writeGraphToXMLFile(String filePath) throws IOException {
 
 		boolean mExternalStorageAvailable = false;
@@ -197,7 +198,7 @@ public class Map {
 			} // -> if ( tagNode.getNodeName().toString().equals("tag") )
 
 			// Create GraphNode:
-			IndoorLocation tempGraphNode = new IndoorLocation(name,"");
+			IndoorLocation tempGraphNode = new IndoorLocation(name, "");
 			tempGraphNode.setDoor(isDoor);
 			tempGraphNode.setId(id);
 			tempGraphNode.setIndoors(isIndoor);
@@ -205,7 +206,7 @@ public class Map {
 			tempGraphNode.setLevel(level);
 			tempGraphNode.setLongitude(lon);
 			tempGraphNode.setMergeId(merge_id);
-			//tempGraphNode.setName(name);
+			// tempGraphNode.setName(name);
 
 			allNodes.add(tempGraphNode);
 
@@ -343,10 +344,8 @@ public class Map {
 			IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
 			for (int i = 1; i <= way.getRefs().size() - 1; i++) {
 				IndoorLocation nextNode = getNode(allNodes, way.getRefs().get(i).intValue());
-				double len = getDistance(firstNode.getLatitude(), // get length between P1 and P2
-						firstNode.getLongitude(), nextNode.getLatitude(), nextNode.getLongitude());
-				double compDegree = getInitialBearing(firstNode.getLatitude(), // get initial bearing between P1 and P2
-						firstNode.getLongitude(), nextNode.getLatitude(), nextNode.getLongitude());
+				double len = firstNode.distanceTo(nextNode);
+				double compDegree = firstNode.bearingTo(nextNode);
 				GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, len, compDegree, wheelchair, level, indoor);
 				if (way.getSteps() > 0) { // make edge a staircase if steps_count was set correctly
 					tempEdge.setStairs(true);
@@ -389,8 +388,8 @@ public class Map {
 
 		boolean isOsmData = false; // flag to wait for osm data
 
-		IndoorLocation tempNode = new IndoorLocation("",""); // temporary node to be added to all nodes in file
-		IndoorLocation NULL_NODE = new IndoorLocation("nullnode",""); // 'NULL' node to point to, for dereferencing
+		IndoorLocation tempNode = new IndoorLocation("", ""); // temporary node to be added to all nodes in file
+		IndoorLocation NULL_NODE = new IndoorLocation("nullnode", ""); // 'NULL' node to point to, for dereferencing
 		GraphWay tempWay = new GraphWay(); // temporary way to be added to all nodes in file
 		GraphWay NULL_WAY = new GraphWay(); // 'NULL' node to point to, for dereferencing
 
@@ -412,7 +411,7 @@ public class Map {
 				} else {
 					int attributeCount = xrp.getAttributeCount();
 					if (xrp.getName().equals("node")) { // node
-						tempNode = new IndoorLocation("","");
+						tempNode = new IndoorLocation("", "");
 						for (int i = 0; i < attributeCount; i++) {
 							if (xrp.getAttributeName(i).equals("id")) {
 								tempNode.setId(xrp.getAttributeIntValue(i, 0)); // node.id
@@ -571,10 +570,8 @@ public class Map {
 			IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
 			for (int i = 1; i <= way.getRefs().size() - 1; i++) {
 				IndoorLocation nextNode = getNode(allNodes, way.getRefs().get(i).intValue());
-				double len = getDistance(firstNode.getLatitude(), // get length between P1 and P2
-						firstNode.getLongitude(), nextNode.getLatitude(), nextNode.getLongitude());
-				double compDegree = getInitialBearing(firstNode.getLatitude(), // get initial bearing between P1 and P2
-						firstNode.getLongitude(), nextNode.getLatitude(), nextNode.getLongitude());
+				double len = firstNode.distanceTo(nextNode);
+				double compDegree = firstNode.bearingTo(nextNode);
 				GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, len, compDegree, wheelchair, level, indoor);
 				if (way.getSteps() > 0) { // make edge a staircase if steps_count was set correctly
 					tempEdge.setStairs(true);
@@ -651,11 +648,11 @@ public class Map {
 		for (GraphEdge edge : edges) {
 			IndoorLocation n0 = edge.getNode0();
 			IndoorLocation n1 = edge.getNode1();
-			if (!n0.getLocEdges().contains(edge)) {
-				n0.getLocEdges().add(edge);
+			if (!n0.getEdges().contains(edge)) {
+				n0.getEdges().add(edge);
 			}
-			if (!n1.getLocEdges().contains(edge)) {
-				n1.getLocEdges().add(edge);
+			if (!n1.getEdges().contains(edge)) {
+				n1.getEdges().add(edge);
 			}
 		}
 	}
@@ -676,8 +673,8 @@ public class Map {
 
 	// Returns a stack of nodes, with the destination at the bottom using
 	// Dykstra's algorithm
-	public synchronized Stack<IndoorLocation > getShortestPath(IndoorLocation from, IndoorLocation to, boolean staircase,
-			boolean elevator, boolean outside) {
+	public synchronized Stack<IndoorLocation> getShortestPath(IndoorLocation from, IndoorLocation to,
+			boolean staircase, boolean elevator, boolean outside) {
 		if (from == null || to == null) {
 			return null;
 		}
@@ -685,7 +682,7 @@ public class Map {
 		Log.i("FOOTPATH", "Looking up path from " + from.getName() + " to " + to.getName());
 
 		int remaining_nodes = array_nodes_by_id.length;
-		IndoorLocation[] previous = new IndoorLocation [array_nodes_by_id.length];
+		IndoorLocation[] previous = new IndoorLocation[array_nodes_by_id.length];
 		double[] dist = new double[array_nodes_by_id.length];
 		boolean[] visited = new boolean[array_nodes_by_id.length];
 
@@ -734,7 +731,7 @@ public class Map {
 			} else {
 				remaining_nodes--;
 			}
-			for (IndoorLocation  v : nOuIq) {
+			for (IndoorLocation v : nOuIq) {
 				double dist_alt = dist[u_i] + u.distanceTo(v);
 				int v_i = getNodePosInIdArray(v);
 				if (dist_alt < dist[v_i]) {
@@ -749,11 +746,11 @@ public class Map {
 	}
 
 	// Returns all neighbors of given node from a given subset (list) of nodes in this graph
-	private LinkedList<IndoorLocation> getNeighbours(boolean[] visited, IndoorLocation  node, boolean staircase,
+	private LinkedList<IndoorLocation> getNeighbours(boolean[] visited, IndoorLocation node, boolean staircase,
 			boolean elevator, boolean outside) {
 
 		LinkedList<IndoorLocation> ret = new LinkedList<IndoorLocation>();
-		for (GraphEdge edge : node.getLocEdges()) { // check all edges if they contain node
+		for (GraphEdge edge : node.getEdges()) { // check all edges if they contain node
 			if (edge.isStairs() && !staircase) { // edge has steps, but not
 													// allowed -> skip
 				continue;
@@ -877,7 +874,7 @@ public class Map {
 	// returns the edge containing nodes a and b
 	public synchronized GraphEdge getEdge(IndoorLocation a, IndoorLocation b) {
 		GraphEdge ret = null;
-		for (GraphEdge edge : a.getLocEdges()) { // return edge if
+		for (GraphEdge edge : a.getEdges()) { // return edge if
 			if (edge.getNode0().equals(a) && edge.getNode1().equals(b)) { // node0=a, node1=b
 				ret = edge; // or
 			} else if (edge.getNode1().equals(a) && edge.getNode0().equals(b)) { // node0=b, node1=a
@@ -885,65 +882,6 @@ public class Map {
 			} // else null
 		}
 		return ret;
-	}
-
-	/**
-	 * Returns the distance between two nodes
-	 * 
-	 * @param node_0
-	 *            first node
-	 * @param node_1
-	 *            second node
-	 * @return the distance in meters
-	 */
-	public synchronized double getDistance(LatLonPos pos_0, GraphNode node_1) {
-		return getDistance(pos_0.getLat(), pos_0.getLon(), node_1.getLat(), node_1.getLon());
-	}
-
-	/**
-	 * Returns the distance between two points given in latitude/longitude
-	 * 
-	 * @param lat_1
-	 *            latitude of first point
-	 * @param lon_1
-	 *            longitude of first point
-	 * @param lat_2
-	 *            latitude of second point
-	 * @param lon_2
-	 *            longitude of second point
-	 * @return the distance in meters
-	 */
-	public synchronized double getDistance(double lat_1, double lon_1, double lat_2, double lon_2) {
-		// source: http://www.movable-type.co.uk/scripts/latlong.html
-		double dLon = lon_2 - lon_1;
-		double dLat = lat_2 - lat_1;
-		lat_1 = Math.toRadians(lat_1);
-		lon_1 = Math.toRadians(lon_1);
-		lat_2 = Math.toRadians(lat_2);
-		lon_2 = Math.toRadians(lon_2);
-		dLon = Math.toRadians(dLon);
-		dLat = Math.toRadians(dLat);
-
-		double r = 6378137; // km
-		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat_1) * Math.cos(lat_2) * Math.sin(dLon / 2)
-				* Math.sin(dLon / 2);
-		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-		return c * r;
-	}
-
-	public synchronized double getInitialBearing(double lat_1, double lon_1, double lat_2, double lon_2) {
-		// source: http://www.movable-type.co.uk/scripts/latlong.html
-		double dLon = lon_2 - lon_1;
-		lat_1 = Math.toRadians(lat_1);
-		lon_1 = Math.toRadians(lon_1);
-		lat_2 = Math.toRadians(lat_2);
-		lon_2 = Math.toRadians(lon_2);
-		dLon = Math.toRadians(dLon);
-		double y = Math.sin(dLon) * Math.cos(lat_2);
-		double x = Math.cos(lat_1) * Math.sin(lat_2) - Math.sin(lat_1) * Math.cos(lat_2) * Math.cos(dLon);
-		double b = Math.atan2(y, x);
-		b = Math.toDegrees(b);
-		return (b < 0) ? b + 360.0 : b;
 	}
 
 	// returns the node with the given name, binary search

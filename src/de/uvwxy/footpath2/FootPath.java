@@ -15,7 +15,6 @@ import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.util.Log;
 import de.uvwxy.footpath.Rev;
-import de.uvwxy.footpath2.map.GraphNode;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.IndoorLocationList;
 import de.uvwxy.footpath2.map.Map;

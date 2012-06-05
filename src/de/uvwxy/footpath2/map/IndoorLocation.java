@@ -86,7 +86,7 @@ public class IndoorLocation extends Location {
 		this.isInDoors = isInDoors;
 	}
 
-	public LinkedList<GraphEdge> getLocEdges() {
+	public LinkedList<GraphEdge> getEdges() {
 		return loc_edges;
 	}
 
@@ -125,6 +125,7 @@ public class IndoorLocation extends Location {
 		setLongitude(getLongitude() + (nextNode.getLongitude() - getLongitude()) * factor);
 	}
 
+	
 	public String toString() {
 		String ret = "\nNode(" + this.id + "): ";
 		ret += name != null ? name : "N/A";
@@ -138,6 +139,10 @@ public class IndoorLocation extends Location {
 		return ret;
 	}
 
+	/**
+	 * This function is used to export a created graph to XML
+	 * @return an XML representation of this Location
+	 */
 	public String toXML() {
 		String ret = "\n  <node id='" + this.id + "' action='modify' visible='true' ";
 		ret += "lat='" + this.getLatitude() + "' lon='" + this.getLongitude() + "'>";
