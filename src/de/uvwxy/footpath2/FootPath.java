@@ -19,6 +19,7 @@ import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.IndoorLocationList;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.matching.BestFit;
+import de.uvwxy.footpath2.matching.FirstFit;
 import de.uvwxy.footpath2.matching.MatchingAlgorithm;
 import de.uvwxy.footpath2.movement.MovementDetection;
 import de.uvwxy.footpath2.movement.SensorEventDistributor;
@@ -145,6 +146,9 @@ public class FootPath {
 			movementDetection.registerOnStepListener(matchingAlgorithm);
 			break;
 		case MATCHING_FIRST_FIT:
+			matchingAlgorithm = new FirstFit();
+			Log.i("FOOTPATH", "Registering FirstFit for movement detection");
+			movementDetection.registerOnStepListener(matchingAlgorithm);
 			break;
 		case MATCHING_MULTI_FIT:
 			break;
