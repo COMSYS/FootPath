@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version='0.6' upload='true' generator='JOSM'>
+  <node id='-47' action='modify' visible='true' lat='51.51058491179744' lon='-0.16230887886865739'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='0' />
+    <tag k='name' v='Stop' />
+  </node>
+  <node id='-43' action='modify' visible='true' lat='51.51044655252669' lon='-0.16172187033503604'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='0' />
+  </node>
+  <node id='-41' action='modify' visible='true' lat='51.510197276085826' lon='-0.16064522870529555'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='0' />
+  </node>
+  <node id='-39' action='modify' visible='true' lat='51.51072098372827' lon='-0.1602630760449098'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='0' />
+  </node>
+  <node id='-37' action='modify' visible='true' lat='51.510622646071084' lon='-0.16181005941050972'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='0' />
+  </node>
+  <node id='-35' action='modify' visible='true' lat='51.51088564165571' lon='-0.16192029575485173'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='0' />
+  </node>
+  <node id='-34' action='modify' visible='true' lat='51.51058834218725' lon='-0.1623244956841058'>
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='0' />
+    <tag k='name' v='Start' />
+  </node>
+  <way id='-36' action='modify' visible='true'>
+    <nd ref='-34' />
+    <nd ref='-35' />
+    <nd ref='-37' />
+    <nd ref='-39' />
+    <nd ref='-41' />
+    <nd ref='-43' />
+    <nd ref='-47' />
+    <tag k='indoor' v='yes' />
+    <tag k='level' v='0' />
+    <tag k='wheelchair' v='yes' />
+  </way>
+</osm>

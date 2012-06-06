@@ -5,6 +5,7 @@ import de.uvwxy.footpath2.map.IndoorLocation;
 
 /**
  * This is a class to maintain a tile. The tile is stored in a bitmap.
+ * 
  * @author Paul Smith
  * 
  */
@@ -54,32 +55,26 @@ public class Tile {
 	}
 
 	public IndoorLocation getLatLonPosLeftTop() {
-		// source: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
-		double lon = 0.0;
-		double lat = 0.0;
-		double n = Math.pow(2, zoomlevel);
-		lon = x / n * 360.0 - 180.0;
-		double lat_rad = Math.atan(Math.sinh(Math.PI * (1.0 - 2.0 * y / n)));
-		lat = lat_rad * 180.0 / Math.PI;
-		IndoorLocation ret = new IndoorLocation("", "");
-		ret.setLatitude(lat);
-		ret.setLongitude(lon);
-		ret.setLevel(-1337);
-		return ret;
+		return tileToLoc(x,y,zoomlevel);
 	}
 
 	public IndoorLocation getLatLonPosRightBottom() {
-		// source: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
-		double lon = 0.0;
-		double lat = 0.0;
-		double n = Math.pow(2, zoomlevel);
-		lon = (x + 1) / n * 360.0 - 180.0;
-		double lat_rad = Math.atan(Math.sinh(Math.PI * (1.0 - 2.0 * (y + 1) / n)));
-		lat = lat_rad * 180.0 / Math.PI;
-		IndoorLocation ret = new IndoorLocation("", "");
-		ret.setLatitude(lat);
-		ret.setLongitude(lon);
-		ret.setLevel(-1337);
-		return ret;
+		return tileToLoc(x+1,y+1,zoomlevel);
+	}
+
+	private IndoorLocation tileToLoc(final int x, final int y, final int zoom) {
+		IndoorLocation loc = new IndoorLocation("LeftTop","");
+		loc.setLatitude(tile2lat(y,zoom));
+		loc.setLongitude(tile2lon(x,zoom));
+		return loc;
+	}
+
+	static double tile2lon(int x, int z) {
+		return x / Math.pow(2.0, z) * 360.0 - 180;
+	}
+
+	static double tile2lat(int y, int z) {
+		double n = Math.PI - (2.0 * Math.PI * y) / Math.pow(2.0, z);
+		return Math.toDegrees(Math.atan(Math.sinh(n)));
 	}
 }
