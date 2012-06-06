@@ -79,12 +79,14 @@ public class TileLoaderAndPainter implements DrawToCanvas {
 	 */
 	public void _c_loadTiles(int zoomlevel) {
 		this.zoomlevel = zoomlevel;
+		new DownloadTilesTask().execute();
 	}
 
 	/**
 	 * To avoid android.os.NetworkOnMainThreadException
+	 * 
 	 * @author Paul Smith, code@uvwxy.de: Jun 6, 2012
-	 *
+	 * 
 	 */
 	private class DownloadTilesTask extends AsyncTask<URL, Integer, Long> {
 		protected Long doInBackground(URL... urls) {
@@ -202,17 +204,22 @@ public class TileLoaderAndPainter implements DrawToCanvas {
 	@Override
 	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeter,
 			Paint pLine, Paint pDots) {
-		for (int i = 0; i < tiles.length; i++) {
-			if (tiles[i] != null) {
-				int[] iLT = GeoUtils.convertToPixelLocation(tiles[i].getLatLonPosLeftTop(), center, pixelsPerMeter);
-				int[] iRB = GeoUtils.convertToPixelLocation(tiles[i].getLatLonPosRightBottom(), center, pixelsPerMeter);
+		if (tiles != null) {
+			for (int i = 0; i < tiles.length; i++) {
+				if (tiles[i] != null) {
+					int[] iLT = GeoUtils.convertToPixelLocation(tiles[i].getLatLonPosLeftTop(), center, pixelsPerMeter);
+					int[] iRB = GeoUtils.convertToPixelLocation(tiles[i].getLatLonPosRightBottom(), center,
+							pixelsPerMeter);
 
-				RectF destRect = new RectF(iLT[0], iLT[1], iRB[0], iRB[1]);
+					RectF destRect = new RectF(iLT[0], iLT[1], iRB[0], iRB[1]);
 
-				if (tiles[i].getBitmap() != null) {
-					canvas.drawBitmap(tiles[i].getBitmap(), null, destRect, null);
+					if (tiles[i].getBitmap() != null) {
+						canvas.drawBitmap(tiles[i].getBitmap(), null, destRect, null);
+					}
 				}
 			}
+		} else {
+			// TODO: draw empty tile symbol?
 		}
 	}
 }
