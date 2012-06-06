@@ -180,7 +180,8 @@ public class FootPath {
 				IndoorLocation x = new IndoorLocation(n.getName(), "FootPath");
 				x.setLatitude(n.getLatitude());
 				x.setLongitude(n.getLongitude());
-				ret.add(x);
+				// Note this reverses the stack, which is from destination to target:
+				ret.addFirst(x);
 			}
 		}
 		return ret;
