@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import de.uvwxy.footpath2.map.IndoorLocation;
 
 /**
- * 
+ * This is a class to maintain a tile. The tile is stored in a bitmap.
  * @author Paul Smith
  * 
  */
