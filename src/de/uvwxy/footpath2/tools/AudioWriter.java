@@ -38,7 +38,7 @@ public class AudioWriter {
 	 */
 	public AudioWriter(String sub_directory, String fileName) {
 		File dir = new File(Environment.getExternalStorageDirectory(),
-				NavigatorFootPath.LOG_DIR + sub_directory);
+				"routelog/" + sub_directory);
 		dir.mkdir();
 		this.filePath = dir.getAbsolutePath() + "/" + fileName;
 	}

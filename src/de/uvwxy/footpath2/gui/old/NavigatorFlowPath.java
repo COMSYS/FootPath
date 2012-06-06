@@ -37,7 +37,8 @@ public class NavigatorFlowPath extends Navigator implements
 		public void onClick(View view) {
 			if (view.equals(btnStartNav)) {
 				if (!fpOk) {
-					fpOk = flowPathInterface.startFlowpath(sh01);
+					// TODO: Fix this: SurfaceHolder initialization
+					//fpOk = flowPathInterface.startFlowpath(sh01);
 					btnStartNav.setText("Stop");
 				} else {
 					flowPathInterface.stopFlowPath();
@@ -75,7 +76,7 @@ public class NavigatorFlowPath extends Navigator implements
 //		stepDetection = new StepDetection(this, this, a, peak, step_timeout_ms);
 
 		flowPathInterface.addMVDTrigger(this);
-		setNavigating(true);
+		//setNavigating(true);
 	}
 
 	/**
@@ -189,7 +190,7 @@ public class NavigatorFlowPath extends Navigator implements
 	@Override
 	public void processMVData(long now_ms, float[][][] mvds) {
 		long tsNow = System.currentTimeMillis();
-		totalStepsWalked++;
+		//totalStepsWalked++;
 
 		mvdHeatMap(mvds, ++hmPtr);
 
@@ -210,14 +211,15 @@ public class NavigatorFlowPath extends Navigator implements
 		} else if (lastSpeeds[0]/numSpeeds >= 3 && lastSpeeds[2]/numSpeeds <= 0 && (tsNow - tsLastMove > STEPMAX)) {
 			// moving "fast"
 			
-			posBestFit.addStep(compassValue);
-			posFirstFit.addStep(compassValue);
-			posBestFit.addStep(compassValue);
-			posFirstFit.addStep(compassValue);
+			// TODO: fixt this: trigger steps:
+//			posBestFit.addStep(compassValue);
+//			posFirstFit.addStep(compassValue);
+//			posBestFit.addStep(compassValue);
+//			posFirstFit.addStep(compassValue);
 
-			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress() + " "
-					+ (tsNow - tsLastMove));
-			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
+//			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress() + " "
+//					+ (tsNow - tsLastMove));
+//			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
 
 			tsLastMove = tsNow;
 			numSpeeds = 0;
@@ -226,12 +228,15 @@ public class NavigatorFlowPath extends Navigator implements
 			lastSpeeds[2] = 0;
 		} else if ((tsNow - tsLastMove > STEPMAX)) {
 			// moving slow
-			posBestFit.addStep(compassValue);
-			posFirstFit.addStep(compassValue);
+			
+			// TODO: fix this: trigger steps:
+//			posBestFit.addStep(compassValue);
+//			posFirstFit.addStep(compassValue);
 
-			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress() + " "
-					+ (tsNow - tsLastMove));
-			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
+//			Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress() + " "
+//					+ (tsNow - tsLastMove));
+//			Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
+			
 			tsLastMove = tsNow;
 			numSpeeds = 0;
 			lastSpeeds[0] = 0;

@@ -14,17 +14,14 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Environment;
 import android.util.Log;
-import de.uvwxy.footpath.R;
 import de.uvwxy.footpath2.map.GraphEdge;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.LatLonPos;
-import de.uvwxy.footpath2.matching.Positioner;
 import de.uvwxy.footpath2.tools.PaintBox;
 import de.uvwxy.footpath2.tools.Tile;
 import de.uvwxy.footpath2.tools.ToolBox;
@@ -184,89 +181,89 @@ class PaintBoxMap extends PaintBox {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		if (runOnce) {
-			edges = this.navigator.getNavPathEdges();
-			setBoundaries();
-			tiles = loadTiles(18, lbBound, rtBound);
-			arrow = BitmapFactory.decodeResource(getResources(), R.drawable.arrow);
-			arrowred = BitmapFactory.decodeResource(getResources(), R.drawable.arrowred);
-			stairs = BitmapFactory.decodeResource(getResources(), R.drawable.stairs);
-			runOnce = false;
-		}
-		double localScale = gScale;
-		IndoorLocation pos = navigator.getPosition(); // get position
-
-		globalOffsetX = getWidth() / 2.0f - getPosX(pos, localScale); // center position to screen center
-		globalOffsetY = getHeight() / 2.0f - getPosY(pos, localScale); // center position to screen center
-
-		canvas.drawColor(Color.BLACK); // black background
-		drawTiles(canvas, localScale); // draw map
-		this.drawPath(canvas, localScale); // draw route
-
-		// draw arrow.png to the screen (user position indicator)
-		if (Positioner
-				.isInRange(navigator.getCompassValue(), navigator.getNavPathDir(), navigator.getAcceptanceWidth())) {
-			m.reset();
-			m.setRotate((float) (navigator.getCompassValue()), arrow.getWidth() / 2.0f, arrow.getHeight() / 2.0f);
-			m.postTranslate(globalOffsetX + getPosX(pos, localScale) - arrow.getWidth() / 2.0f, globalOffsetY
-					+ getPosY(pos, localScale) - arrow.getHeight() / 2.0f);
-			canvas.drawBitmap(arrow, m, null); // draw arrow.png to the screen (user position indicator)
-		} else {
-			m.reset();
-			m.setRotate((float) (navigator.getNavPathDir()), arrow.getWidth() / 2.0f, arrow.getHeight() / 2.0f);
-			m.postTranslate(globalOffsetX + getPosX(pos, localScale) - arrow.getWidth() / 2.0f, globalOffsetY
-					+ getPosY(pos, localScale) - arrow.getHeight() / 2.0f);
-			canvas.drawBitmap(arrow, m, null);
-
-			m.reset();
-			m.setRotate((float) (navigator.getCompassValue()), arrow.getWidth() / 2.0f, arrow.getHeight() / 2.0f);
-			m.postTranslate(globalOffsetX + getPosX(pos, localScale) - arrow.getWidth() / 2.0f, globalOffsetY
-					+ getPosY(pos, localScale) - arrow.getHeight() / 2.0f);
-			canvas.drawBitmap(arrowred, m, null); // draw arrowred.png to the screen, meaning wrong direction
-		}
-
-		// draw additional text + background (readability)
-		canvas.drawRect(0, 0, getWidth(), 148, ToolBox.myPaint(1, Color.BLACK, 128));
-		// check if route end reached
-		if (navigator.getNavPathEdgeLenLeft() != -1) {
-			// draw information
-			canvas.drawText("Distance: " + ToolBox.tdp(navigator.getNavPathLen() - navigator.getNavPathLenLeft())
-					+ "m of " + ToolBox.tdp(navigator.getNavPathLen()) + "m", 10, 42, ToolBox.greenPaint(32.0f));
-
-			String nextPath = "";
-			switch (navigator.getNextTurn()) {
-			case -1:
-				nextPath = "turn left";
-				break;
-			case 0:
-				nextPath = "straight on";
-				break;
-			case 1:
-				nextPath = "turn right";
-				break;
-			}
-			canvas.drawText("Go " + ToolBox.tdp(navigator.getNavPathEdgeLenLeft()) + "m then " + nextPath, 10, 74,
-					ToolBox.greenPaint(32.0f));
-			Paint p = ToolBox.greenPaint(32.0f);
-			if (!Positioner.isInRange(navigator.getNavPathDir(), navigator.getCompassValue(),
-					navigator.getAcceptanceWidth())) {
-				p = ToolBox.redPaint(32.0f);
-			}
-			canvas.drawText(
-					"Bearing: " + ToolBox.tdp(navigator.getCompassValue()) + "/"
-							+ (ToolBox.tdp(navigator.getNavPathDir())), 10, 106, p);
-			// canvas.drawText(
-			// "Variances: " + ToolBox.tdp(navigator.getVarianceOfX()) + "/" + ToolBox.tdp(navigator.getVarianceOfY())
-			// + "/" + ToolBox.tdp(navigator.getVarianceOfZ()), 10, 138, ToolBox.greenPaint(32.0f));
-			canvas.drawText(
-					"Est. step length: " + ToolBox.tdp(navigator.getEstimatedStepLength()) + " vs "
-							+ ToolBox.tdp(navigator.getStepLengthInMeters()) + ", " + navigator.getTotalStepsWalked(),
-					10, 138, ToolBox.greenPaint(32.0f));
-
-		} else {
-			canvas.drawText("Destination ( " + navigator.getRouteEnd().getName() + ") reached", 10, 32,
-					ToolBox.redPaint(32.0f));
-		}
+//		if (runOnce) {
+//			edges = this.navigator.getNavPathEdges();
+//			setBoundaries();
+//			tiles = loadTiles(18, lbBound, rtBound);
+//			arrow = BitmapFactory.decodeResource(getResources(), R.drawable.arrow);
+//			arrowred = BitmapFactory.decodeResource(getResources(), R.drawable.arrowred);
+//			stairs = BitmapFactory.decodeResource(getResources(), R.drawable.stairs);
+//			runOnce = false;
+//		}
+//		double localScale = gScale;
+//		IndoorLocation pos = navigator.getPosition(); // get position
+//
+//		globalOffsetX = getWidth() / 2.0f - getPosX(pos, localScale); // center position to screen center
+//		globalOffsetY = getHeight() / 2.0f - getPosY(pos, localScale); // center position to screen center
+//
+//		canvas.drawColor(Color.BLACK); // black background
+//		drawTiles(canvas, localScale); // draw map
+//		this.drawPath(canvas, localScale); // draw route
+//
+//		// draw arrow.png to the screen (user position indicator)
+//		if (Positioner
+//				.isInRange(navigator.getCompassValue(), navigator.getNavPathDir(), navigator.getAcceptanceWidth())) {
+//			m.reset();
+//			m.setRotate((float) (navigator.getCompassValue()), arrow.getWidth() / 2.0f, arrow.getHeight() / 2.0f);
+//			m.postTranslate(globalOffsetX + getPosX(pos, localScale) - arrow.getWidth() / 2.0f, globalOffsetY
+//					+ getPosY(pos, localScale) - arrow.getHeight() / 2.0f);
+//			canvas.drawBitmap(arrow, m, null); // draw arrow.png to the screen (user position indicator)
+//		} else {
+//			m.reset();
+//			m.setRotate((float) (navigator.getNavPathDir()), arrow.getWidth() / 2.0f, arrow.getHeight() / 2.0f);
+//			m.postTranslate(globalOffsetX + getPosX(pos, localScale) - arrow.getWidth() / 2.0f, globalOffsetY
+//					+ getPosY(pos, localScale) - arrow.getHeight() / 2.0f);
+//			canvas.drawBitmap(arrow, m, null);
+//
+//			m.reset();
+//			m.setRotate((float) (navigator.getCompassValue()), arrow.getWidth() / 2.0f, arrow.getHeight() / 2.0f);
+//			m.postTranslate(globalOffsetX + getPosX(pos, localScale) - arrow.getWidth() / 2.0f, globalOffsetY
+//					+ getPosY(pos, localScale) - arrow.getHeight() / 2.0f);
+//			canvas.drawBitmap(arrowred, m, null); // draw arrowred.png to the screen, meaning wrong direction
+//		}
+//
+//		// draw additional text + background (readability)
+//		canvas.drawRect(0, 0, getWidth(), 148, ToolBox.myPaint(1, Color.BLACK, 128));
+//		// check if route end reached
+//		if (navigator.getNavPathEdgeLenLeft() != -1) {
+//			// draw information
+//			canvas.drawText("Distance: " + ToolBox.tdp(navigator.getNavPathLen() - navigator.getNavPathLenLeft())
+//					+ "m of " + ToolBox.tdp(navigator.getNavPathLen()) + "m", 10, 42, ToolBox.greenPaint(32.0f));
+//
+//			String nextPath = "";
+//			switch (navigator.getNextTurn()) {
+//			case -1:
+//				nextPath = "turn left";
+//				break;
+//			case 0:
+//				nextPath = "straight on";
+//				break;
+//			case 1:
+//				nextPath = "turn right";
+//				break;
+//			}
+//			canvas.drawText("Go " + ToolBox.tdp(navigator.getNavPathEdgeLenLeft()) + "m then " + nextPath, 10, 74,
+//					ToolBox.greenPaint(32.0f));
+//			Paint p = ToolBox.greenPaint(32.0f);
+//			if (!Positioner.isInRange(navigator.getNavPathDir(), navigator.getCompassValue(),
+//					navigator.getAcceptanceWidth())) {
+//				p = ToolBox.redPaint(32.0f);
+//			}
+//			canvas.drawText(
+//					"Bearing: " + ToolBox.tdp(navigator.getCompassValue()) + "/"
+//							+ (ToolBox.tdp(navigator.getNavPathDir())), 10, 106, p);
+//			// canvas.drawText(
+//			// "Variances: " + ToolBox.tdp(navigator.getVarianceOfX()) + "/" + ToolBox.tdp(navigator.getVarianceOfY())
+//			// + "/" + ToolBox.tdp(navigator.getVarianceOfZ()), 10, 138, ToolBox.greenPaint(32.0f));
+//			canvas.drawText(
+//					"Est. step length: " + ToolBox.tdp(navigator.getEstimatedStepLength()) + " vs "
+//							+ ToolBox.tdp(navigator.getStepLengthInMeters()) + ", " + navigator.getTotalStepsWalked(),
+//					10, 138, ToolBox.greenPaint(32.0f));
+//
+//		} else {
+//			canvas.drawText("Destination ( " + navigator.getRouteEnd().getName() + ") reached", 10, 32,
+//					ToolBox.redPaint(32.0f));
+//		}
 	}
 
 	private void drawTiles(Canvas canvas, double localScale) {
