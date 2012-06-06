@@ -2,7 +2,6 @@ package de.uvwxy.footpath2.tools;
 
 import android.graphics.Bitmap;
 import de.uvwxy.footpath2.map.IndoorLocation;
-import de.uvwxy.footpath2.map.LatLonPos;
 
 /**
  * 

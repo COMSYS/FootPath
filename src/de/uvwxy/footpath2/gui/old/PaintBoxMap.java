@@ -21,7 +21,6 @@ import android.os.Environment;
 import android.util.Log;
 import de.uvwxy.footpath2.map.GraphEdge;
 import de.uvwxy.footpath2.map.IndoorLocation;
-import de.uvwxy.footpath2.map.LatLonPos;
 import de.uvwxy.footpath2.tools.PaintBox;
 import de.uvwxy.footpath2.tools.Tile;
 import de.uvwxy.footpath2.tools.ToolBox;
@@ -40,27 +39,27 @@ class PaintBoxMap extends PaintBox {
 	private Bitmap stairs; // icon to show stairs on map
 
 	private final Context context;
-	private final Navigator navigator; // object to get data from (location, bearing,..)
 
 	private LinkedList<GraphEdge> edges; // all edges on the path, in right order
-	private LatLonPos lbBound; // left bottom position of bounding box (lat/lon)
-	private LatLonPos rtBound; // rigt top position of bounding box (lat/lon)
+	private IndoorLocation lbBound; // left bottom position of bounding box (lat/lon)
+	private IndoorLocation rtBound; // rigt top position of bounding box (lat/lon)
 
 	private float gScale = 1.0f; // global scaling, pressing the zoom buttons will change this
 	private final float scaleFactor = 0.6f; // value added/removed when changing zoom level
 
 	private boolean runOnce = true; // needed to create/load resources once
 
-	public PaintBoxMap(Context context, Navigator navigator) {
+	public PaintBoxMap(Context context) {
 		super(context);
 		this.context = context;
-		this.navigator = navigator;
 		// Load saved zoom level
 		this.gScale = context.getSharedPreferences(MAP_SETTINGS, 0).getFloat("gScale", 1.0f);
 	}
 
-	// create lbBound and rtBound
-	private void setBoundaries() {
+	/**
+	 * Call this function to set lbBound and rtBound.
+	 */
+	private void _a_setBoundaries() {
 		double latMin = Double.POSITIVE_INFINITY;
 		double latMax = Double.NEGATIVE_INFINITY;
 		double lonMin = Double.POSITIVE_INFINITY;
@@ -91,19 +90,24 @@ class PaintBoxMap extends PaintBox {
 				lonMax = n1lon;
 		}
 
-		lbBound = new LatLonPos(latMin, lonMin, -1337);
-		rtBound = new LatLonPos(latMax, lonMax, -1337);
+		lbBound = new IndoorLocation("left,bottom","");
+		lbBound.setLatitude(latMin);
+		lbBound.setLongitude(lonMin);
+		
+		rtBound = new IndoorLocation("right,top","");
+		rtBound.setLatitude(latMax);
+		rtBound.setLongitude(lonMax);
 	}
 
 	// load tiles for given zoom level, from sdcard or http
-	private Tile[] loadTiles(int zoomlevel, LatLonPos lbBoundary, LatLonPos rtBoundary) {
+	private Tile[] _b_loadTiles(int zoomlevel, IndoorLocation lbBoundary, IndoorLocation rtBoundary) {
 		// source: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 
 		// find out which tiles to get
-		int x0 = getTileX(lbBoundary.getLon(), zoomlevel); // point 0 left top
-		int y0 = getTileY(rtBoundary.getLat(), zoomlevel);
-		int x1 = getTileX(rtBoundary.getLon(), zoomlevel); // point 1 right top
-		int y2 = getTileY(lbBoundary.getLat(), zoomlevel); // point 2 left bottom
+		int x0 = getTileX(lbBoundary.getLongitude(), zoomlevel); // point 0 left top
+		int y0 = getTileY(rtBoundary.getLatitude(), zoomlevel);
+		int x1 = getTileX(rtBoundary.getLongitude(), zoomlevel); // point 1 right top
+		int y2 = getTileY(lbBoundary.getLatitude(), zoomlevel); // point 2 left bottom
 
 		int diffX = x1 - x0;
 		int diffY = y2 - y0;

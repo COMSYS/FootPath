@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import android.util.Log;
 import de.uvwxy.footpath2.map.GraphEdge;
 import de.uvwxy.footpath2.map.IndoorLocation;
-import de.uvwxy.footpath2.map.IndoorLocationList;
 import de.uvwxy.footpath2.tools.FootPathException;
 
 public class FirstFit extends MatchingAlgorithm {
