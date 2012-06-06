@@ -14,7 +14,7 @@
         android:icon="@drawable/icon"
         android:label="@string/flowpath" >
         <activity
-            android:name="de.uvwxy.footpath2.gui.Loader"
+            android:name="de.uvwxy.footpath2.gui.old.Loader"
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >

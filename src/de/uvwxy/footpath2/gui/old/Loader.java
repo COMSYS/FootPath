@@ -1,4 +1,4 @@
-package de.uvwxy.footpath2.gui;
+package de.uvwxy.footpath2.gui.old;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,9 +35,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 import de.uvwxy.footpath.R;
-import de.uvwxy.footpath2.gui.old.Calibrator;
-import de.uvwxy.footpath2.gui.old.NavigatorFlowPath;
-import de.uvwxy.footpath2.gui.old.NavigatorFootPath;
+import de.uvwxy.footpath2.gui.FlowPathTestGUI;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.tools.FileNameFilterFromStringArray;
