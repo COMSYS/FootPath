@@ -8,7 +8,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.Stack;
+import java.util.TreeMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -38,13 +40,20 @@ public class Map {
 	private final List<GraphNode> nodes;
 	private final List<GraphEdge> edges;
 
-	private GraphNode[] array_nodes_by_id;
-	private GraphNode[] array_nodes_by_name;
+	// private GraphNode[] array_nodes_by_id;
+	// private GraphNode[] array_nodes_by_name;
+
+	// sorted maps for fast access
+	private final SortedMap<Integer, GraphNode> map_nodes_by_id;
+	private final SortedMap<String, GraphNode> map_nodes_by_name;
 
 	public Map() {
 		Log.i("FOOTPATH", "Creating empty map");
 		nodes = new LinkedList<GraphNode>();
 		edges = new LinkedList<GraphEdge>();
+
+		map_nodes_by_id = new TreeMap<Integer, GraphNode>();
+		map_nodes_by_name = new TreeMap<String, GraphNode>();
 	}
 
 	public synchronized boolean writeGraphToXMLFile(String filePath) throws IOException {
@@ -535,11 +544,11 @@ public class Map {
 			eventType = xrp.next();
 		}
 
-		LinkedList<GraphWay> remainingWays = new LinkedList<GraphWay>();
+		List<GraphWay> remainingWays = new LinkedList<GraphWay>();
 
 		for (GraphWay way : allWays) { // find ways which are indoors at some
 										// point
-			LinkedList<Integer> refs = way.getRefs();
+			List<Integer> refs = way.getRefs();
 			if (way.isIndoor()) { // whole path is indoors -> keep
 				remainingWays.add(way);
 			} else { // check for path with indoor node
@@ -644,8 +653,18 @@ public class Map {
 
 	private void initNodes() {
 		// Create arrays for binary search
-		array_nodes_by_id = sortNodesById(nodes);
-		array_nodes_by_name = sortNodesByName(nodes);
+		// array_nodes_by_id = sortNodesById(nodes);
+		// array_nodes_by_name = sortNodesByName(nodes);
+
+		// setup mappings for fast access
+		for (int i = 0; i < nodes.size(); i++) {
+			GraphNode n = nodes.get(i);
+			map_nodes_by_id.put(n.getId(), n);
+
+			if (n.getName() != null) {
+				map_nodes_by_name.put(n.getName(), n);
+			}
+		}
 
 		// Add edges to node, faster look up for neighbors
 		for (GraphEdge edge : edges) {
@@ -676,7 +695,7 @@ public class Map {
 
 	// Returns a stack of nodes, with the destination at the bottom using
 	// Dykstra's algorithm
-	public synchronized Stack<GraphNode> getShortestPath(GraphNode from, GraphNode to, boolean staircase,
+	public synchronized Stack<GraphNode> getShortestPath(final GraphNode from, final GraphNode to, boolean staircase,
 			boolean elevator, boolean outside) {
 		if (from == null || to == null) {
 			return null;
@@ -684,13 +703,13 @@ public class Map {
 
 		Log.i("FOOTPATH", "Looking up path from " + from.getName() + " to " + to.getName());
 
-		int remaining_nodes = array_nodes_by_id.length;
-		GraphNode[] previous = new GraphNode[array_nodes_by_id.length];
-		double[] dist = new double[array_nodes_by_id.length];
-		boolean[] visited = new boolean[array_nodes_by_id.length];
+		int remaining_nodes = nodes.size();// array_nodes_by_id.length;
+		GraphNode[] previous = new GraphNode[remaining_nodes];
+		double[] dist = new double[remaining_nodes];
+		boolean[] visited = new boolean[remaining_nodes];
 
 		// Set initial values
-		for (int i = 0; i < array_nodes_by_id.length; i++) {
+		for (int i = 0; i < remaining_nodes; i++) {
 			dist[i] = Double.POSITIVE_INFINITY;
 			previous[i] = null;
 			visited[i] = false;
@@ -701,7 +720,7 @@ public class Map {
 			GraphNode u;
 			double minDist = Double.POSITIVE_INFINITY;
 			int u_i = -1;
-			for (int i = 0; i < array_nodes_by_id.length; i++) {
+			for (int i = 0; i < remaining_nodes; i++) {
 				if (!visited[i] && dist[i] < minDist) {
 					u_i = i;
 					minDist = dist[i];
@@ -713,14 +732,14 @@ public class Map {
 				break;
 			}
 			// u was found
-			u = array_nodes_by_id[u_i];
+			u = nodes.get(u_i);// array_nodes_by_id[u_i];
 			visited[u_i] = true;
 			if (dist[u_i] == Double.POSITIVE_INFINITY) {
 				// All remaining nodes are unreachable from source
 				break;
 			}
 			// Get neighbors of u in q
-			LinkedList<GraphNode> nOuIq = getNeighbours(visited, u, staircase, elevator, outside);
+			List<GraphNode> nOuIq = getNeighbours(visited, u, staircase, elevator, outside);
 			if (u.equals(to)) {
 				// u = to -> found path to destination Build stack of nodes, destination at the
 				// bottom
@@ -798,53 +817,49 @@ public class Map {
 	}
 
 	// return node pos via binary search
+	// TODO rename method.
+	// TODO check indexOf implementation - maybe we can achieve a speedup with another map
 	private int getNodePosInIdArray(GraphNode node) {
-		if (array_nodes_by_id == null) {
-			initNodes();
-		}
-		int u = 0;
-		int o = array_nodes_by_id.length - 1;
-		int m = 0;
+		return nodes.indexOf(node);
 
-		while (!(o < u)) {
-			m = (u + o) / 2;
-			if (node.getId() == array_nodes_by_id[m].getId()) {
-				return m;
-			}
-			if (node.getId() < array_nodes_by_id[m].getId()) {
-				o = m - 1;
-			} else {
-				u = m + 1;
-			}
-		}
-		return -1;
+		// use mapping instead.
+		/*
+		 * if (array_nodes_by_id == null) { initNodes(); } int u = 0; int o = array_nodes_by_id.length - 1; int m = 0;
+		 * 
+		 * while (!(o < u)) { m = (u + o) / 2; if (node.getId() == array_nodes_by_id[m].getId()) { return m; } if
+		 * (node.getId() < array_nodes_by_id[m].getId()) { o = m - 1; } else { u = m + 1; } } return -1;
+		 */
 	}
 
-	// This is the faster version which can be used after parsing the data
+	/**
+	 * return a node for a given id<br>
+	 * <i>this is the fast implementation after having parsed the data</i>
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public synchronized GraphNode getNode(int id) {
-		if (array_nodes_by_id == null) {
-			initNodes();
-		}
-		int u = 0;
-		int o = array_nodes_by_id.length - 1;
-		int m = 0;
-
-		while (!(o < u)) {
-			m = (u + o) / 2;
-			if (id == array_nodes_by_id[m].getId()) {
-				return array_nodes_by_id[m];
-			}
-			if (id < array_nodes_by_id[m].getId()) {
-				o = m - 1;
-			} else {
-				u = m + 1;
-			}
+		if (map_nodes_by_id.containsKey(Integer.valueOf(id))) {
+			return map_nodes_by_id.get(id);
 		}
 		return null;
+		// use mappings instead.
+		/*
+		 * if (array_nodes_by_id == null) { initNodes(); } int u = 0; int o = array_nodes_by_id.length - 1; int m = 0;
+		 * 
+		 * while (!(o < u)) { m = (u + o) / 2; if (id == array_nodes_by_id[m].getId()) { return array_nodes_by_id[m]; }
+		 * if (id < array_nodes_by_id[m].getId()) { o = m - 1; } else { u = m + 1; } } return null;
+		 */
 	}
 
-	// This is the slower version which is used during parsing
-	private synchronized GraphNode getNode(LinkedList<GraphNode> list, int id) {
+	/**
+	 * return a node for a given id
+	 * 
+	 * @param list
+	 * @param id
+	 * @return
+	 */
+	private synchronized GraphNode getNode(List<GraphNode> list, int id) {
 		for (GraphNode node : list) {
 			if (node.getId() == id)
 				return node;
@@ -854,14 +869,19 @@ public class Map {
 
 	// return all names of nodes != null in a String array
 	public synchronized String[] getRoomList() {
-		if (array_nodes_by_name == null) {
+		if (map_nodes_by_name == null) {
 			initNodes();
 		}
-		String[] retArray = new String[array_nodes_by_name.length];
-		for (int i = 0; i < retArray.length; i++) {
-			retArray[i] = array_nodes_by_name[i].getName();
-		}
-		return retArray;
+
+		String[] retVal = new String[map_nodes_by_name.size()];
+		retVal = map_nodes_by_name.keySet().toArray(retVal);
+
+		return retVal;
+		// use mappings instead.
+		/*
+		 * String[] retArray = new String[array_nodes_by_name.length]; for (int i = 0; i < retArray.length; i++) {
+		 * retArray[i] = array_nodes_by_name[i].getName(); } return retArray;
+		 */
 	}
 
 	// creates a linked list form a stack, top to bottom
@@ -955,28 +975,24 @@ public class Map {
 
 	// returns the node with the given name, binary search
 	public synchronized GraphNode getNodeFromName(String name) {
-		if (array_nodes_by_name == null) {
-			initNodes();
+		if (map_nodes_by_name.containsKey(name)) {
+			Log.i("FOOTPATH", "Room " + map_nodes_by_name.get(name) + " found!");
+			return map_nodes_by_name.get(name);
 		}
-		int u = 0;
-		int o = array_nodes_by_name.length - 1;
-		int m = 0;
-
-		while (!(o < u)) {
-			m = (u + o) / 2;
-			if (name.equals(array_nodes_by_name[m].getName())) {
-				Log.i("FOOTPATH", "Room " + array_nodes_by_name[m].getName() + " found!");
-				return array_nodes_by_name[m];
-			}
-			if (name.compareTo(array_nodes_by_name[m].getName()) < 0) {
-				o = m - 1;
-			} else {
-				u = m + 1;
-			}
-		}
-
 		Log.i("FOOTPATH", "Room " + name + " not found!");
 		return null;
+
+		// should use mappings now
+		/*
+		 * if (array_nodes_by_name == null) { initNodes(); } int u = 0; int o = array_nodes_by_name.length - 1; int m =
+		 * 0;
+		 * 
+		 * while (!(o < u)) { m = (u + o) / 2; if (name.equals(array_nodes_by_name[m].getName())) { Log.i("FOOTPATH",
+		 * "Room " + array_nodes_by_name[m].getName() + " found!"); return array_nodes_by_name[m]; } if
+		 * (name.compareTo(array_nodes_by_name[m].getName()) < 0) { o = m - 1; } else { u = m + 1; } }
+		 * 
+		 * Log.i("FOOTPATH", "Room " + name + " not found!"); return null;
+		 */
 	}
 
 	/**
@@ -1033,6 +1049,12 @@ public class Map {
 	}
 
 	// creates an array, containing only nodes _with_ a name, sorted ascending
+	/**
+	 * @param nodes
+	 * @return
+	 * @deprecated
+	 */
+	@Deprecated
 	private GraphNode[] sortNodesByName(List<GraphNode> nodes) {
 		GraphNode[] node_array;
 		GraphNode temp = null;
@@ -1071,6 +1093,13 @@ public class Map {
 	}
 
 	// creates an array,sorted by id ascending
+
+	/**
+	 * @param nodes
+	 * @return
+	 * @deprecated
+	 */
+	@Deprecated
 	private GraphNode[] sortNodesById(List<GraphNode> nodes) {
 		GraphNode[] node_array;
 		GraphNode temp = null;
