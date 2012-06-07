@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedMap;
@@ -649,6 +651,15 @@ public class Map {
 		initNodes();
 	}
 
+	/**
+	 * setup the faster access to nodes:
+	 * <ul>
+	 * <li>mapping id->node</li>
+	 * <li>mapping name->node</li>
+	 * <li>sort the node-list by id</li>
+	 * <li>add edged to nodes</li>
+	 * </ul>
+	 */
 	private void initNodes() {
 		// Create arrays for binary search
 		// array_nodes_by_id = sortNodesById(nodes);
@@ -675,6 +686,9 @@ public class Map {
 				n1.getEdges().add(edge);
 			}
 		}
+
+		// sort the node list
+		Collections.sort(nodes, new IndoorLocationComparator());
 	}
 
 	public synchronized Stack<IndoorLocation> getShortestPath(String from, String to, boolean staircase,
@@ -807,12 +821,29 @@ public class Map {
 		return ret;
 	}
 
-	// return node pos via binary search
-	// TODO rename method.
-	// TODO change from indexOf to Collections.binarySearch() -> nodes must be a sorted list for speedup.
+	/**
+	 * TODO maybe move directly into IndoorLocation
+	 * 
+	 * @author helge
+	 */
+	public class IndoorLocationComparator implements Comparator<IndoorLocation> {
+		@Override
+		public int compare(IndoorLocation lhs, IndoorLocation rhs) {
+			return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
+		}
+	}
+
+	/**
+	 * return node pos via binary search<br>
+	 * TODO rename method.<br>
+	 * <i>NOTE: Collections.binarySearch() runs in O(n) on unsorted lists</i>
+	 * 
+	 * @param node
+	 * @return
+	 */
 	private int getNodePosInIdArray(IndoorLocation node) {
-		// Collections.binarySearch(nodes, node);
-		return nodes.indexOf(node); // O(n)
+		return Collections.binarySearch(nodes, node, new IndoorLocationComparator());
+		// return nodes.indexOf(node); // O(n)
 
 		/*
 		 * if (array_nodes_by_id == null) { initNodes(); } int u = 0; int o = array_nodes_by_id.length - 1; int m = 0;
@@ -843,7 +874,15 @@ public class Map {
 		 */
 	}
 
-	// This is the slower version which is used during parsing
+	/**
+	 * This is the slower version which is used during parsing<br>
+	 * TODO remove.
+	 * 
+	 * @param list
+	 * @param id
+	 * @return
+	 */
+	@Deprecated
 	private synchronized IndoorLocation getNode(List<IndoorLocation> list, int id) {
 		for (IndoorLocation node : list) {
 			if (node.getId() == id)
@@ -870,8 +909,8 @@ public class Map {
 	}
 
 	// creates a linked list form a stack, top to bottom
-	public synchronized LinkedList<GraphEdge> getPathEdges(Stack<IndoorLocation> navPath) {
-		LinkedList<GraphEdge> pathEdges = new LinkedList<GraphEdge>();
+	public synchronized List<GraphEdge> getPathEdges(Stack<IndoorLocation> navPath) {
+		List<GraphEdge> pathEdges = new LinkedList<GraphEdge>();
 		IndoorLocation a = navPath.pop();
 		while (!navPath.isEmpty()) {
 			IndoorLocation b = navPath.pop();
@@ -886,7 +925,14 @@ public class Map {
 		return pathEdges;
 	}
 
-	// returns the edge containing nodes a and b
+	/**
+	 * returns the edge containing nodes a and b<br>
+	 * TODO more efficient solution
+	 * 
+	 * @param a
+	 * @param b
+	 * @return
+	 */
 	public synchronized GraphEdge getEdge(IndoorLocation a, IndoorLocation b) {
 		GraphEdge ret = null;
 		for (GraphEdge edge : a.getEdges()) { // return edge if
@@ -978,11 +1024,11 @@ public class Map {
 		return minDistance;
 	}
 
-	// creates an array, containing only nodes _with_ a name, sorted ascending
 	/**
+	 * creates an array, containing only nodes _with_ a name, sorted ascending
+	 * 
 	 * @param nodes
 	 * @return
-	 * @deprecated
 	 */
 	@Deprecated
 	private IndoorLocation[] sortNodesByName(List<IndoorLocation> nodes) {
@@ -1022,11 +1068,11 @@ public class Map {
 		return node_array;
 	}
 
-	// creates an array,sorted by id ascending
 	/**
+	 * creates an array,sorted by id ascending
+	 * 
 	 * @param nodes
 	 * @return
-	 * @deprecated
 	 */
 	@Deprecated
 	private IndoorLocation[] sortNodesById(List<IndoorLocation> nodes) {
