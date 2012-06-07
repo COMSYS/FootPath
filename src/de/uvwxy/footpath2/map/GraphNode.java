@@ -62,19 +62,6 @@ public class GraphNode {
 		loc_edges = new LinkedList<GraphEdge>();
 	}
 
-	/**
-	 * Creates a LatLonPos object to return the location.
-	 * 
-	 * @return the new LatLonPos object of this node's location
-	 */
-	public LatLonPos getPos() {
-		LatLonPos ret = new LatLonPos();
-		ret.setLat(lat);
-		ret.setLon(lon);
-		ret.setLevel(level);
-		return ret;
-	}
-
 	public double getLon() {
 		return lon;
 	}

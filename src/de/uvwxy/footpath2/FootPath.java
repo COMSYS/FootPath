@@ -15,11 +15,11 @@ import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.util.Log;
 import de.uvwxy.footpath.Rev;
-import de.uvwxy.footpath2.map.GraphNode;
 import de.uvwxy.footpath2.map.IndoorLocation;
-import de.uvwxy.footpath2.map.IndoorLocationHistory;
+import de.uvwxy.footpath2.map.IndoorLocationList;
 import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.matching.BestFit;
+import de.uvwxy.footpath2.matching.FirstFit;
 import de.uvwxy.footpath2.matching.MatchingAlgorithm;
 import de.uvwxy.footpath2.movement.MovementDetection;
 import de.uvwxy.footpath2.movement.SensorEventDistributor;
@@ -146,6 +146,9 @@ public class FootPath {
 			movementDetection.registerOnStepListener(matchingAlgorithm);
 			break;
 		case MATCHING_FIRST_FIT:
+			matchingAlgorithm = new FirstFit();
+			Log.i("FOOTPATH", "Registering FirstFit for movement detection");
+			movementDetection.registerOnStepListener(matchingAlgorithm);
 			break;
 		case MATCHING_MULTI_FIT:
 			break;
@@ -167,23 +170,24 @@ public class FootPath {
 		settingsLocationProvider = providerType;
 	}
 
-	public IndoorLocationHistory getPath(String location, String destination, boolean staircase, boolean elevator,
+	public IndoorLocationList getPath(String location, String destination, boolean staircase, boolean elevator,
 			boolean outside) {
 		Log.i("FOOTPATH", "Trying to find path from " + location + " to " + destination);
-		IndoorLocationHistory ret = new IndoorLocationHistory();
-		Stack<GraphNode> buf = map.getShortestPath(location, destination, staircase, elevator, outside);
+		IndoorLocationList ret = new IndoorLocationList();
+		Stack<IndoorLocation> buf = map.getShortestPath(location, destination, staircase, elevator, outside);
 		if (buf != null) {
-			for (GraphNode n : buf) {
+			for (IndoorLocation n : buf) {
 				IndoorLocation x = new IndoorLocation(n.getName(), "FootPath");
-				x.setLatitude(n.getLat());
-				x.setLongitude(n.getLon());
-				ret.add(x);
+				x.setLatitude(n.getLatitude());
+				x.setLongitude(n.getLongitude());
+				// Note this reverses the stack, which is from destination to target:
+				ret.addFirst(x);
 			}
 		}
 		return ret;
 	}
 
-	public void _fg_setPath(IndoorLocationHistory path) throws FootPathException {
+	public void _fg_setPath(IndoorLocationList path) throws FootPathException {
 		if (matchingAlgorithm != null) {
 			if (path != null) {
 				matchingAlgorithm.setPath(path);

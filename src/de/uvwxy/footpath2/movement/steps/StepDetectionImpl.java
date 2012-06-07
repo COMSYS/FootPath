@@ -12,16 +12,16 @@ import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.location.Location;
 import android.os.Handler;
 import android.util.Log;
+import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.movement.MovementDetection;
 import de.uvwxy.footpath2.movement.SensorHistory;
 import de.uvwxy.footpath2.movement.SensorTriple;
 import de.uvwxy.footpath2.movement.StepEventListener;
 import de.uvwxy.footpath2.tools.DrawToCanvas;
 
-public class StepDetectionImpl extends MovementDetection implements SensorEventListener, DrawToCanvas, StepDetection {
+public class StepDetectionImpl extends MovementDetection implements SensorEventListener, StepDetection, DrawToCanvas {
 	private static final String PREF_ID = "SENSOR_STEP_HISTORY_SETTINS";
 	private final Handler mHandler = new Handler();
 	private final long delayMillis = 1000 / 30;
@@ -343,14 +343,8 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		vhPointer = vhPointer % vhSize;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.uvwxy.footpath2.movement.steps.StepDetection#drawToCanvas(android.graphics.Canvas,
-	 * android.location.Location, android.graphics.Rect, double, android.graphics.Paint, android.graphics.Paint)
-	 */
 	@Override
-	public void drawToCanvas(Canvas canvas, Location center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
 			Paint pLine, Paint pDots) {
 		long max = System.currentTimeMillis();
 		drawSteps(canvas, boundingBox, pixelsPerMeterOrMaxValue, pLine, pDots, max);

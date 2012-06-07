@@ -37,23 +37,25 @@ import android.util.Log;
  * 
  */
 public class Map {
-	private final List<GraphNode> nodes;
+	private final List<IndoorLocation> nodes;
 	private final List<GraphEdge> edges;
 
-	// private GraphNode[] array_nodes_by_id;
-	// private GraphNode[] array_nodes_by_name;
+	@Deprecated
+	private IndoorLocation[] array_nodes_by_id;
+	@Deprecated
+	private IndoorLocation[] array_nodes_by_name;
 
 	// sorted maps for fast access
-	private final SortedMap<Integer, GraphNode> map_nodes_by_id;
-	private final SortedMap<String, GraphNode> map_nodes_by_name;
+	private final SortedMap<Integer, IndoorLocation> map_nodes_by_id;
+	private final SortedMap<String, IndoorLocation> map_nodes_by_name;
 
 	public Map() {
 		Log.i("FOOTPATH", "Creating empty map");
-		nodes = new LinkedList<GraphNode>();
+		nodes = new LinkedList<IndoorLocation>();
 		edges = new LinkedList<GraphEdge>();
 
-		map_nodes_by_id = new TreeMap<Integer, GraphNode>();
-		map_nodes_by_name = new TreeMap<String, GraphNode>();
+		map_nodes_by_id = new TreeMap<Integer, IndoorLocation>();
+		map_nodes_by_name = new TreeMap<String, IndoorLocation>();
 	}
 
 	public synchronized boolean writeGraphToXMLFile(String filePath) throws IOException {
@@ -85,7 +87,7 @@ public class Map {
 			out.write(mFirstLine);
 			out.write(mSecondLine);
 
-			for (GraphNode n : nodes) {
+			for (IndoorLocation n : nodes) {
 				out.write(n.toXML());
 			}
 
@@ -122,7 +124,7 @@ public class Map {
 		File od = new File(filePath);
 
 		// store all nodes found in file
-		LinkedList<GraphNode> allNodes = new LinkedList<GraphNode>();
+		LinkedList<IndoorLocation> allNodes = new LinkedList<IndoorLocation>();
 		// store all ways found in file
 		LinkedList<GraphWay> allWays = new LinkedList<GraphWay>();
 
@@ -206,15 +208,15 @@ public class Map {
 			} // -> if ( tagNode.getNodeName().toString().equals("tag") )
 
 			// Create GraphNode:
-			GraphNode tempGraphNode = new GraphNode();
+			IndoorLocation tempGraphNode = new IndoorLocation(name, "");
 			tempGraphNode.setDoor(isDoor);
 			tempGraphNode.setId(id);
 			tempGraphNode.setIndoors(isIndoor);
-			tempGraphNode.setLat(lat);
+			tempGraphNode.setLatitude(lat);
 			tempGraphNode.setLevel(level);
-			tempGraphNode.setLon(lon);
+			tempGraphNode.setLongitude(lon);
 			tempGraphNode.setMergeId(merge_id);
-			tempGraphNode.setName(name);
+			// tempGraphNode.setName(name);
 
 			allNodes.add(tempGraphNode);
 
@@ -327,7 +329,7 @@ public class Map {
 			} else { // check for path with indoor node
 				boolean stop = false;
 				for (Integer ref : refs) { // check if there is a node on path which is indoors
-					for (GraphNode node : allNodes) {
+					for (IndoorLocation node : allNodes) {
 						if (node.getId() == ref.intValue()) {
 							remainingWays.add(way);
 							stop = true; // found indoor node on path to be added to graph thus stop both for loops and
@@ -349,13 +351,11 @@ public class Map {
 			short wheelchair = way.getWheelchair();
 			float level = way.getLevel();
 			boolean indoor = way.isIndoor();
-			GraphNode firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
+			IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
 			for (int i = 1; i <= way.getRefs().size() - 1; i++) {
-				GraphNode nextNode = getNode(allNodes, way.getRefs().get(i).intValue());
-				double len = getDistance(firstNode.getLat(), // get length between P1 and P2
-						firstNode.getLon(), nextNode.getLat(), nextNode.getLon());
-				double compDegree = getInitialBearing(firstNode.getLat(), // get initial bearing between P1 and P2
-						firstNode.getLon(), nextNode.getLat(), nextNode.getLon());
+				IndoorLocation nextNode = getNode(allNodes, way.getRefs().get(i).intValue());
+				double len = firstNode.distanceTo(nextNode);
+				double compDegree = firstNode.bearingTo(nextNode);
 				GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, len, compDegree, wheelchair, level, indoor);
 				if (way.getSteps() > 0) { // make edge a staircase if steps_count was set correctly
 					tempEdge.setStairs(true);
@@ -398,12 +398,12 @@ public class Map {
 
 		boolean isOsmData = false; // flag to wait for osm data
 
-		GraphNode tempNode = new GraphNode(); // temporary node to be added to all nodes in file
-		GraphNode NULL_NODE = new GraphNode(); // 'NULL' node to point to, for dereferencing
+		IndoorLocation tempNode = new IndoorLocation("", ""); // temporary node to be added to all nodes in file
+		IndoorLocation NULL_NODE = new IndoorLocation("nullnode", ""); // 'NULL' node to point to, for dereferencing
 		GraphWay tempWay = new GraphWay(); // temporary way to be added to all nodes in file
 		GraphWay NULL_WAY = new GraphWay(); // 'NULL' node to point to, for dereferencing
 
-		LinkedList<GraphNode> allNodes = new LinkedList<GraphNode>(); // store all nodes found in file
+		LinkedList<IndoorLocation> allNodes = new LinkedList<IndoorLocation>(); // store all nodes found in file
 		LinkedList<GraphWay> allWays = new LinkedList<GraphWay>(); // store all ways found in file
 
 		xrp.next();
@@ -421,16 +421,16 @@ public class Map {
 				} else {
 					int attributeCount = xrp.getAttributeCount();
 					if (xrp.getName().equals("node")) { // node
-						tempNode = new GraphNode();
+						tempNode = new IndoorLocation("", "");
 						for (int i = 0; i < attributeCount; i++) {
 							if (xrp.getAttributeName(i).equals("id")) {
 								tempNode.setId(xrp.getAttributeIntValue(i, 0)); // node.id
 							}
 							if (xrp.getAttributeName(i).equals("lat")) {
-								tempNode.setLat(Double.parseDouble(xrp.getAttributeValue(i))); // node.lat
+								tempNode.setLatitude(Double.parseDouble(xrp.getAttributeValue(i))); // node.lat
 							}
 							if (xrp.getAttributeName(i).equals("lon")) {
-								tempNode.setLon(Double.parseDouble(xrp.getAttributeValue(i))); // node.lon
+								tempNode.setLongitude(Double.parseDouble(xrp.getAttributeValue(i))); // node.lon
 							}
 						}
 					} else if (xrp.getName().equals("tag")) { // tag
@@ -555,7 +555,7 @@ public class Map {
 				boolean stop = false;
 				for (Integer ref : refs) { // check if there is a node on path
 											// which is indoors
-					for (GraphNode node : allNodes) {
+					for (IndoorLocation node : allNodes) {
 						if (node.getId() == ref.intValue()) {
 							remainingWays.add(way);
 							stop = true; // found indoor node on path to be added to graph thus stop both for loops and
@@ -577,13 +577,11 @@ public class Map {
 			short wheelchair = way.getWheelchair();
 			float level = way.getLevel();
 			boolean indoor = way.isIndoor();
-			GraphNode firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
+			IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
 			for (int i = 1; i <= way.getRefs().size() - 1; i++) {
-				GraphNode nextNode = getNode(allNodes, way.getRefs().get(i).intValue());
-				double len = getDistance(firstNode.getLat(), // get length between P1 and P2
-						firstNode.getLon(), nextNode.getLat(), nextNode.getLon());
-				double compDegree = getInitialBearing(firstNode.getLat(), // get initial bearing between P1 and P2
-						firstNode.getLon(), nextNode.getLat(), nextNode.getLon());
+				IndoorLocation nextNode = getNode(allNodes, way.getRefs().get(i).intValue());
+				double len = firstNode.distanceTo(nextNode);
+				double compDegree = firstNode.bearingTo(nextNode);
 				GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, len, compDegree, wheelchair, level, indoor);
 				if (way.getSteps() > 0) { // make edge a staircase if steps_count was set correctly
 					tempEdge.setStairs(true);
@@ -622,15 +620,15 @@ public class Map {
 	public synchronized void mergeNodes() {
 		// Edges are note inserted anymore.
 		// Nodes are "Merged". Currently.
-		LinkedList<GraphNode> nodesWithMergeId = new LinkedList<GraphNode>();
+		LinkedList<IndoorLocation> nodesWithMergeId = new LinkedList<IndoorLocation>();
 		// Collect all relevant nodes to merge
-		for (GraphNode node : nodes) {
+		for (IndoorLocation node : nodes) {
 			if (node.getMergeId() != null) {
 				nodesWithMergeId.add(node);
 			}
 		}
-		for (GraphNode node : nodesWithMergeId) {
-			for (GraphNode otherNode : nodesWithMergeId) {
+		for (IndoorLocation node : nodesWithMergeId) {
+			for (IndoorLocation otherNode : nodesWithMergeId) {
 				// Only merge if same id, but not same node!
 				if (node.getMergeId() != null && node.getMergeId().equals(otherNode.getMergeId())
 						&& !node.equals(otherNode)) {
@@ -658,7 +656,7 @@ public class Map {
 
 		// setup mappings for fast access
 		for (int i = 0; i < nodes.size(); i++) {
-			GraphNode n = nodes.get(i);
+			IndoorLocation n = nodes.get(i);
 			map_nodes_by_id.put(n.getId(), n);
 
 			if (n.getName() != null) {
@@ -668,35 +666,35 @@ public class Map {
 
 		// Add edges to node, faster look up for neighbors
 		for (GraphEdge edge : edges) {
-			GraphNode n0 = edge.getNode0();
-			GraphNode n1 = edge.getNode1();
-			if (!n0.getLocEdges().contains(edge)) {
-				n0.getLocEdges().add(edge);
+			IndoorLocation n0 = edge.getNode0();
+			IndoorLocation n1 = edge.getNode1();
+			if (!n0.getEdges().contains(edge)) {
+				n0.getEdges().add(edge);
 			}
-			if (!n1.getLocEdges().contains(edge)) {
-				n1.getLocEdges().add(edge);
+			if (!n1.getEdges().contains(edge)) {
+				n1.getEdges().add(edge);
 			}
 		}
 	}
 
-	public synchronized Stack<GraphNode> getShortestPath(String from, String to, boolean staircase, boolean elevator,
-			boolean outside) {
-		GraphNode gnFrom = getNodeFromName(from);
-		GraphNode gnTo = getNodeFromName(to);
+	public synchronized Stack<IndoorLocation> getShortestPath(String from, String to, boolean staircase,
+			boolean elevator, boolean outside) {
+		IndoorLocation gnFrom = getNodeFromName(from);
+		IndoorLocation gnTo = getNodeFromName(to);
 		return getShortestPath(gnFrom, gnTo, staircase, elevator, outside);
 	}
 
-	public synchronized Stack<GraphNode> getShortestPath(int from, String to, boolean staircase, boolean elevator,
+	public synchronized Stack<IndoorLocation> getShortestPath(int from, String to, boolean staircase, boolean elevator,
 			boolean outside) {
-		GraphNode gnFrom = getNode(from);
-		GraphNode gnTo = getNodeFromName(to);
+		IndoorLocation gnFrom = getNode(from);
+		IndoorLocation gnTo = getNodeFromName(to);
 		return getShortestPath(gnFrom, gnTo, staircase, elevator, outside);
 	}
 
 	// Returns a stack of nodes, with the destination at the bottom using
 	// Dykstra's algorithm
-	public synchronized Stack<GraphNode> getShortestPath(final GraphNode from, final GraphNode to, boolean staircase,
-			boolean elevator, boolean outside) {
+	public synchronized Stack<IndoorLocation> getShortestPath(IndoorLocation from, IndoorLocation to,
+			boolean staircase, boolean elevator, boolean outside) {
 		if (from == null || to == null) {
 			return null;
 		}
@@ -704,7 +702,7 @@ public class Map {
 		Log.i("FOOTPATH", "Looking up path from " + from.getName() + " to " + to.getName());
 
 		int remaining_nodes = nodes.size();// array_nodes_by_id.length;
-		GraphNode[] previous = new GraphNode[remaining_nodes];
+		IndoorLocation[] previous = new IndoorLocation[remaining_nodes];
 		double[] dist = new double[remaining_nodes];
 		boolean[] visited = new boolean[remaining_nodes];
 
@@ -717,7 +715,7 @@ public class Map {
 		dist[getNodePosInIdArray(from)] = 0;
 		while (remaining_nodes > 0) {
 			// Vertex u in q with smallest dist[]
-			GraphNode u;
+			IndoorLocation u;
 			double minDist = Double.POSITIVE_INFINITY;
 			int u_i = -1;
 			for (int i = 0; i < remaining_nodes; i++) {
@@ -739,11 +737,11 @@ public class Map {
 				break;
 			}
 			// Get neighbors of u in q
-			List<GraphNode> nOuIq = getNeighbours(visited, u, staircase, elevator, outside);
+			List<IndoorLocation> nOuIq = getNeighbours(visited, u, staircase, elevator, outside);
 			if (u.equals(to)) {
 				// u = to -> found path to destination Build stack of nodes, destination at the
 				// bottom
-				Stack<GraphNode> s = new Stack<GraphNode>();
+				Stack<IndoorLocation> s = new Stack<IndoorLocation>();
 				while (previous[u_i] != null) {
 					s.push(u);
 					u_i = getNodePosInIdArray(u);
@@ -753,8 +751,8 @@ public class Map {
 			} else {
 				remaining_nodes--;
 			}
-			for (GraphNode v : nOuIq) {
-				double dist_alt = dist[u_i] + dist(u, v);
+			for (IndoorLocation v : nOuIq) {
+				double dist_alt = dist[u_i] + u.distanceTo(v);
 				int v_i = getNodePosInIdArray(v);
 				if (dist_alt < dist[v_i]) {
 					dist[v_i] = dist_alt;
@@ -767,19 +765,12 @@ public class Map {
 		return null;
 	}
 
-	// Returns the distance of two nodes by finding the corresponding edge and reading the len value
-	private double dist(GraphNode from, GraphNode to) {
-		double ret = Double.POSITIVE_INFINITY;
-		ret = getEdge(from, to).getLen();
-		return ret;
-	}
-
 	// Returns all neighbors of given node from a given subset (list) of nodes in this graph
-	private LinkedList<GraphNode> getNeighbours(boolean[] visited, GraphNode node, boolean staircase, boolean elevator,
-			boolean outside) {
+	private LinkedList<IndoorLocation> getNeighbours(boolean[] visited, IndoorLocation node, boolean staircase,
+			boolean elevator, boolean outside) {
 
-		LinkedList<GraphNode> ret = new LinkedList<GraphNode>();
-		for (GraphEdge edge : node.getLocEdges()) { // check all edges if they contain node
+		LinkedList<IndoorLocation> ret = new LinkedList<IndoorLocation>();
+		for (GraphEdge edge : node.getEdges()) { // check all edges if they contain node
 			if (edge.isStairs() && !staircase) { // edge has steps, but not
 													// allowed -> skip
 				continue;
@@ -793,7 +784,7 @@ public class Map {
 				continue;
 			}
 
-			GraphNode buf = null;
+			IndoorLocation buf = null;
 			if (edge.getNode0().equals(node)) { // node0 is node
 				buf = edge.getNode1(); // add node1
 			} else if (edge.getNode1().equals(node)) { // node 1 is node
@@ -818,11 +809,11 @@ public class Map {
 
 	// return node pos via binary search
 	// TODO rename method.
-	// TODO check indexOf implementation - maybe we can achieve a speedup with another map
-	private int getNodePosInIdArray(GraphNode node) {
-		return nodes.indexOf(node);
+	// TODO change from indexOf to Collections.binarySearch() -> nodes must be a sorted list for speedup.
+	private int getNodePosInIdArray(IndoorLocation node) {
+		// Collections.binarySearch(nodes, node);
+		return nodes.indexOf(node); // O(n)
 
-		// use mapping instead.
 		/*
 		 * if (array_nodes_by_id == null) { initNodes(); } int u = 0; int o = array_nodes_by_id.length - 1; int m = 0;
 		 * 
@@ -838,7 +829,7 @@ public class Map {
 	 * @param id
 	 * @return
 	 */
-	public synchronized GraphNode getNode(int id) {
+	public synchronized IndoorLocation getNode(int id) {
 		if (map_nodes_by_id.containsKey(Integer.valueOf(id))) {
 			return map_nodes_by_id.get(id);
 		}
@@ -852,15 +843,9 @@ public class Map {
 		 */
 	}
 
-	/**
-	 * return a node for a given id
-	 * 
-	 * @param list
-	 * @param id
-	 * @return
-	 */
-	private synchronized GraphNode getNode(List<GraphNode> list, int id) {
-		for (GraphNode node : list) {
+	// This is the slower version which is used during parsing
+	private synchronized IndoorLocation getNode(List<IndoorLocation> list, int id) {
+		for (IndoorLocation node : list) {
 			if (node.getId() == id)
 				return node;
 		}
@@ -885,11 +870,11 @@ public class Map {
 	}
 
 	// creates a linked list form a stack, top to bottom
-	public synchronized LinkedList<GraphEdge> getPathEdges(Stack<GraphNode> navPath) {
+	public synchronized LinkedList<GraphEdge> getPathEdges(Stack<IndoorLocation> navPath) {
 		LinkedList<GraphEdge> pathEdges = new LinkedList<GraphEdge>();
-		GraphNode a = navPath.pop();
+		IndoorLocation a = navPath.pop();
 		while (!navPath.isEmpty()) {
-			GraphNode b = navPath.pop();
+			IndoorLocation b = navPath.pop();
 			GraphEdge e = this.getEdge(a, b);
 			if (e != null) {
 				pathEdges.add(e);
@@ -902,9 +887,9 @@ public class Map {
 	}
 
 	// returns the edge containing nodes a and b
-	public synchronized GraphEdge getEdge(GraphNode a, GraphNode b) {
+	public synchronized GraphEdge getEdge(IndoorLocation a, IndoorLocation b) {
 		GraphEdge ret = null;
-		for (GraphEdge edge : a.getLocEdges()) { // return edge if
+		for (GraphEdge edge : a.getEdges()) { // return edge if
 			if (edge.getNode0().equals(a) && edge.getNode1().equals(b)) { // node0=a, node1=b
 				ret = edge; // or
 			} else if (edge.getNode1().equals(a) && edge.getNode0().equals(b)) { // node0=b, node1=a
@@ -914,71 +899,15 @@ public class Map {
 		return ret;
 	}
 
-	/**
-	 * Returns the distance between two nodes
-	 * 
-	 * @param node_0
-	 *            first node
-	 * @param node_1
-	 *            second node
-	 * @return the distance in meters
-	 */
-	public synchronized double getDistance(LatLonPos pos_0, GraphNode node_1) {
-		return getDistance(pos_0.getLat(), pos_0.getLon(), node_1.getLat(), node_1.getLon());
-	}
-
-	/**
-	 * Returns the distance between two points given in latitude/longitude
-	 * 
-	 * @param lat_1
-	 *            latitude of first point
-	 * @param lon_1
-	 *            longitude of first point
-	 * @param lat_2
-	 *            latitude of second point
-	 * @param lon_2
-	 *            longitude of second point
-	 * @return the distance in meters
-	 */
-	public synchronized double getDistance(double lat_1, double lon_1, double lat_2, double lon_2) {
-		// source: http://www.movable-type.co.uk/scripts/latlong.html
-		double dLon = lon_2 - lon_1;
-		double dLat = lat_2 - lat_1;
-		lat_1 = Math.toRadians(lat_1);
-		lon_1 = Math.toRadians(lon_1);
-		lat_2 = Math.toRadians(lat_2);
-		lon_2 = Math.toRadians(lon_2);
-		dLon = Math.toRadians(dLon);
-		dLat = Math.toRadians(dLat);
-
-		double r = 6378137; // km
-		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat_1) * Math.cos(lat_2) * Math.sin(dLon / 2)
-				* Math.sin(dLon / 2);
-		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-		return c * r;
-	}
-
-	public synchronized double getInitialBearing(double lat_1, double lon_1, double lat_2, double lon_2) {
-		// source: http://www.movable-type.co.uk/scripts/latlong.html
-		double dLon = lon_2 - lon_1;
-		lat_1 = Math.toRadians(lat_1);
-		lon_1 = Math.toRadians(lon_1);
-		lat_2 = Math.toRadians(lat_2);
-		lon_2 = Math.toRadians(lon_2);
-		dLon = Math.toRadians(dLon);
-		double y = Math.sin(dLon) * Math.cos(lat_2);
-		double x = Math.cos(lat_1) * Math.sin(lat_2) - Math.sin(lat_1) * Math.cos(lat_2) * Math.cos(dLon);
-		double b = Math.atan2(y, x);
-		b = Math.toDegrees(b);
-		return (b < 0) ? b + 360.0 : b;
-	}
-
 	// returns the node with the given name, binary search
-	public synchronized GraphNode getNodeFromName(String name) {
+	public synchronized IndoorLocation getNodeFromName(String name) {
+		if (map_nodes_by_name == null) {
+			initNodes();
+		}
 		if (map_nodes_by_name.containsKey(name)) {
-			Log.i("FOOTPATH", "Room " + map_nodes_by_name.get(name) + " found!");
 			return map_nodes_by_name.get(name);
 		}
+
 		Log.i("FOOTPATH", "Room " + name + " not found!");
 		return null;
 
@@ -1008,16 +937,17 @@ public class Map {
 	 *            limit of distance to a node
 	 * @return the closest GraphNode
 	 */
-	public synchronized GraphNode getClosestNodeToLatLonPos(LatLonPos pos, float level, boolean indoor, int maxMeters) {
+	public synchronized IndoorLocation getClosestNodeToLatLonPos(IndoorLocation pos, float level, boolean indoor,
+			int maxMeters) {
 		double minDistance = Double.MAX_VALUE;
 		double tempDistance = Double.MAX_VALUE;
-		GraphNode minDistNode = null;
+		IndoorLocation minDistNode = null;
 
-		for (GraphNode node : nodes) {
+		for (IndoorLocation node : nodes) {
 			// First: node has to be at the same level Second: if indoor = true, then take all nodes
 			// Third: if indoor = false check if node is not indoors!
 			if (node.getLevel() == level && (indoor || (node.isIndoors() == indoor))) {
-				tempDistance = getDistance(pos, node);
+				tempDistance = pos.distanceTo(node);
 				if (tempDistance < minDistance) {
 					minDistance = tempDistance;
 					minDistNode = node;
@@ -1031,15 +961,15 @@ public class Map {
 		}
 	}
 
-	public synchronized double getClosestDistanceToNode(LatLonPos pos, float level, boolean indoor) {
+	public synchronized double getClosestDistanceToNode(IndoorLocation pos, float level, boolean indoor) {
 		double minDistance = Double.MAX_VALUE;
 		double tempDistance = Double.MAX_VALUE;
 
-		for (GraphNode node : nodes) {
+		for (IndoorLocation node : nodes) {
 			// First: node has to be at the same level Second: if indoor = true, then take all nodes
 			// Third: if indoor = false check if node is not indoors!
 			if (node.getLevel() == level && (indoor || (node.isIndoors() != indoor))) {
-				tempDistance = getDistance(pos, node);
+				tempDistance = pos.distanceTo(node);
 				if (tempDistance < minDistance) {
 					minDistance = tempDistance;
 				}
@@ -1055,9 +985,9 @@ public class Map {
 	 * @deprecated
 	 */
 	@Deprecated
-	private GraphNode[] sortNodesByName(List<GraphNode> nodes) {
-		GraphNode[] node_array;
-		GraphNode temp = null;
+	private IndoorLocation[] sortNodesByName(List<IndoorLocation> nodes) {
+		IndoorLocation[] node_array;
+		IndoorLocation temp = null;
 		int num_nulls = 0;
 		int c = 0;
 		boolean not_sorted = true;
@@ -1068,8 +998,8 @@ public class Map {
 			}
 		}
 		// create an array for nodes with a name
-		node_array = new GraphNode[nodes.size() - num_nulls];
-		for (GraphNode node : nodes) {
+		node_array = new IndoorLocation[nodes.size() - num_nulls];
+		for (IndoorLocation node : nodes) {
 			if (node != null && node.getName() != null) {
 				// insert node with name into array
 				node_array[c] = node;
@@ -1093,21 +1023,20 @@ public class Map {
 	}
 
 	// creates an array,sorted by id ascending
-
 	/**
 	 * @param nodes
 	 * @return
 	 * @deprecated
 	 */
 	@Deprecated
-	private GraphNode[] sortNodesById(List<GraphNode> nodes) {
-		GraphNode[] node_array;
-		GraphNode temp = null;
+	private IndoorLocation[] sortNodesById(List<IndoorLocation> nodes) {
+		IndoorLocation[] node_array;
+		IndoorLocation temp = null;
 		int c = 0;
 		boolean not_sorted = true;
 		// create an array for all nodes
-		node_array = new GraphNode[nodes.size()];
-		for (GraphNode node : nodes) {
+		node_array = new IndoorLocation[nodes.size()];
+		for (IndoorLocation node : nodes) {
 			if (node != null) {
 				// insert node
 				node_array[c] = node;

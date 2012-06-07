@@ -50,8 +50,4 @@ public interface StepDetection {
 	public abstract int getNumJumps();
 
 	public abstract MovementType getCurrentMovement();
-
-	public abstract void drawToCanvas(Canvas canvas, Location center, Rect boundingBox,
-			double pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots);
-
 }

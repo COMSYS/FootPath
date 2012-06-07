@@ -6,7 +6,7 @@ import java.util.List;
 import android.util.Log;
 import de.uvwxy.footpath2.map.GraphEdge;
 import de.uvwxy.footpath2.map.IndoorLocation;
-import de.uvwxy.footpath2.map.IndoorLocationHistory;
+import de.uvwxy.footpath2.map.IndoorLocationList;
 import de.uvwxy.footpath2.tools.FootPathException;
 
 /**
@@ -24,16 +24,12 @@ public class BestFit extends MatchingAlgorithm {
 	private double all_dist = 0.0;
 	private double avg_steplength = 0.0;
 	private double[] from_map = null;
-	private List<GraphEdge> edges = null;
 	private LinkedList<Double> s = null;
 	private double[][] dyn = null;
 	private final int INITIAL_DYN_SIZE = 2;
-	private double progress = 0.0;
-	private int currentStep = 0;
 
 	boolean firstStep = false;
 
-	private IndoorLocationHistory returnedPositions = new IndoorLocationHistory();
 
 	@Override
 	public void onStepUpdate(double bearing, double steplength, long timestamp, double estimatedStepLengthError,
@@ -85,14 +81,14 @@ public class BestFit extends MatchingAlgorithm {
 			tempLen += edges.get(edgeIndex).getLen();
 		}
 
-		double tmp = progress;
-		for (int i = 0; i < edgeIndex; i++) {
-			tmp -= edges.get(i).getLen();
-		}
+//		double tmp = progress;
+//		for (int i = 0; i < edgeIndex; i++) {
+//			tmp -= edges.get(i).getLen();
+//		}
 
 		currentLocation = getPositionFromProgress();
 		returnedPositions.add(currentLocation);
-		Log.i("BESTFIT", "Progress is " + progress);
+		Log.i("FOOTPATH", "BestFit: Progress is " + progress);
 		// conf.setNpCurLen(tmp);
 		//
 		// conf.setNpPointer(edgeIndex);
@@ -121,6 +117,7 @@ public class BestFit extends MatchingAlgorithm {
 			e.setLevel(l0.getLevel());
 			edges.add(e);
 		}
+
 
 		c = new double[edges.size()][2];
 		// Setup c:
@@ -212,35 +209,5 @@ public class BestFit extends MatchingAlgorithm {
 		return ret;
 	}
 
-	private IndoorLocation getPositionFromProgress() {
-		IndoorLocation ret = new IndoorLocation("" + currentStep, "FootPath");
-		double tempProgress = progress;
-		Log.i("FOOTPATH", "BestFit: tempProgress=" + tempProgress);
-		for (int i = 0; i < edges.size() - 1; i++) {
-			if (tempProgress - edges.get(i).getLen() > 0) {
-				tempProgress -= edges.get(i).getLen();
-				Log.i("FOOTPATH", "BestFit: -> tempProgress=" + tempProgress);
-			} else {
-				Log.i("FOOTPATH", "BestFit: !! tempProgress=" + tempProgress);
-				// read: edge e_i = (loc_i, loc_(i+1))
-				IndoorLocation x = path.get(i);
-				ret.setLatitude(x.getLatitude());
-				ret.setLongitude(x.getLongitude());
-				Log.i("FOOTPATH", "BestFit: !! dist = " + x.distanceTo(path.get(i + 1)));
-				Log.i("FOOTPATH", "BestFit: !! mv factor = " + tempProgress + " / " +  x.distanceTo(path.get(i + 1))
-						+ " = " + tempProgress /  x.distanceTo(path.get(i + 1)));
 
-				ret.moveIntoDirection(path.get(i + 1),tempProgress / x.distanceTo(path.get(i + 1)) );
-				// ret=path.get(i);
-				break;
-			}
-		}
-		Log.i("FOOTPATH", "BestFit: " + ret.getLatitude() + "/ " + ret.getLongitude());
-		return ret;
-	}
-
-	@Deprecated
-	public IndoorLocationHistory _debug_getLocHist() {
-		return returnedPositions;
-	}
 }

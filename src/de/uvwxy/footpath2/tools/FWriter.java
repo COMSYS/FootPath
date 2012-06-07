@@ -45,13 +45,13 @@ public class FWriter {
 	 */
 	public void openFileOnCard() throws FileNotFoundException {
 		// check if first dir exists
-		File dir = new File(Environment.getExternalStorageDirectory(),NavigatorFootPath.LOG_DIR);
+		File dir = new File(Environment.getExternalStorageDirectory(),"routelog/");
 		if(!dir.exists()){
 			dir.mkdir();
 		}
 		// check if second dir exists
 		dir = new File(Environment.getExternalStorageDirectory(),
-				NavigatorFootPath.LOG_DIR + sub_directory);
+				"routelog/" + sub_directory);
 		if(!dir.exists()){
 			dir.mkdir();
 		}
