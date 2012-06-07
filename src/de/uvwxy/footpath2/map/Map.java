@@ -126,9 +126,9 @@ public class Map {
 		File od = new File(filePath);
 
 		// store all nodes found in file
-		LinkedList<IndoorLocation> allNodes = new LinkedList<IndoorLocation>();
+		List<IndoorLocation> allNodes = new LinkedList<IndoorLocation>();
 		// store all ways found in file
-		LinkedList<GraphWay> allWays = new LinkedList<GraphWay>();
+		List<GraphWay> allWays = new LinkedList<GraphWay>();
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setIgnoringElementContentWhitespace(true);
@@ -322,10 +322,10 @@ public class Map {
 			allWays.add(tempWay);
 		}
 
-		LinkedList<GraphWay> remainingWays = new LinkedList<GraphWay>();
+		List<GraphWay> remainingWays = new LinkedList<GraphWay>();
 
 		for (GraphWay way : allWays) { // find ways which are indoors at some point
-			LinkedList<Integer> refs = way.getRefs();
+			List<Integer> refs = way.getRefs();
 			if (way.isIndoor()) { // whole path is indoors -> keep
 				remainingWays.add(way);
 			} else { // check for path with indoor node
@@ -780,10 +780,10 @@ public class Map {
 	}
 
 	// Returns all neighbors of given node from a given subset (list) of nodes in this graph
-	private LinkedList<IndoorLocation> getNeighbours(boolean[] visited, IndoorLocation node, boolean staircase,
+	private List<IndoorLocation> getNeighbours(boolean[] visited, IndoorLocation node, boolean staircase,
 			boolean elevator, boolean outside) {
 
-		LinkedList<IndoorLocation> ret = new LinkedList<IndoorLocation>();
+		List<IndoorLocation> ret = new LinkedList<IndoorLocation>();
 		for (GraphEdge edge : node.getEdges()) { // check all edges if they contain node
 			if (edge.isStairs() && !staircase) { // edge has steps, but not
 													// allowed -> skip
