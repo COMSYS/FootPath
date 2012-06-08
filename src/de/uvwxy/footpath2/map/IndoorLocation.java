@@ -1,6 +1,7 @@
 package de.uvwxy.footpath2.map;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import android.location.Location;
 
@@ -12,7 +13,7 @@ public class IndoorLocation extends Location {
 	private int id;
 	private String mergeid;
 	private int numSteps = 0;
-	private LinkedList<GraphEdge> loc_edges;
+	private List<GraphEdge> loc_edges;
 
 	// planet radius in meters
 	private static final int r = 6378137;
@@ -86,7 +87,7 @@ public class IndoorLocation extends Location {
 		this.isInDoors = isInDoors;
 	}
 
-	public LinkedList<GraphEdge> getEdges() {
+	public List<GraphEdge> getEdges() {
 		return loc_edges;
 	}
 
