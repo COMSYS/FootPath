@@ -6,9 +6,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -1032,31 +1034,52 @@ public class Map {
 		 */
 	}
 
-	// creates a linked list form a stack, top to bottom
+	/**
+	 * creates a list form a stack, top to bottom
+	 * 
+	 * @param navPath
+	 * @return
+	 */
 	public synchronized List<GraphEdge> getPathEdges(Stack<IndoorLocation> navPath) {
-		List<GraphEdge> pathEdges = new LinkedList<GraphEdge>();
-		IndoorLocation a = navPath.pop();
-		while (!navPath.isEmpty()) {
-			IndoorLocation b = navPath.pop();
-			GraphEdge e = this.getEdge(a, b);
-			if (e != null) {
-				pathEdges.add(e);
-			} else {
-				return null;
+		// ArrayList should be more efficient here?!
+		List<GraphEdge> pathEdges = new ArrayList<GraphEdge>(navPath.size());
+
+		// we dont have a path with any edges
+		if (navPath.size() < 2)
+			return pathEdges;
+
+		// get the edges
+		Iterator<IndoorLocation> it = navPath.iterator();
+		IndoorLocation current = it.next();
+		IndoorLocation next;
+		while (it.hasNext()) {
+			next = it.next();
+			for (GraphEdge e : current.getEdges()) {
+				// this edge contains the next node
+				if (e.getNode0().equals(next) || e.getNode1().equals(next))
+					pathEdges.add(e);
+				// update current node
+				current = next;
 			}
-			a = b;
 		}
+
 		return pathEdges;
+
+		/*
+		 * IndoorLocation a = navPath.pop(); while (!navPath.isEmpty()) { IndoorLocation b = navPath.pop(); GraphEdge e
+		 * = this.getEdge(a, b); if (e != null) { pathEdges.add(e); } else { return null; } a = b; }
+		 */
 	}
 
 	/**
 	 * returns the edge containing nodes a and b<br>
-	 * TODO more efficient solution
+	 * TODO delete?!
 	 * 
 	 * @param a
 	 * @param b
 	 * @return
 	 */
+	@Deprecated
 	public synchronized GraphEdge getEdge(IndoorLocation a, IndoorLocation b) {
 		GraphEdge ret = null;
 		for (GraphEdge edge : a.getEdges()) { // return edge if
