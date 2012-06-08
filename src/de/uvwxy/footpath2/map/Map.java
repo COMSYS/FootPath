@@ -843,7 +843,6 @@ public class Map {
 	/**
 	 * Returns a stack of nodes, with the destination at the bottom using<br>
 	 * Dykstra's algorithm<br>
-	 * TODO use PriorityQueue and minDist-comparator...
 	 * 
 	 * @param from
 	 * @param to
@@ -961,12 +960,13 @@ public class Map {
 
 	/**
 	 * return node pos via binary search<br>
-	 * TODO rename method.<br>
+	 * TODO remove<br>
 	 * <i>NOTE: Collections.binarySearch() runs in O(n) on unsorted lists</i>
 	 * 
 	 * @param node
 	 * @return
 	 */
+	@Deprecated
 	private int getNodePosInIdArray(IndoorLocation node) {
 		return Collections.binarySearch(nodes, node, new IndoorLocationComparator());
 		// return nodes.indexOf(node); // O(n)
@@ -1002,7 +1002,7 @@ public class Map {
 
 	/**
 	 * This is the slower version which is used during parsing<br>
-	 * TODO remove.
+	 * TODO remove
 	 * 
 	 * @param list
 	 * @param id
@@ -1073,7 +1073,7 @@ public class Map {
 
 	/**
 	 * returns the edge containing nodes a and b<br>
-	 * TODO delete?!
+	 * TODO remove
 	 * 
 	 * @param a
 	 * @param b
@@ -1092,7 +1092,12 @@ public class Map {
 		return ret;
 	}
 
-	// returns the node with the given name, binary search
+	/**
+	 * returns the node with the given name, binary search
+	 * 
+	 * @param name
+	 * @return
+	 */
 	public synchronized IndoorLocation getNodeFromName(String name) {
 		if (map_nodes_by_name == null) {
 			initNodes();
@@ -1154,6 +1159,12 @@ public class Map {
 		}
 	}
 
+	/**
+	 * @param pos
+	 * @param level
+	 * @param indoor
+	 * @return
+	 */
 	public synchronized double getClosestDistanceToNode(IndoorLocation pos, float level, boolean indoor) {
 		double minDistance = Double.MAX_VALUE;
 		double tempDistance = Double.MAX_VALUE;
