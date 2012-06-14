@@ -91,14 +91,6 @@ public class MapFileSelector extends Activity {
 			file = new File(Environment.getExternalStorageDirectory() + "/");
 		}
 
-		// is this path readable/does it exist?!
-		if (!file.canRead()) {
-			// nope.
-			Toast.makeText(this, "path not found: " + initPath, Toast.LENGTH_LONG).show();
-			finish();
-			return;
-		}
-
 		lvFileSelectorAdapter = new FileListAdapter(this, file);
 
 		lvFileSelectorAdapter.notifyDataSetChanged();
@@ -175,6 +167,11 @@ public class MapFileSelector extends Activity {
 			this.dir = dir;
 			this.context = context;
 			inflater = LayoutInflater.from(context);
+			
+			if (!dir.exists()){
+				dir = Environment.getExternalStorageDirectory();
+			}
+			
 			goToDir(dir);
 		}
 
