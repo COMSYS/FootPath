@@ -25,7 +25,7 @@ public interface Exporter {
 	 * @param path
 	 * @return number of entries/lines cleared
 	 */
-	public int export_recentdata(String path);
+	public int export_recentData(String path);
 	
 	/**
 	 * This function can be called after exportRecentData(...) to prevent a class from consuming too much memory.

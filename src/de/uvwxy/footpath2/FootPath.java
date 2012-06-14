@@ -15,6 +15,7 @@ import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.util.Log;
 import de.uvwxy.footpath.Rev;
+import de.uvwxy.footpath2.log.ExportManager;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.IndoorLocationList;
 import de.uvwxy.footpath2.map.Map;
@@ -32,10 +33,13 @@ import de.uvwxy.footpath2.types.FP_MovementDetection;
 /**
  * This class will be the main interface to use footpath.
  * 
- * @author paul
+ * @author Paul Smith
  * 
  */
 public class FootPath {
+	
+	private static FootPath thisInstance = null;
+	
 	private final Context context;
 	private final Map map;
 	private final SensorEventDistributor sensorEventDistributor;
@@ -44,11 +48,22 @@ public class FootPath {
 	private FP_MovementDetection settingsMovementDetection;
 	private FP_MatchingAlgorithm settingsMatchingAlgorithm;
 	private FP_LocationProvider settingsLocationProvider;
-
-	// TODO: make this simpleton?
-	public FootPath(Context context) {
+	private ExportManager exportManager;
+	
+	
+	public static FootPath getInstance(Context context){
+		if (thisInstance == null){
+			thisInstance = new FootPath(context);
+		}
+		
+		return thisInstance;
+	}
+	
+	private FootPath(Context context) {
 		this.context = context;
 		sensorEventDistributor = SensorEventDistributor.getInstance(context);
+		exportManager = ExportManager.getInstance();
+		exportManager.add(sensorEventDistributor);
 		map = new Map();
 	}
 
@@ -57,10 +72,12 @@ public class FootPath {
 	}
 
 	private void exampleUsage() throws FootPathException {
-
+		
 		// initialization
 		FootPath fp = new FootPath(null);
 
+		_a4_loadMapDataFromXMLFile("file.osm");
+		
 		// movement input and location output setup
 		_b_setMovementDetection(FP_MovementDetection.MOVEMENT_DETECTION_STEPS);
 		_c_setMatchingAlgorithm(FP_MatchingAlgorithm.MATCHING_BEST_FIT);

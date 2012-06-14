@@ -228,7 +228,7 @@ public class SensorEventDistributor implements Exporter, SensorEventListener {
 	}
 
 	@Override
-	public int export_recentdata(String path) {
+	public int export_recentData(String path) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
