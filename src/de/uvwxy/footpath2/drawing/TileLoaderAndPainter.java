@@ -1,4 +1,4 @@
-package de.uvwxy.footpath2.tools;
+package de.uvwxy.footpath2.drawing;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 import de.uvwxy.footpath2.map.IndoorLocation;
+import de.uvwxy.footpath2.tools.GeoUtils;
 
 public class TileLoaderAndPainter implements DrawToCanvas {
 

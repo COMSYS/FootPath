@@ -1,4 +1,4 @@
-package de.uvwxy.footpath2.tools.log;
+package de.uvwxy.footpath2.log;
 
 /**
  * To maintain a consistent logging functionality this interface should be implemented and the implementing classes

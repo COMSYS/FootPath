@@ -16,10 +16,10 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.uvwxy.footpath.R;
+import de.uvwxy.footpath2.drawing.DrawToCanvasWrapper;
+import de.uvwxy.footpath2.drawing.PaintBoxDrawToCanvasWrapper;
 import de.uvwxy.footpath2.movement.SensorEventDistributor;
 import de.uvwxy.footpath2.movement.steps.StepDetectionImpl;
-import de.uvwxy.footpath2.tools.DrawToCanvasWrapper;
-import de.uvwxy.footpath2.tools.PaintBoxDrawToCanvasWrapper;
 
 /**
  * Author: paul Date: May 9, 2012 2:13:56 PM

@@ -14,12 +14,12 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.os.Handler;
 import android.util.Log;
+import de.uvwxy.footpath2.drawing.DrawToCanvas;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.movement.MovementDetection;
 import de.uvwxy.footpath2.movement.SensorHistory;
 import de.uvwxy.footpath2.movement.SensorTriple;
 import de.uvwxy.footpath2.movement.StepEventListener;
-import de.uvwxy.footpath2.tools.DrawToCanvas;
 
 public class StepDetectionImpl extends MovementDetection implements SensorEventListener, StepDetection, DrawToCanvas {
 	private static final String PREF_ID = "SENSOR_STEP_HISTORY_SETTINS";

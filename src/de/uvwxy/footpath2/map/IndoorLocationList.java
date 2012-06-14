@@ -10,7 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.location.Location;
 import android.os.Environment;
-import de.uvwxy.footpath2.tools.DrawToCanvas;
+import de.uvwxy.footpath2.drawing.DrawToCanvas;
 import de.uvwxy.footpath2.tools.GeoUtils;
 
 /**

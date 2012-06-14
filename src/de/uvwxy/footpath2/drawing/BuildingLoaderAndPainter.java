@@ -1,4 +1,4 @@
-package de.uvwxy.footpath2.tools;
+package de.uvwxy.footpath2.drawing;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +24,7 @@ import android.util.Log;
 import de.uvwxy.footpath2.map.GraphEdge;
 import de.uvwxy.footpath2.map.GraphWay;
 import de.uvwxy.footpath2.map.IndoorLocation;
+import de.uvwxy.footpath2.tools.GeoUtils;
 
 public class BuildingLoaderAndPainter {
 	private static final double ARC_DISTANCE_PER_DEGREE = 60 * 1852;

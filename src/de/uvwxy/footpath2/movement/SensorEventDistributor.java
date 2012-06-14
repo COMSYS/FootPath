@@ -9,7 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
-import de.uvwxy.footpath2.tools.log.Exporter;
+import de.uvwxy.footpath2.log.Exporter;
 
 /**
  * The current idea behind yet another SensorEventManager is that we can here, globally filter/modify/log the sensor

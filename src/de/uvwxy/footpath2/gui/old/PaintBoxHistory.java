@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import de.uvwxy.footpath2.tools.PaintBox;
+import de.uvwxy.footpath2.drawing.PaintBox;
 import de.uvwxy.footpath2.tools.ToolBox;
 
 /**

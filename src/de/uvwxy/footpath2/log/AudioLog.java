@@ -1,4 +1,4 @@
-package de.uvwxy.footpath2.tools;
+package de.uvwxy.footpath2.log;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import android.os.Environment;
  * 
  * Usage:
  * 
- * 	o = new AudioWriter()
+ * 	o = new AudioLog()
  * 	o.registerCapture()
  * 	o.startCapture()
  * 	[... magic moment in time ...]
@@ -27,7 +27,7 @@ import android.os.Environment;
  * @author Paul Smith
  * 
  */
-public class AudioWriter {
+public class AudioLog {
 	private MediaRecorder recorder;
 	private String filePath;
 		
@@ -36,9 +36,9 @@ public class AudioWriter {
 	 * 
 	 * @param fileName  the file name
 	 */
-	public AudioWriter(String sub_directory, String fileName) {
+	public AudioLog(String subdirectory, String fileName) {
 		File dir = new File(Environment.getExternalStorageDirectory(),
-				"routelog/" + sub_directory);
+				"routelog/" + subdirectory);
 		dir.mkdir();
 		this.filePath = dir.getAbsolutePath() + "/" + fileName;
 	}
@@ -49,7 +49,7 @@ public class AudioWriter {
 	 * @throws IllegalStateException
 	 * @throws IOException
 	 */
-	public void registerCapture() throws IllegalStateException, IOException {
+	public void _a_registerCapture() throws IllegalStateException, IOException {
 		recorder = new MediaRecorder();
 		recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
@@ -61,14 +61,14 @@ public class AudioWriter {
 	/**
 	 * Call this to start capture
 	 */
-	public void startCapture() {
+	public void _b_startCapture() {
 		recorder.start();
 	}
 
 	/**
 	 * Call this to stop capture
 	 */
-	public void stopCapture() {
+	public void _c_stopCapture() {
 		recorder.stop();
 		recorder.reset();
 	}
@@ -76,7 +76,7 @@ public class AudioWriter {
 	/**
 	 * Call this to release capture device
 	 */
-	public void unregisterCapture() {
+	public void _d_unregisterCapture() {
 		recorder.release();
 	}
 

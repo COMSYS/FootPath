@@ -19,10 +19,10 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Environment;
 import android.util.Log;
+import de.uvwxy.footpath2.drawing.PaintBox;
+import de.uvwxy.footpath2.drawing.Tile;
 import de.uvwxy.footpath2.map.GraphEdge;
 import de.uvwxy.footpath2.map.IndoorLocation;
-import de.uvwxy.footpath2.tools.PaintBox;
-import de.uvwxy.footpath2.tools.Tile;
 import de.uvwxy.footpath2.tools.ToolBox;
 
 /**

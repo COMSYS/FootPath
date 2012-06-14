@@ -1,4 +1,4 @@
-package de.uvwxy.footpath2.tools.log;
+package de.uvwxy.footpath2.log;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

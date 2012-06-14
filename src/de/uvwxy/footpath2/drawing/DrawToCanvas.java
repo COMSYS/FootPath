@@ -1,4 +1,4 @@
-package de.uvwxy.footpath2.tools;
+package de.uvwxy.footpath2.drawing;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
