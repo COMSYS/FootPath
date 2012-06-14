@@ -22,8 +22,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 import de.uvwxy.footpath.R;
+import de.uvwxy.footpath2.tools.FileNameFilterFromStringArrayWithDirectores;
 
 /**
  * Author: paul Date: May 11, 2012 7:10:40 PM
@@ -38,9 +38,8 @@ public class MapFileSelector extends Activity {
 	private TextView tvSelectedFile = null;
 	private Button btnLoad = null;
 	private File selectedFile = null;
-
+	private FileNameFilterFromStringArrayWithDirectores filter = null;
 	private String initPath = null;
-	private String[] filter = null;
 
 	// ####################################################################
 	// Listener, Callbacks
@@ -55,14 +54,8 @@ public class MapFileSelector extends Activity {
 		setContentView(R.layout.map_file_selector);
 		initPath = getIntent().getStringExtra("INIT_PATH");
 		String buf = getIntent().getStringExtra("FILTER");
-		if (buf != null) {
-			filter = buf.split(",");
-			for (String f : filter) {
-				Log.i("FOOTPATH", "Filtering \"" + f + "\"");
-			}
-		} else {
-			Log.i("FOOTPATH", "Using no filtering");
-		}
+
+		filter = new FileNameFilterFromStringArrayWithDirectores(buf.split(","));
 
 		lvFileSelector = (ListView) findViewById(R.id.lvFileSelector);
 
@@ -167,11 +160,11 @@ public class MapFileSelector extends Activity {
 			this.dir = dir;
 			this.context = context;
 			inflater = LayoutInflater.from(context);
-			
-			if (!dir.exists()){
+
+			if (!dir.exists()) {
 				dir = Environment.getExternalStorageDirectory();
 			}
-			
+
 			goToDir(dir);
 		}
 
@@ -182,46 +175,11 @@ public class MapFileSelector extends Activity {
 
 		public synchronized void goToDir(File dir) {
 			this.dir = dir;
-			files = new LinkedList<File>(Arrays.asList(dir.listFiles()));
-			filter();
+			files = new LinkedList<File>(Arrays.asList(dir.listFiles(filter)));
+			// filter();
 			sort();
 			tvCurrentDirectory.setText("Current directory:\n" + dir.getAbsolutePath() + "/");
 
-		}
-
-		private synchronized void filter() {
-			// TODO: use this code:
-			// String[] endingsToFilter = {"osm","xml"};
-			// FileNameFilterFromStringArray fileFilter = new FileNameFilterFromStringArray(endingsToFilter);
-			// File[] files = searchFolder.listFiles(fileFilter);
-
-			Log.i("FOOTPATH", "size: " + files.size());
-			LinkedList<File> toRemove = new LinkedList<File>();
-
-			for (File f : files) {
-				if (f.isFile()) {
-					String buf = f.getName();
-					// note: minimum accepted filename: a.bc
-					if (buf.length() >= 4) {
-						String[] s = buf.split("\\.");
-						if (s.length != 0) {
-							String ending = s[s.length - 1];
-							boolean keep = false;
-							for (String e : filter) {
-								if (ending.equals(e)) {
-									keep = true;
-								}
-							}
-							if (!keep)
-								toRemove.add(f);
-						}
-					}
-				}
-			}
-
-			for (File f : toRemove) {
-				files.remove(f);
-			}
 		}
 
 		@Override
