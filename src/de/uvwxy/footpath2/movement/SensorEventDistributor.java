@@ -9,7 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
-import de.uvwxy.footpath2.tools.Loggable;
+import de.uvwxy.footpath2.tools.log.Exporter;
 
 /**
  * The current idea behind yet another SensorEventManager is that we can here, globally filter/modify/log the sensor
@@ -21,7 +21,7 @@ import de.uvwxy.footpath2.tools.Loggable;
  * @author Paul Smith
  * 
  */
-public class SensorEventDistributor implements Loggable, SensorEventListener {
+public class SensorEventDistributor implements Exporter, SensorEventListener {
 	private boolean running = false;
 	private static SensorEventDistributor thisInstance = null;
 	private List<SensorEventListener> linearAccelerometerEventListenerList;
@@ -174,11 +174,6 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 		sm.unregisterListener(this);
 	}
 
-	@Override
-	public void exportData(String path) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -224,5 +219,29 @@ public class SensorEventDistributor implements Loggable, SensorEventListener {
 			}
 			break;
 		}
+	}
+
+	@Override
+	public int export_allData(String path) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int export_recentdata(String path) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int export_clearData() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int export_consumedBytes() {
+		// TODO Auto-generated method stub
+		return 0;
 	};
 }
