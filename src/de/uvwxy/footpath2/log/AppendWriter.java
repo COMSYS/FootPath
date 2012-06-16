@@ -11,35 +11,23 @@ import android.os.Environment;
 import android.util.Log;
 
 public class AppendWriter {
-	private static final String directory = "footpath_exports/";
+	private ExportManager em = ExportManager.getInstance();
 	private String path = null;
 	private String filename = null;
 	private BufferedOutputStream fos;
 	private PrintWriter p;
 
-	public AppendWriter(String subdirectory, String filename) {
-
-		// check if first dir exists
-		File dir = new File(Environment.getExternalStorageDirectory(), directory);
-		if (!dir.exists()) {
-			dir.mkdir();
-		}
-
-		// check if second dir exists
-		dir = new File(Environment.getExternalStorageDirectory(), directory + subdirectory);
-		if (!dir.exists()) {
-			dir.mkdir();
-		}
-
-		path = dir.getAbsolutePath();
-
+	public AppendWriter(String filename) {
 		this.filename = filename;
+		File f = new File(Environment.getExternalStorageDirectory(), em.getDirectory() + em.getSubdirectory());
+		path = f.getAbsolutePath();
 	}
 
 	public boolean openFile(boolean append) {
 		// check if file exists
 		try {
-			fos = new BufferedOutputStream(new FileOutputStream(path + filename));
+			Log.i("FOOTPATH", "Opening file " + path + "/" + filename);
+			fos = new BufferedOutputStream(new FileOutputStream(path + "/" + filename, append));
 			p = new PrintWriter(fos);
 		} catch (IOException e) {
 			Log.i("FOOTPATH", "ERROR: " + e.toString());
@@ -66,6 +54,8 @@ public class AppendWriter {
 	}
 
 	public void closeFile() {
+		Log.i("FOOTPATH", "Closing file " + path + "/" + filename);
+		p.flush();
 		p.close();
 		try {
 			fos.close();

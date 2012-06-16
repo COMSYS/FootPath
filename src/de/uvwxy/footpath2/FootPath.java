@@ -63,7 +63,6 @@ public class FootPath {
 		this.context = context;
 		sensorEventDistributor = SensorEventDistributor.getInstance(context);
 		exportManager = ExportManager.getInstance();
-		exportManager.add(sensorEventDistributor);
 		map = new Map();
 	}
 
@@ -242,6 +241,7 @@ public class FootPath {
 	public void _h_start() throws FootPathException {
 		// TODO:
 		matchingAlgorithm.init();
+		sensorEventDistributor.registerExportData();
 		sensorEventDistributor._a_startSensorUpdates();
 		movementDetection._a_startMovementDetection();
 

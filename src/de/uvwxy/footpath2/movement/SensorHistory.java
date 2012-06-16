@@ -12,8 +12,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.location.Location;
+import de.uvwxy.footpath2.log.AppendWriter;
+import de.uvwxy.footpath2.log.Exporter;
 
-public class SensorHistory implements Serializable {
+public class SensorHistory implements Serializable, Exporter {
 	private final List<SensorTriple> list = new LinkedList<SensorTriple>();
 
 	private static final long serialVersionUID = 5777397679052032803L;
@@ -327,4 +329,72 @@ public class SensorHistory implements Serializable {
 	public <T> T[] toArray(T[] array) {
 		return list.toArray(array);
 	}
+
+	private int last_i = 0;
+
+	@Override
+	public int export_allData(String filename) {
+		AppendWriter a = new AppendWriter(filename);
+		int size = list.size();
+		last_i = size;
+		// append = true
+		a.openFile(true);
+		SensorTriple triple;
+		for (int i = 0; i < size; i++) {
+			triple = list.get(i);
+			a.appendLineToFile(triple.toCSVLine());
+		}
+
+		a.closeFile();
+		return size;
+	}
+
+	@Override
+	public int export_recentData(String filename) {
+		AppendWriter a = new AppendWriter(filename);
+		a.openFile(true);
+
+		int size = list.size();
+		int sum = size - last_i;
+
+		SensorTriple triple;
+
+		for (int i = last_i; i < size; i++) {
+			triple = list.get(i);
+			a.appendLineToFile(triple.toCSVLine());
+		}
+
+		a.closeFile();
+		last_i = size;
+		return sum;
+	}
+
+	@Override
+	public int export_clearRecentData() {
+		int ret = last_i;
+		for (int i = 0; i < last_i; i++) {
+			list.remove(0);
+		}
+		last_i = 0;
+		return ret;
+	}
+
+	@Override
+	public int export_clearAllData() {
+		int size = list.size();
+		list.clear();
+		last_i = 0;
+		return size;
+	}
+
+	@Override
+	public int export_consumedBytes() {
+		if (list.size() == 0) {
+			return 0;
+		} else {
+			// num of floats in values + float + long
+			return list.size() * (list.get(0).getValues().length * 4 + 4 + 8);
+		}
+	}
+
 }

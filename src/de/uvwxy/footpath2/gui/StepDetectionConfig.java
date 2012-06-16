@@ -18,6 +18,8 @@ import android.widget.Toast;
 import de.uvwxy.footpath.R;
 import de.uvwxy.footpath2.drawing.DrawToCanvasWrapper;
 import de.uvwxy.footpath2.drawing.PaintBoxDrawToCanvasWrapper;
+import de.uvwxy.footpath2.log.ExportManager;
+import de.uvwxy.footpath2.log.ExportManager.IntervalExportBehavior;
 import de.uvwxy.footpath2.movement.SensorEventDistributor;
 import de.uvwxy.footpath2.movement.steps.StepDetectionImpl;
 
@@ -91,6 +93,9 @@ public class StepDetectionConfig extends Activity implements DrawToCanvasWrapper
 		seekbarOnChangeListener.onProgressChanged(sbStepTimeOutControl, (stepDetection.getStepTimeOut()), false);
 		seekbarOnChangeListener
 				.onProgressChanged(sbStandingTimeOutControl, (stepDetection.getStandingTimeOut()), false);
+		ExportManager em = ExportManager.getInstance();
+		em.setBehavior(IntervalExportBehavior.EXPORT_RECENTDATA);
+		em.startIntervalExporting(2500);
 	}
 
 	@Override
@@ -99,6 +104,8 @@ public class StepDetectionConfig extends Activity implements DrawToCanvasWrapper
 		if (stepDetection != null) {
 			stepDetection._b1_pauseMovementDetection();
 			sensorEventDistributor._b1_pauseSensorUpdates();
+			ExportManager em = ExportManager.getInstance();
+			em.stopIntervalExporting();
 		}
 	}
 
@@ -119,6 +126,7 @@ public class StepDetectionConfig extends Activity implements DrawToCanvasWrapper
 			sensorEventDistributor.addLinearAccelerometerListener(stepDetection);
 			sensorEventDistributor.addGravityListener(stepDetection);
 			sensorEventDistributor._a_startSensorUpdates();
+			sensorEventDistributor.registerExportData();
 		}
 	}
 

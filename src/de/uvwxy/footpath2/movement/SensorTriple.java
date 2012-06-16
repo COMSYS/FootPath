@@ -1,5 +1,7 @@
 package de.uvwxy.footpath2.movement;
 
+import android.hardware.Sensor;
+
 //hier variable anzahl an elementen - irgendwie blöd - oder?!
 public class SensorTriple {
 	public final static int NUM_ELEMENTS = 3;
@@ -45,5 +47,18 @@ public class SensorTriple {
 	 */
 	public int getType() {
 		return type;
+	}
+
+	public String toCSVLine() {
+		String buf = "" + ts;
+
+		if (values != null) {
+			for (float f : values) {
+				buf += ", " + f;
+			}
+		} else {
+			buf += ", DATA = NULL";
+		}	
+		return buf;
 	}
 }

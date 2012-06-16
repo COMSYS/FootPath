@@ -9,7 +9,10 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
+import de.uvwxy.footpath2.log.AppendWriter;
+import de.uvwxy.footpath2.log.ExportManager;
 import de.uvwxy.footpath2.log.Exporter;
+import de.uvwxy.footpath2.log.ExportManager.IntervalExportBehavior;
 
 /**
  * The current idea behind yet another SensorEventManager is that we can here, globally filter/modify/log the sensor
@@ -21,7 +24,7 @@ import de.uvwxy.footpath2.log.Exporter;
  * @author Paul Smith
  * 
  */
-public class SensorEventDistributor implements Exporter, SensorEventListener {
+public class SensorEventDistributor implements  SensorEventListener {
 	private boolean running = false;
 	private static SensorEventDistributor thisInstance = null;
 	private List<SensorEventListener> linearAccelerometerEventListenerList;
@@ -33,7 +36,8 @@ public class SensorEventDistributor implements Exporter, SensorEventListener {
 	private static SensorManager sm;
 	private List<Sensor> lSensor;
 	private static Context context;
-
+	private ExportManager em = ExportManager.getInstance();
+	
 	/**
 	 * Initialize the SensorEventDistributor. Only the first provided context is considered.
 	 * 
@@ -61,9 +65,6 @@ public class SensorEventDistributor implements Exporter, SensorEventListener {
 		if (linearAccelerometerEventListenerList == null) {
 			linearAccelerometerEventListenerList = new LinkedList<SensorEventListener>();
 		}
-		if (running) {
-			// TODO: if running start lin acc events if first listener
-		}
 		Log.i("FOOTPATH", "Adding Acc Ev Lis");
 		linearAccelerometerEventListenerList.add(sel);
 	}
@@ -71,10 +72,6 @@ public class SensorEventDistributor implements Exporter, SensorEventListener {
 	public void removeLinearAccelerometerListener(SensorEventListener sel) {
 		if (linearAccelerometerEventListenerList == null || sel == null) {
 			return;
-		}
-		if (linearAccelerometerEventListenerList.size() == 0) {
-			// TODO: remove lin acc events if last listener
-
 		}
 		Log.i("FOOTPATH", "Removing Acc Ev Lis");
 		linearAccelerometerEventListenerList.remove(sel);
@@ -84,9 +81,6 @@ public class SensorEventDistributor implements Exporter, SensorEventListener {
 		if (orientationEventListenerList == null) {
 			orientationEventListenerList = new LinkedList<SensorEventListener>();
 		}
-		if (running) {
-			// TODO: if running start orientation events if first listener
-		}
 		Log.i("FOOTPATH", "Adding orientation listener");
 		orientationEventListenerList.add(sel);
 	}
@@ -94,10 +88,6 @@ public class SensorEventDistributor implements Exporter, SensorEventListener {
 	public void removeOrientationListener(SensorEventListener sel) {
 		if (orientationEventListenerList == null || sel == null) {
 			return;
-		}
-		if (orientationEventListenerList.size() == 0) {
-			// TODO: remove orientation events if last listener
-
 		}
 		Log.i("FOOTPATH", "Removing orientation listener");
 		orientationEventListenerList.remove(sel);
@@ -107,9 +97,6 @@ public class SensorEventDistributor implements Exporter, SensorEventListener {
 		if (gravityEventListenerList == null) {
 			gravityEventListenerList = new LinkedList<SensorEventListener>();
 		}
-		if (running) {
-			// TODO: if running start lin acc events if first listener
-		}
 		Log.i("FOOTPATH", "Adding Grav Ev Lis");
 		gravityEventListenerList.add(sel);
 	}
@@ -118,16 +105,34 @@ public class SensorEventDistributor implements Exporter, SensorEventListener {
 		if (gravityEventListenerList == null || sel == null) {
 			return;
 		}
-		if (gravityEventListenerList.size() == 0) {
-			// TODO: remove grav events if last listener
-
-		}
 		Log.i("FOOTPATH", "Removing Gravity Ev Lis");
 		gravityEventListenerList.remove(sel);
 	}
 
 	public synchronized boolean isRunning() {
 		return running;
+	}
+	
+	/**
+	 * This method is to be called to register wanted loggers for sensors.
+	 */
+	public void registerExportData(){
+		// TODO: extract this information from config later
+		boolean regLinAcc = true;
+		boolean regOrientation = true;
+		boolean regGravity = true;
+		
+		if (regLinAcc){
+			em.add("linearAccelerometerHistory", linearAccelerometerHistory);
+		}
+		
+		if (regOrientation){
+			em.add("orientationHistory", orientationHistory);
+		}
+		
+		if (regGravity){
+			em.add("gravityHistory", gravityHistory);
+		}		
 	}
 
 	private void initSensorsForExistingListeners() {
@@ -174,7 +179,6 @@ public class SensorEventDistributor implements Exporter, SensorEventListener {
 		sm.unregisterListener(this);
 	}
 
-
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		// TODO Auto-generated method stub
@@ -220,28 +224,4 @@ public class SensorEventDistributor implements Exporter, SensorEventListener {
 			break;
 		}
 	}
-
-	@Override
-	public int export_allData(String path) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int export_recentData(String path) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int export_clearData() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int export_consumedBytes() {
-		// TODO Auto-generated method stub
-		return 0;
-	};
 }
