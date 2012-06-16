@@ -94,8 +94,9 @@ public class StepDetectionConfig extends Activity implements DrawToCanvasWrapper
 		seekbarOnChangeListener
 				.onProgressChanged(sbStandingTimeOutControl, (stepDetection.getStandingTimeOut()), false);
 		ExportManager em = ExportManager.getInstance();
-		em.setBehavior(IntervalExportBehavior.EXPORT_RECENTDATA);
-		em.startIntervalExporting(2500);
+		em.setBehavior(IntervalExportBehavior.EXPORT_RECENTDATA); // only exporting, no clearing of data
+		em.startIntervalExporting(15*1000); // save data each 10 seconds
+		em.setByteThreshold(0); // direct saving
 	}
 
 	@Override
@@ -106,6 +107,7 @@ public class StepDetectionConfig extends Activity implements DrawToCanvasWrapper
 			sensorEventDistributor._b1_pauseSensorUpdates();
 			ExportManager em = ExportManager.getInstance();
 			em.stopIntervalExporting();
+			em.export_recentData(); // save new data on exit.
 		}
 	}
 

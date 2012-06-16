@@ -24,7 +24,7 @@ import de.uvwxy.footpath2.log.ExportManager.IntervalExportBehavior;
  * @author Paul Smith
  * 
  */
-public class SensorEventDistributor implements  SensorEventListener {
+public class SensorEventDistributor implements SensorEventListener {
 	private boolean running = false;
 	private static SensorEventDistributor thisInstance = null;
 	private List<SensorEventListener> linearAccelerometerEventListenerList;
@@ -37,7 +37,7 @@ public class SensorEventDistributor implements  SensorEventListener {
 	private List<Sensor> lSensor;
 	private static Context context;
 	private ExportManager em = ExportManager.getInstance();
-	
+
 	/**
 	 * Initialize the SensorEventDistributor. Only the first provided context is considered.
 	 * 
@@ -112,27 +112,27 @@ public class SensorEventDistributor implements  SensorEventListener {
 	public synchronized boolean isRunning() {
 		return running;
 	}
-	
+
 	/**
 	 * This method is to be called to register wanted loggers for sensors.
 	 */
-	public void registerExportData(){
+	public void registerExportData() {
 		// TODO: extract this information from config later
 		boolean regLinAcc = true;
 		boolean regOrientation = true;
 		boolean regGravity = true;
-		
-		if (regLinAcc){
+
+		if (regLinAcc) {
 			em.add("linearAccelerometerHistory", linearAccelerometerHistory);
 		}
-		
-		if (regOrientation){
+
+		if (regOrientation) {
 			em.add("orientationHistory", orientationHistory);
 		}
-		
-		if (regGravity){
+
+		if (regGravity) {
 			em.add("gravityHistory", gravityHistory);
-		}		
+		}
 	}
 
 	private void initSensorsForExistingListeners() {
@@ -166,7 +166,8 @@ public class SensorEventDistributor implements  SensorEventListener {
 
 	public synchronized void _b1_pauseSensorUpdates() {
 		running = false;
-		sm.unregisterListener(this);
+		if (sm != null)
+			sm.unregisterListener(this);
 	};
 
 	public synchronized void _b2_unPauseSensorUpdates() {
@@ -176,7 +177,8 @@ public class SensorEventDistributor implements  SensorEventListener {
 
 	public synchronized void _c_stopSensorUpdates() {
 		running = false;
-		sm.unregisterListener(this);
+		if (sm != null)
+			sm.unregisterListener(this);
 	}
 
 	@Override

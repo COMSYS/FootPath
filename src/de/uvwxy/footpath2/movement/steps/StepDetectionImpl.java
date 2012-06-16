@@ -56,7 +56,6 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		jumpPeak = settings.getFloat("jumpPeak", 8.0f);
 		step_timeout_ms = settings.getInt("step_timeout_ms", 666);
 		standing_timeout_ms = settings.getInt("standing_timeout_ms", 1234);
-
 	}
 
 	/*

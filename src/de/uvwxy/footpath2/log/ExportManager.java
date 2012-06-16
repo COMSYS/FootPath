@@ -27,7 +27,7 @@ public class ExportManager {
 	private IntervalExportBehavior behavior = IntervalExportBehavior.EXPORT_RECENTDATA;
 	private static final String directory = "footpath_exports/";
 	private static String subdirectory = null;
-	private int byteThreshold = 102400; // 100kb
+	private int byteThreshold = 0; // number of bytes or 0 for direct save
 
 	public enum IntervalExportBehavior {
 		EXPORT_ALLDATA, EXPORT_AND_CLEAR_ALLDATA, EXPORT_RECENTDATA, EXPORT_AND_CLEAR_RECENTDATA, CLEAR_ALLDATA
@@ -81,7 +81,8 @@ public class ExportManager {
 
 	public void startIntervalExporting(long ms) {
 		delayMillis = ms;
-		unPauseHandler();
+		if (mHandlerStop = true) // only start once!
+			unPauseHandler();
 	}
 
 	public void stopIntervalExporting() {

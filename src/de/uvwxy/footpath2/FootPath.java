@@ -16,6 +16,7 @@ import android.location.Location;
 import android.util.Log;
 import de.uvwxy.footpath.Rev;
 import de.uvwxy.footpath2.log.ExportManager;
+import de.uvwxy.footpath2.log.ExportManager.IntervalExportBehavior;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.IndoorLocationList;
 import de.uvwxy.footpath2.map.Map;
@@ -37,9 +38,11 @@ import de.uvwxy.footpath2.types.FP_MovementDetection;
  * 
  */
 public class FootPath {
-	
+
+	private static final long EXPORT_INTERVALL = 15000;
+
 	private static FootPath thisInstance = null;
-	
+
 	private final Context context;
 	private final Map map;
 	private final SensorEventDistributor sensorEventDistributor;
@@ -49,20 +52,22 @@ public class FootPath {
 	private FP_MatchingAlgorithm settingsMatchingAlgorithm;
 	private FP_LocationProvider settingsLocationProvider;
 	private ExportManager exportManager;
-	
-	
-	public static FootPath getInstance(Context context){
-		if (thisInstance == null){
+
+	public static FootPath getInstance(Context context) {
+		if (thisInstance == null) {
 			thisInstance = new FootPath(context);
 		}
-		
+
 		return thisInstance;
 	}
-	
+
 	private FootPath(Context context) {
 		this.context = context;
 		sensorEventDistributor = SensorEventDistributor.getInstance(context);
+		sensorEventDistributor.registerExportData();
 		exportManager = ExportManager.getInstance();
+		exportManager.setBehavior(IntervalExportBehavior.EXPORT_RECENTDATA);
+		exportManager.setByteThreshold(0);
 		map = new Map();
 	}
 
@@ -71,12 +76,12 @@ public class FootPath {
 	}
 
 	private void exampleUsage() throws FootPathException {
-		
+
 		// initialization
 		FootPath fp = new FootPath(null);
 
 		_a4_loadMapDataFromXMLFile("file.osm");
-		
+
 		// movement input and location output setup
 		_b_setMovementDetection(FP_MovementDetection.MOVEMENT_DETECTION_STEPS);
 		_c_setMatchingAlgorithm(FP_MatchingAlgorithm.MATCHING_BEST_FIT);
@@ -241,27 +246,38 @@ public class FootPath {
 	public void _h_start() throws FootPathException {
 		// TODO:
 		matchingAlgorithm.init();
-		sensorEventDistributor.registerExportData();
+		exportManager.startIntervalExporting(EXPORT_INTERVALL);
 		sensorEventDistributor._a_startSensorUpdates();
 		movementDetection._a_startMovementDetection();
 
 	}
 
 	public void _i1_pause() {
-		sensorEventDistributor._b1_pauseSensorUpdates();
-		movementDetection._b1_pauseMovementDetection();
+		if (exportManager != null) {
+			exportManager.stopIntervalExporting();
+			exportManager.export_recentData();
+		}
+		if (sensorEventDistributor != null)
+			sensorEventDistributor._b1_pauseSensorUpdates();
+		if (movementDetection != null)
+			movementDetection._b1_pauseMovementDetection();
 	}
 
 	public void _i2_unpause() {
+		exportManager.startIntervalExporting(EXPORT_INTERVALL);
 		sensorEventDistributor._b2_unPauseSensorUpdates();
 		movementDetection._b2_unPauseMovementDetection();
 	}
 
-	public int _j_stop() {
-		sensorEventDistributor._c_stopSensorUpdates();
-		movementDetection._c_stopMovementDetection();
-
-		return 0;
+	public void _j_stop() {
+		if (exportManager != null) {
+			exportManager.stopIntervalExporting();
+			exportManager.export_recentData();
+		}
+		if (sensorEventDistributor != null)
+			sensorEventDistributor._c_stopSensorUpdates();
+		if (movementDetection != null)
+			movementDetection._c_stopMovementDetection();
 	}
 
 	@Deprecated
