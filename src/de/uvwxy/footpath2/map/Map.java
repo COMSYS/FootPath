@@ -30,6 +30,7 @@ import org.xml.sax.SAXException;
 
 import android.os.Environment;
 import android.util.Log;
+import de.uvwxy.footpath2.drawing.OSM2DBuilding;
 
 /**
  * This class is used to create a graph from XML files stored in the directory res/xml. Data from multiple files/layers
@@ -47,6 +48,8 @@ public class Map {
 	private final SortedMap<Integer, IndoorLocation> map_nodes_by_id;
 	private final SortedMap<String, IndoorLocation> map_nodes_by_name;
 
+	private OSM2DBuilding osm2Dbuilding = new OSM2DBuilding();
+
 	public Map() {
 		Log.i("FOOTPATH", "Creating empty map");
 		nodes = new LinkedList<IndoorLocation>();
@@ -56,6 +59,11 @@ public class Map {
 		map_nodes_by_name = new TreeMap<String, IndoorLocation>();
 	}
 
+	public OSM2DBuilding getOsm2Dbuilding() {
+		return osm2Dbuilding;
+	}
+	
+	
 	public synchronized boolean writeGraphToXMLFile(String filePath) throws IOException {
 
 		boolean mExternalStorageAvailable = false;
@@ -277,7 +285,55 @@ public class Map {
 
 		for (GraphWay way : allWays) { // find ways which are indoors at some point
 			List<Integer> refs = way.getRefs();
-			if (way.isIndoor()) { // whole path is indoors -> keep
+			if (way.getBuildingpart()!=null){
+				if (way.getBuildingpart().equals("wall")){
+					if (way.getIndoor().equals("yes")){
+						if (way.getArea().equals("yes")){
+							LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
+							addWayAsEdgesToList(temp,way,allNodes);
+							// areas are lists of lists
+							osm2Dbuilding.walls_inner_area.add(temp);
+						} else  {
+							addWayAsEdgesToList(osm2Dbuilding.walls_inner,way,allNodes);
+							// areas are lists of lists
+						}
+					} else if (way.getIndoor().equals("no")){
+						if (way.getArea().equals("yes")){
+							LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
+							addWayAsEdgesToList(temp,way,allNodes);
+							// areas are lists of lists
+							osm2Dbuilding.walls_outer_area.add(temp);
+						} else  {
+							addWayAsEdgesToList(osm2Dbuilding.walls_outer,way,allNodes);
+							// areas are lists of lists
+						}
+					}
+				} else if (way.getBuildingpart().equals("elevator"))  {
+					if (way.getArea().equals("yes")){
+						LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
+						addWayAsEdgesToList(temp,way,allNodes);
+						// areas are lists of lists
+						osm2Dbuilding.elevators_area.add(temp);
+					} else  {
+						addWayAsEdgesToList(osm2Dbuilding.elevators,way,allNodes);
+						// areas are lists of lists
+					}
+				} else if (way.getBuildingpart().equals("steps"))  {
+					if (way.getArea().equals("yes")){
+						LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
+						addWayAsEdgesToList(temp,way,allNodes);
+						// areas are lists of lists
+						osm2Dbuilding.stairs_area.add(temp);
+					} else  {
+						addWayAsEdgesToList(osm2Dbuilding.stairs,way,allNodes);
+						// areas are lists of lists
+					}
+				}
+			}
+			
+			// only add things as path if it is not a building part
+			// TODO: maybe use corridor later?
+			if (way.isIndoor() && way.getBuildingpart() == null) { // whole path is indoors -> keep
 				remainingWays.add(way);
 			} else { // check for path with indoor node
 				boolean stop = false;
@@ -327,6 +383,29 @@ public class Map {
 		initNodes();
 		return true;
 	} // -> addToGraphFromXMLFile(String filePath) { ... }
+
+	private void addWayAsEdgesToList(LinkedList<GraphEdge> insertInto, GraphWay way,
+			List<IndoorLocation> allNodes) {
+		
+		IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
+		
+		for (int i = 1; i <= way.getRefs().size() - 1; i++) {
+			
+			IndoorLocation nextNode = getNode(allNodes, way.getRefs().get(i).intValue());
+
+			GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, firstNode.distanceTo(nextNode), firstNode.bearingTo(nextNode), way.getWheelchair(),
+					way.getLevel(), way.getIndoor());
+			
+			tempEdge.setHighway(way.getHighway());
+			tempEdge.setSteps(way.getSteps());
+			tempEdge.setBuildingpart(way.getBuildingpart());
+
+			insertInto.add(tempEdge); // add edge to graph
+
+			firstNode = nextNode;
+		}
+
+	}
 
 	// use this to add edges for stairs to flags, this should be called once
 	public synchronized void mergeNodes() {

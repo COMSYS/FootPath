@@ -66,7 +66,12 @@ public class GraphEdge {
 		this.indoor = indoor;
 	}
 	
-
+public String getBuildingpart() {
+	return buildingpart;
+}public void setBuildingpart(String buildingpart) {
+	this.buildingpart = buildingpart;
+}
+	
 	public String getWheelchair() {
 		return wheelchair;
 	}

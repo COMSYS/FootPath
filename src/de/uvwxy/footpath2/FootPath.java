@@ -17,6 +17,7 @@ import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.util.Log;
 import de.uvwxy.footpath.Rev;
+import de.uvwxy.footpath2.drawing.OSM2DBuilding;
 import de.uvwxy.footpath2.log.ExportManager;
 import de.uvwxy.footpath2.log.ExportManager.IntervalExportBehavior;
 import de.uvwxy.footpath2.map.IndoorLocation;
@@ -293,5 +294,10 @@ public class FootPath {
 	@Deprecated
 	public MatchingAlgorithm _debug_getMatchinAlgorithm() {
 		return matchingAlgorithm;
+	}
+	
+	@Deprecated
+	public OSM2DBuilding _debug_getOSM2DBuilding(){
+		return map.getOsm2Dbuilding();
 	}
 }
