@@ -1,5 +1,6 @@
 package de.uvwxy.footpath2;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Stack;
@@ -10,6 +11,7 @@ import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources.NotFoundException;
 import android.hardware.SensorEventListener;
 import android.location.Location;
@@ -105,19 +107,9 @@ public class FootPath {
 	}
 
 	public void _a2_loadMapDataFromXMLResource(int resID) {
-		// TODO:
-		try {
-			map.addToGraphFromXMLResourceParser(context.getResources().getXml(resID));
-		} catch (NotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (XmlPullParserException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		AssetFileDescriptor afd = context.getResources().openRawResourceFd(resID);
+		FileInputStream fis = new FileInputStream(afd.getFileDescriptor());
+		_a5_loadMapDataFromFileInputStream(fis);
 	}
 
 	public void _a3_loadMapDataFromURL(String uri) {
@@ -136,6 +128,24 @@ public class FootPath {
 		} catch (SAXException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void _a5_loadMapDataFromFileInputStream(FileInputStream fis){
+		try {
+			map.addToGraphFromFileInputStream(fis);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

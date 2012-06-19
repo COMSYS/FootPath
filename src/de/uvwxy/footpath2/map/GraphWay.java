@@ -10,30 +10,24 @@ import java.util.LinkedList;
  */
 public class GraphWay {
 	// all nodes on this path ( ref0 -> ref1 -> ref2 -> ...)
-	private LinkedList<Integer> refs;
+	private LinkedList<Integer> refs = new LinkedList<Integer>();
 	private int id;
-	private short wheelchair;
-
-	// >0 := number correct steps given
-	// 0 := no steps
-	// -1 := undefined number of steps
-	// -2 := elevator
-	private int numSteps = 0;
-
-	// Float.MAX_VALUE == undefined!
+	private int step_count = 0;
 	private float level;
-	private boolean isIndoor;
-
-	/**
-	 * Constructor to create an empty way.
-	 */
+	private String indoor;
+	private String buildingpart;
+	private String highway;
+	private String wheelchair;
+	private String area;
+	
 	public GraphWay() {
-		this.refs = new LinkedList<Integer>();
-		this.id = 0;
-		this.wheelchair = 1;
-		this.level = Float.MAX_VALUE;
+		// creating empty GraphWay
 	}
-
+	
+	public GraphWay(int id) {
+		this.id = id;
+	}
+	
 	/**
 	 * Constructor to create a coordinate with given parameters.
 	 * 
@@ -46,7 +40,7 @@ public class GraphWay {
 	 * @param level
 	 *            the level of this way
 	 */
-	public GraphWay(LinkedList<Integer> refs, int id, short wheelchair, float level) {
+	public GraphWay(LinkedList<Integer> refs, int id, String wheelchair, float level) {
 		this.refs = refs;
 		this.id = id;
 		this.wheelchair = wheelchair;
@@ -57,62 +51,98 @@ public class GraphWay {
 		return refs;
 	}
 
-	public int getId() {
-		return id;
-	}
-
-	public short getWheelchair() {
-		return wheelchair;
-	}
-
-	public int getSteps() {
-		return numSteps;
-	}
-
-	public float getLevel() {
-		return level;
-	}
-
-	public boolean isIndoor() {
-		return isIndoor;
-	}
-
 	public void setRefs(LinkedList<Integer> refs) {
 		this.refs = refs;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	public void setWheelchair(short wheelchair) {
-		this.wheelchair = wheelchair;
-	}
-
-	public void setSteps(int numSteps) {
-		this.numSteps = numSteps;
-	}
-
-	public void setLevel(float level) {
-		this.level = level;
-	}
-
-	public void setIndoor(boolean isIndoor) {
-		this.isIndoor = isIndoor;
 	}
 
 	public void addRef(int ref) {
 		this.refs.add(Integer.valueOf(ref));
 	}
 
+	public String getBuildingpart() {
+		return buildingpart;
+	}
+
+	public void setBuildingpart(String buildingpart) {
+		this.buildingpart = buildingpart;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getWheelchair() {
+		return wheelchair;
+	}
+
+	public void setWheelchair(String wheelchair) {
+		this.wheelchair = wheelchair;
+	}
+
+	public String getHighway() {
+		return highway;
+	}
+
+	public void setHighway(String highway) {
+		this.highway = highway;
+	}
+
+	public String getArea() {
+		return area;
+	}
+
+	public void setArea(String area) {
+		this.area = area;
+	}
+
+	public int getStepCount() {
+		return step_count;
+	}
+
+	public void setStepCount(int numSteps) {
+		this.step_count = numSteps;
+	}
+
+	public int getSteps() {
+		return step_count;
+	}
+
+	public void setSteps(int numSteps) {
+		this.step_count = numSteps;
+	}
+
+	public float getLevel() {
+		return level;
+	}
+
+	public void setLevel(float level) {
+		this.level = level;
+	}
+
+	public String getIndoor() {
+		return indoor;
+	}
+
+	public void setIndoor(String indoor) {
+		this.indoor = indoor;
+	}
+
 	@Override
 	public String toString() {
 		String ret = "\nWay(" + this.id + "): ";
-		ret += this.wheelchair >= 0 ? "(wheelchair)" : "(non-wheelchair)";
+		ret += "Wheelchair: " + wheelchair;
 		ret += "\nRefs:";
 		for (Integer ref : refs) {
 			ret += "\n    " + ref.intValue();
 		}
 		return ret;
+	}
+
+	public boolean isIndoor() {
+		return indoor.equals("yes");
 	}
 }

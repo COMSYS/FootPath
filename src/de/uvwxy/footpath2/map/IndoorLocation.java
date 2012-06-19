@@ -6,6 +6,11 @@ import java.util.List;
 import android.location.Location;
 
 public class IndoorLocation extends Location {
+	// planet radius in meters
+	private static final int r = 6378137;
+	// meters per degree
+	private static final double scale = (Math.PI * r) / 180.0;
+	
 	private String name;
 	private float level;
 	private boolean isDoor = false;
@@ -14,11 +19,6 @@ public class IndoorLocation extends Location {
 	private String mergeid;
 	private int numSteps = 0;
 	private List<GraphEdge> loc_edges;
-
-	// planet radius in meters
-	private static final int r = 6378137;
-	// meters per degree
-	private static final double scale = (Math.PI * r) / 180.0;
 
 	public IndoorLocation(Location l) {
 		super(l);

@@ -27,10 +27,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.res.XmlResourceParser;
 import android.os.Environment;
 import android.util.Log;
 
@@ -45,11 +42,6 @@ import android.util.Log;
 public class Map {
 	private final List<IndoorLocation> nodes;
 	private final List<GraphEdge> edges;
-
-	@Deprecated
-	private IndoorLocation[] array_nodes_by_id;
-	@Deprecated
-	private IndoorLocation[] array_nodes_by_name;
 
 	// sorted maps for fast access
 	private final SortedMap<Integer, IndoorLocation> map_nodes_by_id;
@@ -127,7 +119,24 @@ public class Map {
 		if (filePath == null)
 			return false;
 
-		File od = new File(filePath);
+		File file = new File(filePath);
+
+		return addToGraphFromFileInputStream(new FileInputStream(file));
+
+	}
+
+	/**
+	 * 
+	 * @param fis
+	 *            the file input stream to read from
+	 * @return true if succeeded
+	 * @throws ParserConfigurationException
+	 * @throws FileNotFoundException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public synchronized boolean addToGraphFromFileInputStream(FileInputStream fis) throws ParserConfigurationException,
+			FileNotFoundException, SAXException, IOException {
 
 		// store all nodes found in file
 		List<IndoorLocation> allNodes = new LinkedList<IndoorLocation>();
@@ -138,7 +147,7 @@ public class Map {
 		factory.setIgnoringElementContentWhitespace(true);
 
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document dom = builder.parse(new FileInputStream(od));
+		Document dom = builder.parse(fis);
 
 		NodeList domNodes = dom.getDocumentElement().getElementsByTagName("node");
 		NodeList domWays = dom.getDocumentElement().getElementsByTagName("way");
@@ -232,96 +241,58 @@ public class Map {
 		for (int i = 0; i < domWays.getLength(); i++) {
 			Node way = domWays.item(i);
 			NamedNodeMap way_attributes = way.getAttributes();
-
-			// Interesting attributes:
-			// id='-2910'
-			int id = Integer.parseInt(way_attributes.getNamedItem("id").getNodeValue());
-			boolean isIndoor = false;
-			float level = 0;
-			short wheelchair = -1;
-
-			// Just to remember our lazy brains:
-			// >0 := number correct steps given
-			// 0 := no steps
-			// -1 := undefined number of steps
-			// -2 := elevator
-			int numSteps = 0;
-
+			GraphWay tempWay = new GraphWay(Integer.parseInt(way_attributes.getNamedItem("id").getNodeValue()));
 			LinkedList<Integer> refs = new LinkedList<Integer>();
-
 			NodeList way_children = way.getChildNodes();
-			// for crap
 			for (int j = 0; j < way_children.getLength(); j++) {
-
-				// Possible tags:
-				// <nd ref='-466' />
-				// <nd ref='-464' />
-				// <tag k='indoor' v='yes' />
-				// <tag k='level' v='0' />
-				// <tag k='wheelchair' v='no' />
-				// <tag k='highway' v='no' />
 				Node tagOrNDNode = way_children.item(j);
-
 				if (tagOrNDNode.getNodeName().toString().equals("nd")) {
 					// collect referenced nodes
-
 					NamedNodeMap tag_attributes = tagOrNDNode.getAttributes();
 					if (tag_attributes != null) {
 						String refValue = tag_attributes.getNamedItem("ref").getNodeValue();
 						if (refValue != null) {
 							refs.add(new Integer(refValue));
 						}
-					} // -> if (tag_attributes != null)
+					}
+					tempWay.setRefs(refs);
 				} else if (tagOrNDNode.getNodeName().toString().equals("tag")) {
 					// collect way attributes
 					NamedNodeMap tag_attributes = tagOrNDNode.getAttributes();
 					if (tag_attributes != null) {
 						String tagKValue = tag_attributes.getNamedItem("k").getNodeValue();
 						String tagVValue = tag_attributes.getNamedItem("v").getNodeValue();
-
 						// we need values for k= and v= otherwise bogus xml
 						if (tagKValue != null && tagVValue != null) {
 							if (tagKValue.equals("indoor")) {
-								if (tagVValue.equals("yes")) {
-									isIndoor = true;
-								} else {
-									isIndoor = false;
-								}
+								tempWay.setIndoor(tagVValue);
 							} else if (tagKValue.equals("level")) {
-								level = Float.parseFloat(tagVValue);
+								tempWay.setLevel(Float.parseFloat(tagVValue));
 							} else if (tagKValue.equals("wheelchair")) {
-								if (tagVValue.equals("yes")) {
-									wheelchair = 1;
-								} else if (tagVValue.equals("no")) {
-									wheelchair = -1;
-								} else {
-									wheelchair = 0;
-								}
+								tempWay.setWheelchair(tagVValue);
 							} else if (tagKValue.equals("highway")) {
+								tempWay.setHighway(tagVValue);
+								// do some reading between the lines, if some tags have been omitted:s
+								// if we have steps -> no wheeling about
 								if (tagVValue.equals("steps")) {
-									wheelchair = -1;
-									if (numSteps == 0) {
-										numSteps = -1;
+									tempWay.setWheelchair("no");
+									if (tempWay.getStepCount() == 0) {
+										// if the step count has not been set, set it to undefined (-1) first
+										tempWay.setStepCount(-1);
 									}
 								} else if (tagVValue.equals("elevator")) {
-									numSteps = -2;
-									wheelchair = 1;
+									tempWay.setStepCount(-2);
+									if (tempWay.getWheelchair() != null)
+										tempWay.setWheelchair("yes");
 								}
 							} else if (tagKValue.equals("step_count")) {
-								numSteps = Integer.parseInt(tagVValue);
+								tempWay.setStepCount(Integer.parseInt(tagVValue));
+								// usually this tag is missing, or only set if step count is known
 							}
 						}
-					} // -> if (tag_attributes != null)
-				} // -> if (tagOrNDNode.getNodeName().toString().equals("nd OR tag"))
-			} // -> for (int j = 0; j < way_children.getLength(); j++)
-
-			GraphWay tempWay = new GraphWay();
-			tempWay.setId(id);
-			tempWay.setIndoor(isIndoor);
-			tempWay.setLevel(level);
-			tempWay.setRefs(refs);
-			tempWay.setWheelchair(wheelchair);
-			tempWay.setSteps(numSteps);
+					}
+				}
+			}
 
 			allWays.add(tempWay);
 		}
@@ -354,7 +325,7 @@ public class Map {
 			return false;
 
 		for (GraphWay way : remainingWays) {
-			short wheelchair = way.getWheelchair();
+			String wheelchair = way.getWheelchair();
 			float level = way.getLevel();
 			boolean indoor = way.isIndoor();
 			IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
@@ -394,233 +365,6 @@ public class Map {
 		initNodes();
 		return true;
 	} // -> addToGraphFromXMLFile(String filePath) { ... }
-
-	public synchronized boolean addToGraphFromXMLResourceParser(XmlResourceParser xrp) throws XmlPullParserException,
-			IOException {
-		boolean ret = false; // return value
-		if (xrp == null) {
-			return ret;
-		}
-
-		boolean isOsmData = false; // flag to wait for osm data
-
-		IndoorLocation tempNode = new IndoorLocation("", ""); // temporary node to be added to all nodes in file
-		IndoorLocation NULL_NODE = new IndoorLocation("nullnode", ""); // 'NULL' node to point to, for dereferencing
-		GraphWay tempWay = new GraphWay(); // temporary way to be added to all nodes in file
-		GraphWay NULL_WAY = new GraphWay(); // 'NULL' node to point to, for dereferencing
-
-		LinkedList<IndoorLocation> allNodes = new LinkedList<IndoorLocation>(); // store all nodes found in file
-		LinkedList<GraphWay> allWays = new LinkedList<GraphWay>(); // store all ways found in file
-
-		xrp.next();
-		int eventType = xrp.getEventType();
-		while (eventType != XmlPullParser.END_DOCUMENT) {
-			switch (eventType) {
-			case XmlPullParser.START_DOCUMENT:
-				break;
-			case XmlPullParser.START_TAG:
-				if (!isOsmData) {
-					if (xrp.getName().equals("osm")) {
-						isOsmData = true; // osm
-						// TODO: Test for correct version? (v0.6)
-					}
-				} else {
-					int attributeCount = xrp.getAttributeCount();
-					if (xrp.getName().equals("node")) { // node
-						tempNode = new IndoorLocation("", "");
-						for (int i = 0; i < attributeCount; i++) {
-							if (xrp.getAttributeName(i).equals("id")) {
-								tempNode.setId(xrp.getAttributeIntValue(i, 0)); // node.id
-							}
-							if (xrp.getAttributeName(i).equals("lat")) {
-								tempNode.setLatitude(Double.parseDouble(xrp.getAttributeValue(i))); // node.lat
-							}
-							if (xrp.getAttributeName(i).equals("lon")) {
-								tempNode.setLongitude(Double.parseDouble(xrp.getAttributeValue(i))); // node.lon
-							}
-						}
-					} else if (xrp.getName().equals("tag")) { // tag
-						if (tempNode != NULL_NODE) { // node.tag
-							for (int i = 0; i < attributeCount; i++) {
-								if (xrp.getAttributeName(i).equals("k") && xrp.getAttributeValue(i).equals("indoor")) { // node.tag.indoor
-									String v = xrp.getAttributeValue(i + 1);
-									tempNode.setIndoors(v.equals("yes"));
-									if (v.equals("door")) {
-										tempNode.setIndoors(true);
-										tempNode.setDoor(true); // this is a
-																// door (which
-																// is always
-																// inDOORS) ;)
-									}
-								} else if (xrp.getAttributeName(i).equals("k")
-										&& xrp.getAttributeValue(i).equals("name")) { // node.tag.name
-									String v = xrp.getAttributeValue(i + 1);
-									tempNode.setName(v);
-								} else if (xrp.getAttributeName(i).equals("k")
-										&& xrp.getAttributeValue(i).equals("merge_id")) { // node.tag.merge_id
-									String v = xrp.getAttributeValue(i + 1);
-									tempNode.setMergeId(v);
-								} else if (xrp.getAttributeName(i).equals("k")
-										&& xrp.getAttributeValue(i).equals("step_count")) { // node.tag.step_count
-									int v = xrp.getAttributeIntValue(i + 1, Integer.MAX_VALUE);
-									tempNode.setSteps(v);
-								} else if (xrp.getAttributeName(i).equals("k")
-										&& xrp.getAttributeValue(i).equals("level")) { // node.tag.level
-									String v = xrp.getAttributeValue(i + 1);
-									float f = Float.parseFloat(v);
-									tempNode.setLevel(f);
-								}
-
-							}
-						} else { // way.tag
-							for (int i = 0; i < attributeCount; i++) {
-								if (xrp.getAttributeName(i).equals("k")
-										&& xrp.getAttributeValue(i).equals("wheelchair")) { // way.tag.wheelchair
-									String v = xrp.getAttributeValue(i + 1);
-									short wheelchair = (short) (v.equals("yes") ? 1 : v.equals("limited") ? 0 : -1);
-									tempWay.setWheelchair(wheelchair);
-								} else if (xrp.getAttributeName(i).equals("k")
-										&& xrp.getAttributeValue(i).equals("step_count")) { // way.tag.step_count
-									int v = xrp.getAttributeIntValue(i + 1, Integer.MAX_VALUE);
-									tempWay.setSteps(v);
-								} else if (xrp.getAttributeName(i).equals("k")
-										&& xrp.getAttributeValue(i).equals("level")) { // way.tag.level
-									String v = xrp.getAttributeValue(i + 1);
-									float f = Float.parseFloat(v);
-									tempWay.setLevel(f);
-								} else if (xrp.getAttributeName(i).equals("k")
-										&& xrp.getAttributeValue(i).equals("indoor")) { // way.tag.indoor
-									String v = xrp.getAttributeValue(i + 1);
-									tempWay.setIndoor(v.equals("yes"));
-								} else if (xrp.getAttributeName(i).equals("k")
-										&& xrp.getAttributeValue(i).equals("highway")) { // way.tag.highway
-									String v = xrp.getAttributeValue(i + 1);
-									if (v.equals("steps")) {
-										tempWay.setWheelchair((short) -1);
-										if (tempWay.getSteps() == 0) { // no steps configured before
-											tempWay.setSteps(-1); // so set to undefined (but present), otherwise might
-																	// be set later
-										}
-									}
-									if (v.equals("elevator")) {
-										tempWay.setWheelchair((short) 1);
-										tempWay.setSteps(-2);
-									}
-								}
-							}
-						}
-
-					} else if (xrp.getName().equals("way")) { // way
-						tempWay = new GraphWay();
-						for (int i = 0; i < attributeCount; i++) {
-							if (xrp.getAttributeName(i).equals("id")) {
-								tempWay.setId(xrp.getAttributeIntValue(i, 0)); // way.id
-							}
-						}
-					} else if (xrp.getName().equals("nd")) { // way.nd
-						for (int i = 0; i < attributeCount; i++) {
-							if (xrp.getAttributeName(i).equals("ref")) { // way.nd.ref
-								String v = xrp.getAttributeValue(i);
-								int ref = Integer.parseInt(v);
-								tempWay.addRef(ref);
-							}
-						}
-					}
-				}
-				break;
-			case XmlPullParser.END_TAG:
-				if (isOsmData) {
-					if (xrp.getName().equals("osm")) {
-						ret = true;
-					} else if (xrp.getName().equals("node")) { // node
-						allNodes.add(tempNode);
-						tempNode = NULL_NODE;
-					} else if (xrp.getName().equals("tag")) { // tag
-
-					} else if (xrp.getName().equals("way")) { // way
-						allWays.add(tempWay);
-						tempWay = NULL_WAY;
-					} else if (xrp.getName().equals("nd")) { // way.nd
-
-					}
-				}
-				break;
-			default:
-			}
-			eventType = xrp.next();
-		}
-
-		List<GraphWay> remainingWays = new LinkedList<GraphWay>();
-
-		for (GraphWay way : allWays) { // find ways which are indoors at some
-										// point
-			List<Integer> refs = way.getRefs();
-			if (way.isIndoor()) { // whole path is indoors -> keep
-				remainingWays.add(way);
-			} else { // check for path with indoor node
-				boolean stop = false;
-				for (Integer ref : refs) { // check if there is a node on path
-											// which is indoors
-					for (IndoorLocation node : allNodes) {
-						if (node.getId() == ref.intValue()) {
-							remainingWays.add(way);
-							stop = true; // found indoor node on path to be added to graph thus stop both for loops and
-											// continue with next way
-						}
-						if (stop)
-							break;
-					}
-					if (stop)
-						break;
-				}
-			}
-		}
-
-		if (remainingWays.size() == 0) // return false, nothing to be added to graph
-			return false;
-
-		for (GraphWay way : remainingWays) {
-			short wheelchair = way.getWheelchair();
-			float level = way.getLevel();
-			boolean indoor = way.isIndoor();
-			IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
-			for (int i = 1; i <= way.getRefs().size() - 1; i++) {
-				IndoorLocation nextNode = getNode(allNodes, way.getRefs().get(i).intValue());
-				double len = firstNode.distanceTo(nextNode);
-				double compDegree = firstNode.bearingTo(nextNode);
-				GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, len, compDegree, wheelchair, level, indoor);
-				if (way.getSteps() > 0) { // make edge a staircase if steps_count was set correctly
-					tempEdge.setStairs(true);
-					tempEdge.setElevator(false);
-					tempEdge.setSteps(way.getSteps());
-				} else if (way.getSteps() == -1) {
-					tempEdge.setStairs(true); // make edge a staircase if steps_count was set to -1
-												// (undefined steps)
-					tempEdge.setElevator(false);
-					tempEdge.setSteps(-1);
-				} else if (way.getSteps() == -2) {
-					tempEdge.setStairs(false); // make edge an elevator if steps_count was set to -2
-					tempEdge.setElevator(true);
-					tempEdge.setSteps(-2);
-				} else if (way.getSteps() == 0) {
-					tempEdge.setStairs(false);
-					tempEdge.setElevator(false);
-					tempEdge.setSteps(0);
-				}
-				edges.add(tempEdge); // add edge to graph
-				if (!nodes.contains(firstNode)) {
-					nodes.add(firstNode); // add node to graph if not present
-				}
-				firstNode = nextNode;
-			}
-
-			if (!nodes.contains(firstNode)) {
-				nodes.add(firstNode); // add last node to graph if not present
-			}
-		}
-		initNodes();
-		return ret;
-	}
 
 	// use this to add edges for stairs to flags, this should be called once
 	public synchronized void mergeNodes() {
@@ -767,16 +511,13 @@ public class Map {
 				// Visit each edge exiting u
 				for (GraphEdge e : u.getEdges()) {
 					// check wether this is an allowed node
-					if (e.isStairs() && !staircase) { // edge has steps, but not
-						// allowed -> skip
+					if (e.isStairs() && !staircase) { // edge has steps, but not allowed -> skip
 						continue;
 					}
-					if (e.isElevator() && !elevator) { // edge is elevator, but not
-						// allowed -> skip
+					if (e.isElevator() && !elevator) { // edge is elevator, but not allowed -> skip
 						continue;
 					}
-					if (!e.isIndoor() && !outside) { // edge is outdoors, but not
-						// allowed -> skip
+					if (!e.isIndoor() && !outside) { // edge is outdoors, but not allowed -> skip
 						continue;
 					}
 

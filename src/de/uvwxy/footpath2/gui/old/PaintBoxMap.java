@@ -178,7 +178,8 @@ class PaintBoxMap extends PaintBox {
 	@Deprecated
 	private void drawPath(Canvas canvas, double localScale) {
 		if (edges.size() == 1) { // special case: only one edge
-			Paint wPaint = edges.get(0).getWheelchair() < 0 ? ToolBox.redPaint() : ToolBox.greenPaint();
+//			Paint wPaint = edges.get(0).getWheelchair() < 0 ? ToolBox.redPaint() : ToolBox.greenPaint();
+			Paint wPaint = ToolBox.redPaint();
 			canvas.drawLine(globalOffsetX + getPosX(edges.get(0).getNode0(), localScale),
 					globalOffsetY + getPosY(edges.get(0).getNode0(), localScale),
 					globalOffsetX + getPosX(edges.get(0).getNode1(), localScale),
@@ -222,7 +223,8 @@ class PaintBoxMap extends PaintBox {
 				oldNodeId = edges.get(i).getNode0().getId();
 			}
 			// set color according to accessibility (wheelchairable -> green, else red)
-			Paint wPaint = edges.get(i).getWheelchair() < 0 ? ToolBox.redPaint() : ToolBox.greenPaint();
+//			Paint wPaint = edges.get(i).getWheelchair() < 0 ? ToolBox.redPaint() : ToolBox.greenPaint();
+			Paint wPaint = ToolBox.redPaint();
 
 			if (edges.get(i).isStairs()) { // draw stairs icon
 				Matrix m = new Matrix();

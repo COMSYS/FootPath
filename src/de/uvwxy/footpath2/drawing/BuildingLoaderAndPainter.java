@@ -26,12 +26,18 @@ import de.uvwxy.footpath2.map.GraphWay;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.tools.GeoUtils;
 
+@Deprecated
 public class BuildingLoaderAndPainter {
-	private static final double ARC_DISTANCE_PER_DEGREE = 60 * 1852;
-
-	LinkedList<GraphEdge> walls = new LinkedList<GraphEdge>();
+	LinkedList<GraphEdge> walls_outer = new LinkedList<GraphEdge>();
+	LinkedList<GraphEdge> walls_inner = new LinkedList<GraphEdge>();
+	LinkedList<LinkedList<GraphEdge>> walls_outer_area = new LinkedList<LinkedList<GraphEdge>>();
+	LinkedList<LinkedList<GraphEdge>> walls_inner_area = new LinkedList<LinkedList<GraphEdge>>();
+	
 	LinkedList<GraphEdge> stairs = new LinkedList<GraphEdge>();
 	LinkedList<GraphEdge> elevators = new LinkedList<GraphEdge>();
+	LinkedList<LinkedList<GraphEdge>> stairs_area = new LinkedList<LinkedList<GraphEdge>>();
+	LinkedList<LinkedList<GraphEdge>> elevators_area = new LinkedList<LinkedList<GraphEdge>>();
+	
 	LinkedList<IndoorLocation> nodes = new LinkedList<IndoorLocation>();
 
 	/**
@@ -140,7 +146,7 @@ public class BuildingLoaderAndPainter {
 			} // -> if ( tagNode.getNodeName().toString().equals("tag") )
 
 			// Create GraphNode:
-			IndoorLocation tempGraphNode = new IndoorLocation(name,"footpath");
+			IndoorLocation tempGraphNode = new IndoorLocation(name, "footpath");
 			tempGraphNode.setDoor(isDoor);
 			tempGraphNode.setId(id);
 			tempGraphNode.setIndoors(isIndoor);
@@ -173,19 +179,17 @@ public class BuildingLoaderAndPainter {
 			// -2 := elevator
 			int numSteps = 0;
 
+			boolean isArea = false;
+			String buildingpart = null;
+			
 			LinkedList<Integer> refs = new LinkedList<Integer>();
+
 
 			NodeList way_children = way.getChildNodes();
 			// for crap
 			for (int j = 0; j < way_children.getLength(); j++) {
+				GraphWay tempWay = new GraphWay();
 
-				// Possible tags:
-				// <nd ref='-466' />
-				// <nd ref='-464' />
-				// <tag k='indoor' v='yes' />
-				// <tag k='level' v='0' />
-				// <tag k='wheelchair' v='no' />
-				// <tag k='highway' v='no' />
 				Node tagOrNDNode = way_children.item(j);
 
 				if (tagOrNDNode.getNodeName().toString().equals("nd")) {
@@ -235,29 +239,33 @@ public class BuildingLoaderAndPainter {
 								}
 							} else if (tagKValue.equals("step_count")) {
 								numSteps = Integer.parseInt(tagVValue);
+							} else if (tagKValue.equals("buildingpart")) {
+									buildingpart = tagVValue;
 							}
 						}
 					} // -> if (tag_attributes != null)
 				} // -> if (tagOrNDNode.getNodeName().toString().equals("nd OR tag"))
 			} // -> for (int j = 0; j < way_children.getLength(); j++)
 
-			GraphWay tempWay = new GraphWay();
-			tempWay.setId(id);
-			tempWay.setIndoor(isIndoor);
-			tempWay.setLevel(level);
-			tempWay.setRefs(refs);
-			tempWay.setWheelchair(wheelchair);
-			tempWay.setSteps(numSteps);
 
-			// if (tempWay.getWheelchair() == )
-			allWays.add(tempWay);
+				GraphWay tempWay = new GraphWay();
+				tempWay.setId(id);
+//				tempWay.setIndoor(isIndoor);
+				tempWay.setLevel(level);
+				tempWay.setRefs(refs);
+//				tempWay.setWheelchair(wheelchair);
+				tempWay.setSteps(numSteps);
+				tempWay.setBuildingpart(buildingpart);
+				// if (tempWay.getWheelchair() == )
+				allWays.add(tempWay);
+			
 		}
 
 		if (allWays.size() == 0) // return false, nothing to be added to graph
 			return false;
 
 		for (GraphWay way : allWays) {
-			short wheelchair = way.getWheelchair();
+			String wheelchair = way.getWheelchair();
 			float level = way.getLevel();
 			boolean indoor = way.isIndoor();
 			IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
@@ -289,7 +297,7 @@ public class BuildingLoaderAndPainter {
 				} else if (tempEdge.isStairs()) {
 					stairs.add(tempEdge);
 				} else {
-					walls.add(tempEdge); // add edge to graph
+					walls_inner.add(tempEdge); // add edge to graph
 				}
 				if (!nodes.contains(firstNode)) {
 					nodes.add(firstNode); // add node to graph if not present
@@ -304,11 +312,11 @@ public class BuildingLoaderAndPainter {
 
 		Log.i("FOOTPATH", "Add map data: " + elevators.size() + " elevator edges");
 		Log.i("FOOTPATH", "Add map data: " + stairs.size() + " stairs edges");
-		Log.i("FOOTPATH", "Add map data: " + walls.size() + " walls edges");
+		Log.i("FOOTPATH", "Add map data: " + walls_inner.size() + " walls (inner) edges");
+		Log.i("FOOTPATH", "Add map data: " + walls_outer.size() + " walls (outer) edges");
 
 		return true;
 	} // -> addToGraphFromXMLFile(String filePath) { ... }+
-
 
 	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox,
 			double pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
@@ -320,9 +328,9 @@ public class BuildingLoaderAndPainter {
 		}
 
 		pLine.setColor(Color.WHITE);
-		for (int i = 0; i < walls.size() - 1; i++) {
-			int[] apix = GeoUtils.convertToPixelLocation(walls.get(i).getNode0(), center, pixelsPerMeterOrMaxValue);
-			int[] bpix = GeoUtils.convertToPixelLocation(walls.get(i).getNode1(), center, pixelsPerMeterOrMaxValue);
+		for (int i = 0; i < walls_inner.size() - 1; i++) {
+			int[] apix = GeoUtils.convertToPixelLocation(walls_inner.get(i).getNode0(), center, pixelsPerMeterOrMaxValue);
+			int[] bpix = GeoUtils.convertToPixelLocation(walls_inner.get(i).getNode1(), center, pixelsPerMeterOrMaxValue);
 			canvas.drawLine(w + apix[0], h + apix[1], w + bpix[0], h + bpix[1], pLine);
 		}
 		pLine.setColor(Color.RED);

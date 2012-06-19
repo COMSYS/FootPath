@@ -12,7 +12,7 @@ public class GraphEdge {
 	private IndoorLocation node1;
 	private double len;
 	private double bearing;
-	private short wheelchair;
+	private String wheelchair;
 	private boolean isStairs = false;
 	private boolean isElevator = false;
 
@@ -32,7 +32,7 @@ public class GraphEdge {
 		this.node0 = null;
 		this.node1 = null;
 		this.len = 0.0;
-		this.wheelchair = 1;
+		this.wheelchair = "yes";
 		this.level = Float.MAX_VALUE;
 		this.isIndoor = false;
 	}
@@ -55,7 +55,7 @@ public class GraphEdge {
 	 * @param isIndoor
 	 *            true if is indoor
 	 */
-	public GraphEdge(IndoorLocation node0, IndoorLocation node1, double len, double compDir, short wheelchair,
+	public GraphEdge(IndoorLocation node0, IndoorLocation node1, double len, double compDir, String wheelchair,
 			float level, boolean isIndoor) {
 		this.node0 = node0;
 		this.node1 = node1;
@@ -94,11 +94,11 @@ public class GraphEdge {
 		this.len = len;
 	}
 
-	public short getWheelchair() {
+	public String getWheelchair() {
 		return wheelchair;
 	}
 
-	public void setWheelchair(short wheelchair) {
+	public void setWheelchair(String wheelchair) {
 		this.wheelchair = wheelchair;
 	}
 
@@ -125,7 +125,7 @@ public class GraphEdge {
 	public void setSteps(int numSteps) {
 		this.numSteps = numSteps;
 		if (numSteps > 0 || numSteps == -1)
-			this.setWheelchair((short) -1);// if steps, NO wheelchair
+			this.setWheelchair("no");// if steps, NO wheelchair
 	}
 
 	public float getLevel() {
@@ -182,18 +182,10 @@ public class GraphEdge {
 		ret += nd(this.node1.getId());
 		ret += tag("indoor", this.isIndoor() ? "yes" : "no");
 		ret += tag("level", "" + level);
-		switch (wheelchair) {
-		case -1:
-			ret += tag("wheelchair", "no");
-			break;
-		case 0:
-			ret += tag("wheelchair", "limited");
-			break;
-		case 1:
-			ret += tag("wheelchair", "yes");
-			break;
-		default:
-		}
+		
+		ret += tag("wheelchair", wheelchair);
+		// old: -1 = no, 0 = limited, 1 = yes
+		
 
 		if (this.isElevator) {
 			ret += tag("highway", "elevator");
