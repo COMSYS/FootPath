@@ -25,7 +25,6 @@ public class GraphEdge {
 	private int numSteps = 0;
 
 	private float level;
-	private boolean isIndoor;
 
 	/**
 	 * Constructor to create an empty edge with everything set to 0/null/false
@@ -36,7 +35,6 @@ public class GraphEdge {
 		this.len = 0.0;
 		this.wheelchair = "yes";
 		this.level = Float.MAX_VALUE;
-		this.isIndoor = false;
 	}
 
 	/**
@@ -58,14 +56,14 @@ public class GraphEdge {
 	 *            true if is indoor
 	 */
 	public GraphEdge(IndoorLocation node0, IndoorLocation node1, double len, double compDir, String wheelchair,
-			float level, boolean isIndoor) {
+			float level, String indoor) {
 		this.node0 = node0;
 		this.node1 = node1;
 		this.len = len;
 		this.bearing = compDir;
 		this.wheelchair = wheelchair;
 		this.level = level;
-		this.isIndoor = isIndoor;
+		this.indoor = indoor;
 	}
 	
 
@@ -157,12 +155,14 @@ public class GraphEdge {
 		this.level = level;
 	}
 
-	public void setLevel(boolean isIndoor) {
-		this.isIndoor = isIndoor;
-	}
 
 	public boolean isIndoor() {
-		return isIndoor;
+		if(indoor == null)
+			return false;
+		if (indoor.equals("yes"))
+			return true;
+		else 
+			return false;
 	}
 
 	public void setCompDir(double compDir) {

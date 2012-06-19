@@ -93,6 +93,7 @@ public class BuildingLoaderAndPainter {
 			String name = null;
 			String merge_id = null;
 			float level = 0.0f;
+			IndoorLocation tempGraphNode = new IndoorLocation(name, "footpath");
 
 			// Collect GraphNode Data:
 			NodeList node_children = node.getChildNodes();
@@ -120,11 +121,7 @@ public class BuildingLoaderAndPainter {
 							if (tagKValue.equals("building")) {
 								// Add additional attribute handling here
 							} else if (tagKValue.equals("indoor")) {
-								if (tagVValue.equals("yes")) {
-									isIndoor = true;
-								} else if (tagVValue.equals("no")) {
-									isIndoor = false;
-								}
+								tempGraphNode.setIndoor(tagVValue);
 							} else if (tagKValue.equals("level")) {
 								level = Float.parseFloat(tagVValue);
 							} else if (tagKValue.equals("name")) {
@@ -133,11 +130,8 @@ public class BuildingLoaderAndPainter {
 								merge_id = tagVValue;
 							} else if (tagKValue.equals("amenity")) {
 								// Add additional attribute handling here
-							} else if (tagKValue.equals("highway")) {
-								if (tagVValue.equals("door")) {
-									isIndoor = true;
-									isDoor = true;
-								}
+							}else if (tagKValue.equals("door")) {
+								tempGraphNode.setDoor(tagVValue);
 							}
 						} // -> if (tagKValue != null && tagVValue != null)
 					} // -> if (tag_attributes != null)
@@ -146,10 +140,7 @@ public class BuildingLoaderAndPainter {
 			} // -> if ( tagNode.getNodeName().toString().equals("tag") )
 
 			// Create GraphNode:
-			IndoorLocation tempGraphNode = new IndoorLocation(name, "footpath");
-			tempGraphNode.setDoor(isDoor);
 			tempGraphNode.setId(id);
-			tempGraphNode.setIndoors(isIndoor);
 			tempGraphNode.setLatitude(lat);
 			tempGraphNode.setLevel(level);
 			tempGraphNode.setLongitude(lon);
@@ -267,30 +258,14 @@ public class BuildingLoaderAndPainter {
 		for (GraphWay way : allWays) {
 			String wheelchair = way.getWheelchair();
 			float level = way.getLevel();
-			boolean indoor = way.isIndoor();
 			IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
 			for (int i = 1; i <= way.getRefs().size() - 1; i++) {
 				IndoorLocation nextNode = getNode(allNodes, way.getRefs().get(i).intValue());
 				double len = firstNode.distanceTo(nextNode);
 				double compDegree = firstNode.bearingTo(nextNode);
-				GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, len, compDegree, wheelchair, level, indoor);
-				if (way.getSteps() > 0) { // make edge a staircase if steps_count was set correctly
-					tempEdge.setStairs(true);
-					tempEdge.setElevator(false);
-					tempEdge.setSteps(way.getSteps());
-				} else if (way.getSteps() == -1) {
-					tempEdge.setStairs(true); // make edge a staircase if steps_count was set to -1 (undefined steps)
-					tempEdge.setElevator(false);
-					tempEdge.setSteps(-1);
-				} else if (way.getSteps() == -2) {
-					tempEdge.setStairs(false); // make edge an elevator if steps_count was set to -2
-					tempEdge.setElevator(true);
-					tempEdge.setSteps(-2);
-				} else if (way.getSteps() == 0) {
-					tempEdge.setStairs(false);
-					tempEdge.setElevator(false);
-					tempEdge.setSteps(0);
-				}
+				GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, len, compDegree, wheelchair, level, way.getIndoor());
+				tempEdge.setHighway(way.getHighway());
+				tempEdge.setSteps(way.getSteps());
 
 				if (tempEdge.isElevator()) {
 					elevators.add(tempEdge);

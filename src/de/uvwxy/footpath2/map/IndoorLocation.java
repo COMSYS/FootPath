@@ -10,24 +10,36 @@ public class IndoorLocation extends Location {
 	private static final int r = 6378137;
 	// meters per degree
 	private static final double scale = (Math.PI * r) / 180.0;
-	
+
 	private String name;
+	private String indoor;
+	private String door;
+
 	private float level;
-	private boolean isDoor = false;
-	private boolean isInDoors = true;
 	private int id;
 	private String mergeid;
 	private int numSteps = 0;
-	private List<GraphEdge> loc_edges;
+	private List<GraphEdge> loc_edges = new LinkedList<GraphEdge>();
 
 	public IndoorLocation(Location l) {
 		super(l);
 	}
 
+	public IndoorLocation(String provider) {
+		super(provider);
+	}
+
 	public IndoorLocation(String name, String provider) {
 		super(provider);
 		this.name = name;
-		loc_edges = new LinkedList<GraphEdge>();
+	}
+
+	public void setIndoor(String indoor) {
+		this.indoor = indoor;
+	}
+
+	public String getIndoor() {
+		return indoor;
 	}
 
 	public int getId() {
@@ -72,19 +84,25 @@ public class IndoorLocation extends Location {
 	}
 
 	public boolean isDoor() {
-		return isDoor;
+		if (door == null)
+			return false;
+		if (door.equals("yes"))
+			return true;
+		else
+			return false;
 	}
 
-	public void setDoor(boolean isDoor) {
-		this.isDoor = isDoor;
+	public void setDoor(String door) {
+		this.door = door;
 	}
 
 	public boolean isIndoors() {
-		return isInDoors;
-	}
-
-	public void setIndoors(boolean isInDoors) {
-		this.isInDoors = isInDoors;
+		if (indoor == null)
+			return false;
+		if (indoor.equals("yes"))
+			return true;
+		else
+			return false;
 	}
 
 	public List<GraphEdge> getEdges() {
@@ -130,7 +148,7 @@ public class IndoorLocation extends Location {
 	public String toString() {
 		String ret = "\nNode(" + this.id + "): ";
 		ret += name != null ? name : "N/A";
-		ret += isInDoors ? " (indoors)" : " (outdoors)";
+		ret += "Indoor: " + indoor;
 		ret += "\n    Level: " + this.level;
 		ret += "\n    Lat: " + this.getLatitude();
 		ret += "\n    Lon: " + this.getLongitude();
@@ -148,11 +166,10 @@ public class IndoorLocation extends Location {
 	public String toXML() {
 		String ret = "\n  <node id='" + this.id + "' action='modify' visible='true' ";
 		ret += "lat='" + this.getLatitude() + "' lon='" + this.getLongitude() + "'>";
-		ret += tag("indoor", this.isInDoors ? "yes" : "no");
+		ret += tag("indoor", indoor);
 		ret += tag("level", "" + level);
-		if (isDoor) {
-			ret += tag("highway", "door");
-		}
+		ret += tag("door", door);
+
 		if (name != null && !name.equals("")) {
 			ret += tag("name", name);
 		}

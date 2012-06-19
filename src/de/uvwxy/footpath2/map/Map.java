@@ -152,41 +152,26 @@ public class Map {
 		NodeList domNodes = dom.getDocumentElement().getElementsByTagName("node");
 		NodeList domWays = dom.getDocumentElement().getElementsByTagName("way");
 
-
 		// Collect GraphNodes:
 		// <fold>
 		for (int i = 0; i < domNodes.getLength(); i++) {
 			Node node = domNodes.item(i);
 			NamedNodeMap node_attributes = node.getAttributes();
 
-			// Interesting attributes:
-			// id='-734'
-			// lat='50.77832601390677'
-			// lon='6.0785245124026615'
+			IndoorLocation tempIndoorLocation = new IndoorLocation("");
 
 			int id = Integer.parseInt(node_attributes.getNamedItem("id").getNodeValue());
 			double lat = Double.parseDouble(node_attributes.getNamedItem("lat").getNodeValue());
 			double lon = Double.parseDouble(node_attributes.getNamedItem("lon").getNodeValue());
-			boolean isIndoor = false;
-			boolean isDoor = false;
-			String name = null;
-			String merge_id = null;
-			float level = 0.0f;
+
+			tempIndoorLocation.setId(id);
+			tempIndoorLocation.setLatitude(lat);
+			tempIndoorLocation.setLongitude(lon);
 
 			// Collect GraphNode Data:
 			NodeList node_children = node.getChildNodes();
 			for (int j = 0; j < node_children.getLength(); j++) {
-
-				// Possible tags:
-				// <tag k='building' v='entrance' /> NOT USED by FOOTPATH yet
-				// <tag k='indoor' v='yes|no' />
-				// <tag k='level' v='0' />
-				// <tag k='name' v='C-Caffè' />
-				// <tag k='merge_id' v='RE_0' />
-				// <tag k='amenity' v='toilets' /> NOT USED by FOOTPATH yet
-
 				Node tagNode = node_children.item(j);
-
 				if (tagNode.getNodeName().toString().equals("tag")) {
 					NamedNodeMap tag_attributes = tagNode.getAttributes();
 					if (tag_attributes != null) {
@@ -199,47 +184,29 @@ public class Map {
 							if (tagKValue.equals("building")) {
 								// Add additional attribute handling here
 							} else if (tagKValue.equals("indoor")) {
-								if (tagVValue.equals("yes")) {
-									isIndoor = true;
-								} else if (tagVValue.equals("no")) {
-									isIndoor = false;
-								}
+								tempIndoorLocation.setIndoor(tagVValue);
 							} else if (tagKValue.equals("level")) {
-								level = Float.parseFloat(tagVValue);
+								tempIndoorLocation.setLevel(Float.parseFloat(tagVValue));
 							} else if (tagKValue.equals("name")) {
-								name = tagVValue;
+								tempIndoorLocation.setName(tagVValue);
 							} else if (tagKValue.equals("merge_id")) {
-								merge_id = tagVValue;
+								tempIndoorLocation.setMergeId(tagVValue);
 							} else if (tagKValue.equals("amenity")) {
 								// Add additional attribute handling here
-							} else if (tagKValue.equals("highway")) {
-								if (tagVValue.equals("door")) {
-									isIndoor = true;
-									isDoor = true;
-								}
+							} else if (tagKValue.equals("door")) {
+								tempIndoorLocation.setDoor(tagVValue);
 							}
-						} // -> if (tagKValue != null && tagVValue != null)
-					} // -> if (tag_attributes != null)
+						}
+					}
 
-				} // -> for (int j = 0; j < node_children.getLength(); j++)
-			} // -> if ( tagNode.getNodeName().toString().equals("tag") )
-
-			// Create GraphNode:
-			IndoorLocation tempIndoorLocation = new IndoorLocation(name, "");
-			tempIndoorLocation.setDoor(isDoor);
-			tempIndoorLocation.setId(id);
-			tempIndoorLocation.setIndoors(isIndoor);
-			tempIndoorLocation.setLatitude(lat);
-			tempIndoorLocation.setLevel(level);
-			tempIndoorLocation.setLongitude(lon);
-			tempIndoorLocation.setMergeId(merge_id);
+				}
+			}
 
 			allNodes.add(tempIndoorLocation);
 
 		}
 		// </fold>
-		
-		
+
 		// Collect GraphWays:
 		// <fold>
 		for (int i = 0; i < domWays.getLength(); i++) {
@@ -292,6 +259,10 @@ public class Map {
 							} else if (tagKValue.equals("step_count")) {
 								tempWay.setStepCount(Integer.parseInt(tagVValue));
 								// usually this tag is missing, or only set if step count is known
+							} else if (tagKValue.equals("buildingpart")) {
+								tempWay.setBuildingpart(tagVValue);
+							} else if (tagKValue.equals("area")) {
+								tempWay.setArea(tagVValue);
 							}
 						}
 					}
@@ -300,7 +271,7 @@ public class Map {
 
 			allWays.add(tempWay);
 		}
-		//</fold>
+		// </fold>
 
 		List<GraphWay> remainingWays = new LinkedList<GraphWay>();
 
@@ -312,7 +283,7 @@ public class Map {
 				boolean stop = false;
 				for (Integer ref : refs) { // check if there is a node on path which is indoors
 					for (IndoorLocation node : allNodes) {
-						if (node.getId() == ref.intValue()) {
+						if (node.getId() == ref.intValue() && node.isIndoors()) {
 							remainingWays.add(way);
 							stop = true; // found indoor node on path to be added to graph thus stop both for loops and
 											// continue with next way
@@ -332,16 +303,16 @@ public class Map {
 		for (GraphWay way : remainingWays) {
 			String wheelchair = way.getWheelchair();
 			float level = way.getLevel();
-			boolean indoor = way.isIndoor();
 			IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
 			for (int i = 1; i <= way.getRefs().size() - 1; i++) {
 				IndoorLocation nextNode = getNode(allNodes, way.getRefs().get(i).intValue());
 				double len = firstNode.distanceTo(nextNode);
 				double compDegree = firstNode.bearingTo(nextNode);
-				GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, len, compDegree, wheelchair, level, indoor);
+				GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, len, compDegree, wheelchair, level,
+						way.getIndoor());
 				tempEdge.setHighway(way.getHighway());
 				tempEdge.setSteps(way.getSteps());
-				
+
 				edges.add(tempEdge); // add edge to graph
 				if (!nodes.contains(firstNode)) {
 					nodes.add(firstNode); // add node to graph if not present
@@ -471,8 +442,6 @@ public class Map {
 
 		return path;
 	}
-
-	
 
 	/**
 	 * return a node for a given id<br>
@@ -656,11 +625,11 @@ public class Map {
 		private final IndoorLocation from;
 		private final IndoorLocation to;
 		private boolean computed = false;
-	
+
 		private final boolean staircase;
 		private final boolean elevator;
 		private final boolean outside;
-	
+
 		/**
 		 * @param from
 		 * @param to
@@ -671,34 +640,34 @@ public class Map {
 		public Dykstra(IndoorLocation from, IndoorLocation to, boolean staircase, boolean elevator, boolean outside) {
 			this.from = from;
 			this.to = to;
-	
+
 			this.staircase = staircase;
 			this.elevator = elevator;
 			this.outside = outside;
 		}
-	
+
 		/**
 		 * compute shortest path
 		 */
 		private void computePaths() {
 			// setup starting distance
 			dists.put(from, 0d);
-	
+
 			// the priorityqueue will hold all neighbornodes to check next - it will ensure the min dist one to be the
 			// first
 			PriorityQueue<IndoorLocation> queue = new PriorityQueue<IndoorLocation>(20,
 					new Comparator<IndoorLocation>() {
-	
+
 						@Override
 						public int compare(IndoorLocation lhs, IndoorLocation rhs) {
 							return Double.compare(dists.get(lhs), dists.get(rhs));
 						}
 					});
 			queue.add(from);
-	
+
 			while (!queue.isEmpty()) {
 				IndoorLocation u = queue.poll();
-	
+
 				// Visit each edge exiting u
 				for (GraphEdge e : u.getEdges()) {
 					// check wether this is an allowed node
@@ -711,41 +680,41 @@ public class Map {
 					if (!e.isIndoor() && !outside) { // edge is outdoors, but not allowed -> skip
 						continue;
 					}
-	
+
 					// get the neigbor-node
 					IndoorLocation v = (e.getNode0().equals(u)) ? e.getNode1() : e.getNode0();
-	
+
 					double dist = e.getLen();
 					double distOverU = dists.get(u) + dist;
-	
+
 					// the map may not yet contain an entry for v
 					double distOfV = (dists.containsKey(v)) ? dists.get(v) : Double.POSITIVE_INFINITY;
-	
+
 					// relax edge?
 					if (distOverU < distOfV) {
 						// remove from queue as it wont be up to date on the dist-change
 						queue.remove(v);
-	
+
 						// update new dist
 						dists.put(v, distOverU);
-	
+
 						// keep track of path
 						previous.put(v, u);
-	
+
 						// stop computing as soon as target is reached
 						if (v.equals(to)) {
 							break;
 						}
-	
+
 						// re-add this node with updated dists
 						queue.add(v);
 					}
 				}
 			}
-	
+
 			this.computed = true;
 		}
-	
+
 		/**
 		 * return the shortest path from source to target<br>
 		 * it will compute the needed paths if necessary
@@ -756,18 +725,18 @@ public class Map {
 			if (computed == false) {
 				computePaths();
 			}
-	
+
 			// did we find a path?
 			if (!previous.containsKey(to)) {
 				return null;
 			}
-	
+
 			// yes.
 			Stack<IndoorLocation> path = new Stack<IndoorLocation>();
 			for (IndoorLocation vertex = to; vertex != null; vertex = previous.get(vertex)) {
 				path.add(vertex);
 			}
-	
+
 			return path;
 		}
 	}
