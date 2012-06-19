@@ -152,7 +152,9 @@ public class Map {
 		NodeList domNodes = dom.getDocumentElement().getElementsByTagName("node");
 		NodeList domWays = dom.getDocumentElement().getElementsByTagName("way");
 
+
 		// Collect GraphNodes:
+		// <fold>
 		for (int i = 0; i < domNodes.getLength(); i++) {
 			Node node = domNodes.item(i);
 			NamedNodeMap node_attributes = node.getAttributes();
@@ -223,21 +225,23 @@ public class Map {
 			} // -> if ( tagNode.getNodeName().toString().equals("tag") )
 
 			// Create GraphNode:
-			IndoorLocation tempGraphNode = new IndoorLocation(name, "");
-			tempGraphNode.setDoor(isDoor);
-			tempGraphNode.setId(id);
-			tempGraphNode.setIndoors(isIndoor);
-			tempGraphNode.setLatitude(lat);
-			tempGraphNode.setLevel(level);
-			tempGraphNode.setLongitude(lon);
-			tempGraphNode.setMergeId(merge_id);
-			// tempGraphNode.setName(name);
+			IndoorLocation tempIndoorLocation = new IndoorLocation(name, "");
+			tempIndoorLocation.setDoor(isDoor);
+			tempIndoorLocation.setId(id);
+			tempIndoorLocation.setIndoors(isIndoor);
+			tempIndoorLocation.setLatitude(lat);
+			tempIndoorLocation.setLevel(level);
+			tempIndoorLocation.setLongitude(lon);
+			tempIndoorLocation.setMergeId(merge_id);
 
-			allNodes.add(tempGraphNode);
+			allNodes.add(tempIndoorLocation);
 
 		}
-
+		// </fold>
+		
+		
 		// Collect GraphWays:
+		// <fold>
 		for (int i = 0; i < domWays.getLength(); i++) {
 			Node way = domWays.item(i);
 			NamedNodeMap way_attributes = way.getAttributes();
@@ -296,6 +300,7 @@ public class Map {
 
 			allWays.add(tempWay);
 		}
+		//</fold>
 
 		List<GraphWay> remainingWays = new LinkedList<GraphWay>();
 
@@ -334,23 +339,9 @@ public class Map {
 				double len = firstNode.distanceTo(nextNode);
 				double compDegree = firstNode.bearingTo(nextNode);
 				GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, len, compDegree, wheelchair, level, indoor);
-				if (way.getSteps() > 0) { // make edge a staircase if steps_count was set correctly
-					tempEdge.setStairs(true);
-					tempEdge.setElevator(false);
-					tempEdge.setSteps(way.getSteps());
-				} else if (way.getSteps() == -1) {
-					tempEdge.setStairs(true); // make edge a staircase if steps_count was set to -1 (undefined steps)
-					tempEdge.setElevator(false);
-					tempEdge.setSteps(-1);
-				} else if (way.getSteps() == -2) {
-					tempEdge.setStairs(false); // make edge an elevator if steps_count was set to -2
-					tempEdge.setElevator(true);
-					tempEdge.setSteps(-2);
-				} else if (way.getSteps() == 0) {
-					tempEdge.setStairs(false);
-					tempEdge.setElevator(false);
-					tempEdge.setSteps(0);
-				}
+				tempEdge.setHighway(way.getHighway());
+				tempEdge.setSteps(way.getSteps());
+				
 				edges.add(tempEdge); // add edge to graph
 				if (!nodes.contains(firstNode)) {
 					nodes.add(firstNode); // add node to graph if not present

@@ -12,9 +12,11 @@ public class GraphEdge {
 	private IndoorLocation node1;
 	private double len;
 	private double bearing;
+	
+	private String indoor;
+	private String buildingpart;
+	private String highway;
 	private String wheelchair;
-	private boolean isStairs = false;
-	private boolean isElevator = false;
 
 	// >0 := number correct steps given
 	// 0 := no steps
@@ -65,6 +67,31 @@ public class GraphEdge {
 		this.level = level;
 		this.isIndoor = isIndoor;
 	}
+	
+
+	public String getWheelchair() {
+		return wheelchair;
+	}
+
+	public void setWheelchair(String wheelchair) {
+		this.wheelchair = wheelchair;
+	}
+
+	public String getHighway() {
+		return highway;
+	}
+
+	public void setHighway(String highway) {
+		this.highway = highway;
+	}
+
+	public String getIndoor() {
+		return indoor;
+	}
+
+	public void setIndoor(String indoor) {
+		this.indoor = indoor;
+	}
 
 	public double getCompDir() {
 		return bearing;
@@ -94,30 +121,24 @@ public class GraphEdge {
 		this.len = len;
 	}
 
-	public String getWheelchair() {
-		return wheelchair;
-	}
-
-	public void setWheelchair(String wheelchair) {
-		this.wheelchair = wheelchair;
-	}
 
 	public boolean isStairs() {
-		return isStairs;
-	}
+		if (highway == null)
+			return false;
+		if (highway.equals("steps"))
+			return true;
+		else 
+			return false;	}
 
-	public void setStairs(boolean isStairs) {
-		this.isStairs = isStairs;
-	}
 
 	public boolean isElevator() {
-		return isElevator;
+		if (highway == null)
+			return false;
+		if (highway.equals("elevator"))
+			return true;
+		else 
+			return false;
 	}
-
-	public void setElevator(boolean isElevator) {
-		this.isElevator = isElevator;
-	}
-
 	public int getSteps() {
 		return numSteps;
 	}
@@ -187,11 +208,11 @@ public class GraphEdge {
 		// old: -1 = no, 0 = limited, 1 = yes
 		
 
-		if (this.isElevator) {
+		if (isElevator()) {
 			ret += tag("highway", "elevator");
 		}
 
-		if (this.isStairs) {
+		if (isStairs()) {
 			ret += tag("highway", "steps");
 			ret += tag("step_count", "" + numSteps);
 		}
