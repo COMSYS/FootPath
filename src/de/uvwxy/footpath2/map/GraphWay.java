@@ -143,6 +143,8 @@ public class GraphWay {
 	}
 
 	public boolean isIndoor() {
+		if (indoor == null)
+			return false;
 		return indoor.equals("yes");
 	}
 }

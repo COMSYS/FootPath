@@ -454,134 +454,6 @@ public class Map {
 	}
 
 	/**
-	 * simple dykstra implementation using a priorityqueue comparing min dists towards nodes neighbors
-	 * 
-	 * @author helge
-	 * 
-	 */
-	public class Dykstra {
-		private final java.util.Map<IndoorLocation, Double> dists = new HashMap<IndoorLocation, Double>();
-		private final java.util.Map<IndoorLocation, IndoorLocation> previous = new HashMap<IndoorLocation, IndoorLocation>();
-		private final IndoorLocation from;
-		private final IndoorLocation to;
-		private boolean computed = false;
-
-		private final boolean staircase;
-		private final boolean elevator;
-		private final boolean outside;
-
-		/**
-		 * @param from
-		 * @param to
-		 * @param staircase
-		 * @param elevator
-		 * @param outside
-		 */
-		public Dykstra(IndoorLocation from, IndoorLocation to, boolean staircase, boolean elevator, boolean outside) {
-			this.from = from;
-			this.to = to;
-
-			this.staircase = staircase;
-			this.elevator = elevator;
-			this.outside = outside;
-		}
-
-		/**
-		 * compute shortest path
-		 */
-		private void computePaths() {
-			// setup starting distance
-			dists.put(from, 0d);
-
-			// the priorityqueue will hold all neighbornodes to check next - it will ensure the min dist one to be the
-			// first
-			PriorityQueue<IndoorLocation> queue = new PriorityQueue<IndoorLocation>(20,
-					new Comparator<IndoorLocation>() {
-
-						@Override
-						public int compare(IndoorLocation lhs, IndoorLocation rhs) {
-							return Double.compare(dists.get(lhs), dists.get(rhs));
-						}
-					});
-			queue.add(from);
-
-			while (!queue.isEmpty()) {
-				IndoorLocation u = queue.poll();
-
-				// Visit each edge exiting u
-				for (GraphEdge e : u.getEdges()) {
-					// check wether this is an allowed node
-					if (e.isStairs() && !staircase) { // edge has steps, but not allowed -> skip
-						continue;
-					}
-					if (e.isElevator() && !elevator) { // edge is elevator, but not allowed -> skip
-						continue;
-					}
-					if (!e.isIndoor() && !outside) { // edge is outdoors, but not allowed -> skip
-						continue;
-					}
-
-					// get the neigbor-node
-					IndoorLocation v = (e.getNode0().equals(u)) ? e.getNode1() : e.getNode0();
-
-					double dist = e.getLen();
-					double distOverU = dists.get(u) + dist;
-
-					// the map may not yet contain an entry for v
-					double distOfV = (dists.containsKey(v)) ? dists.get(v) : Double.POSITIVE_INFINITY;
-
-					// relax edge?
-					if (distOverU < distOfV) {
-						// remove from queue as it wont be up to date on the dist-change
-						queue.remove(v);
-
-						// update new dist
-						dists.put(v, distOverU);
-
-						// keep track of path
-						previous.put(v, u);
-
-						// stop computing as soon as target is reached
-						if (v.equals(to)) {
-							break;
-						}
-
-						// re-add this node with updated dists
-						queue.add(v);
-					}
-				}
-			}
-
-			this.computed = true;
-		}
-
-		/**
-		 * return the shortest path from source to target<br>
-		 * it will compute the needed paths if necessary
-		 * 
-		 * @return
-		 */
-		public Stack<IndoorLocation> getShortestPathTo() {
-			if (computed == false) {
-				computePaths();
-			}
-
-			// did we find a path?
-			if (!previous.containsKey(to)) {
-				return null;
-			}
-
-			// yes.
-			Stack<IndoorLocation> path = new Stack<IndoorLocation>();
-			for (IndoorLocation vertex = to; vertex != null; vertex = previous.get(vertex)) {
-				path.add(vertex);
-			}
-
-			return path;
-		}
-	}
-
-	/**
 	 * Returns a stack of nodes, with the destination at the bottom using<br>
 	 * Dykstra's algorithm<br>
 	 * 
@@ -607,118 +479,9 @@ public class Map {
 			Log.i("FOOTPATH", "Looking up path from " + from.getName() + " to " + to.getName() + " failed!");
 
 		return path;
-
-		/*
-		 * Log.i("FOOTPATH", "Looking up path from " + from.getName() + " to " + to.getName());
-		 * 
-		 * int remaining_nodes = nodes.size();// array_nodes_by_id.length; IndoorLocation[] previous = new
-		 * IndoorLocation[remaining_nodes]; double[] dist = new double[remaining_nodes]; boolean[] visited = new
-		 * boolean[remaining_nodes];
-		 * 
-		 * // Set initial values for (int i = 0; i < remaining_nodes; i++) { dist[i] = Double.POSITIVE_INFINITY;
-		 * previous[i] = null; visited[i] = false; } dist[getNodePosInIdArray(from)] = 0; while (remaining_nodes > 0) {
-		 * // Vertex u in q with smallest dist[] IndoorLocation u; double minDist = Double.POSITIVE_INFINITY; int u_i =
-		 * -1; for (int i = 0; i < remaining_nodes; i++) { if (!visited[i] && dist[i] < minDist) { u_i = i; minDist =
-		 * dist[i]; } }
-		 * 
-		 * if (u_i == -1) { // No nodes left break; } // u was found u = nodes.get(u_i);// array_nodes_by_id[u_i];
-		 * visited[u_i] = true; if (dist[u_i] == Double.POSITIVE_INFINITY) { // All remaining nodes are unreachable from
-		 * source break; } // Get neighbors of u in q List<IndoorLocation> nOuIq = getNeighbours(visited, u, staircase,
-		 * elevator, outside); if (u.equals(to)) { // u = to -> found path to destination Build stack of nodes,
-		 * destination at the // bottom Stack<IndoorLocation> s = new Stack<IndoorLocation>(); while (previous[u_i] !=
-		 * null) { s.push(u); u_i = getNodePosInIdArray(u); u = previous[u_i]; } return s; } else { remaining_nodes--; }
-		 * for (IndoorLocation v : nOuIq) { double dist_alt = dist[u_i] + u.distanceTo(v); int v_i =
-		 * getNodePosInIdArray(v); if (dist_alt < dist[v_i]) { dist[v_i] = dist_alt; previous[v_i] = u; } } }
-		 * 
-		 * Log.i("FOOTPATH", "Looking up path from " + from.getName() + " to " + to.getName() + " failed!"); return
-		 * null;
-		 */
 	}
 
-	/**
-	 * Returns all neighbors of given node from a given subset (list) of nodes in this graph
-	 * 
-	 * @param visited
-	 * @param node
-	 * @param staircase
-	 * @param elevator
-	 * @param outside
-	 * @return
-	 */
-	@Deprecated
-	private List<IndoorLocation> getNeighbours(boolean[] visited, IndoorLocation node, boolean staircase,
-			boolean elevator, boolean outside) {
-
-		List<IndoorLocation> ret = new LinkedList<IndoorLocation>();
-		for (GraphEdge edge : node.getEdges()) { // check all edges if they contain node
-			if (edge.isStairs() && !staircase) { // edge has steps, but not
-													// allowed -> skip
-				continue;
-			}
-			if (edge.isElevator() && !elevator) { // edge is elevator, but not
-													// allowed -> skip
-				continue;
-			}
-			if (!edge.isIndoor() && !outside) { // edge is outdoors, but not
-												// allowed -> skip
-				continue;
-			}
-
-			IndoorLocation buf = null;
-			if (edge.getNode0().equals(node)) { // node0 is node
-				buf = edge.getNode1(); // add node1
-			} else if (edge.getNode1().equals(node)) { // node 1 is node
-				buf = edge.getNode0(); // add node0
-			}
-			if (outside) {
-				if (buf != null) { // if outside, all nodes are allowed
-					if (!ret.contains(buf) && !visited[getNodePosInIdArray(buf)]) {
-						ret.add(buf); // add buf only once, iff not visited
-					}
-				}
-			} else { // if !outside, only indoor nodes are allowed
-				if (buf != null && buf.isIndoors()) {
-					if (!ret.contains(buf) && !visited[getNodePosInIdArray(buf)]) {
-						ret.add(buf); // add buf only once, iff not visited
-					}
-				}
-			}
-		}
-		return ret;
-	}
-
-	/**
-	 * TODO maybe move directly into IndoorLocation
-	 * 
-	 * @author helge
-	 */
-	public class IndoorLocationComparator implements Comparator<IndoorLocation> {
-		@Override
-		public int compare(IndoorLocation lhs, IndoorLocation rhs) {
-			return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
-		}
-	}
-
-	/**
-	 * return node pos via binary search<br>
-	 * TODO remove<br>
-	 * <i>NOTE: Collections.binarySearch() runs in O(n) on unsorted lists</i>
-	 * 
-	 * @param node
-	 * @return
-	 */
-	@Deprecated
-	private int getNodePosInIdArray(IndoorLocation node) {
-		return Collections.binarySearch(nodes, node, new IndoorLocationComparator());
-		// return nodes.indexOf(node); // O(n)
-
-		/*
-		 * if (array_nodes_by_id == null) { initNodes(); } int u = 0; int o = array_nodes_by_id.length - 1; int m = 0;
-		 * 
-		 * while (!(o < u)) { m = (u + o) / 2; if (node.getId() == array_nodes_by_id[m].getId()) { return m; } if
-		 * (node.getId() < array_nodes_by_id[m].getId()) { o = m - 1; } else { u = m + 1; } } return -1;
-		 */
-	}
+	
 
 	/**
 	 * return a node for a given id<br>
@@ -813,27 +576,6 @@ public class Map {
 	}
 
 	/**
-	 * returns the edge containing nodes a and b<br>
-	 * TODO remove
-	 * 
-	 * @param a
-	 * @param b
-	 * @return
-	 */
-	@Deprecated
-	public synchronized GraphEdge getEdge(IndoorLocation a, IndoorLocation b) {
-		GraphEdge ret = null;
-		for (GraphEdge edge : a.getEdges()) { // return edge if
-			if (edge.getNode0().equals(a) && edge.getNode1().equals(b)) { // node0=a, node1=b
-				ret = edge; // or
-			} else if (edge.getNode1().equals(a) && edge.getNode0().equals(b)) { // node0=b, node1=a
-				ret = edge;
-			} // else null
-		}
-		return ret;
-	}
-
-	/**
 	 * returns the node with the given name, binary search
 	 * 
 	 * @param name
@@ -849,18 +591,6 @@ public class Map {
 
 		Log.i("FOOTPATH", "Room " + name + " not found!");
 		return null;
-
-		// should use mappings now
-		/*
-		 * if (array_nodes_by_name == null) { initNodes(); } int u = 0; int o = array_nodes_by_name.length - 1; int m =
-		 * 0;
-		 * 
-		 * while (!(o < u)) { m = (u + o) / 2; if (name.equals(array_nodes_by_name[m].getName())) { Log.i("FOOTPATH",
-		 * "Room " + array_nodes_by_name[m].getName() + " found!"); return array_nodes_by_name[m]; } if
-		 * (name.compareTo(array_nodes_by_name[m].getName()) < 0) { o = m - 1; } else { u = m + 1; } }
-		 * 
-		 * Log.i("FOOTPATH", "Room " + name + " not found!"); return null;
-		 */
 	}
 
 	/**
@@ -924,82 +654,142 @@ public class Map {
 	}
 
 	/**
-	 * creates an array, containing only nodes _with_ a name, sorted ascending
+	 * simple dykstra implementation using a priorityqueue comparing min dists towards nodes neighbors
 	 * 
-	 * @param nodes
-	 * @return
+	 * @author helge
+	 * 
 	 */
-	@Deprecated
-	private IndoorLocation[] sortNodesByName(List<IndoorLocation> nodes) {
-		IndoorLocation[] node_array;
-		IndoorLocation temp = null;
-		int num_nulls = 0;
-		int c = 0;
-		boolean not_sorted = true;
-		// count number of nodes without a name (null)
-		for (int i = 0; i < nodes.size(); i++) {
-			if (nodes.get(i) != null && nodes.get(i).getName() == null) {
-				num_nulls++;
-			}
+	public class Dykstra {
+		private final java.util.Map<IndoorLocation, Double> dists = new HashMap<IndoorLocation, Double>();
+		private final java.util.Map<IndoorLocation, IndoorLocation> previous = new HashMap<IndoorLocation, IndoorLocation>();
+		private final IndoorLocation from;
+		private final IndoorLocation to;
+		private boolean computed = false;
+	
+		private final boolean staircase;
+		private final boolean elevator;
+		private final boolean outside;
+	
+		/**
+		 * @param from
+		 * @param to
+		 * @param staircase
+		 * @param elevator
+		 * @param outside
+		 */
+		public Dykstra(IndoorLocation from, IndoorLocation to, boolean staircase, boolean elevator, boolean outside) {
+			this.from = from;
+			this.to = to;
+	
+			this.staircase = staircase;
+			this.elevator = elevator;
+			this.outside = outside;
 		}
-		// create an array for nodes with a name
-		node_array = new IndoorLocation[nodes.size() - num_nulls];
-		for (IndoorLocation node : nodes) {
-			if (node != null && node.getName() != null) {
-				// insert node with name into array
-				node_array[c] = node;
-				c++;
-			}
-		}
-		// sort by name (bubble sort)
-		while (not_sorted) {
-			not_sorted = false;
-			for (int i = 0; i < node_array.length - 1; i++) {
-				if (node_array[i].getName().compareTo(node_array[i + 1].getName()) > 0) {
-					temp = node_array[i];
-					node_array[i] = node_array[i + 1];
-					node_array[i + 1] = temp;
-					not_sorted = true;
+	
+		/**
+		 * compute shortest path
+		 */
+		private void computePaths() {
+			// setup starting distance
+			dists.put(from, 0d);
+	
+			// the priorityqueue will hold all neighbornodes to check next - it will ensure the min dist one to be the
+			// first
+			PriorityQueue<IndoorLocation> queue = new PriorityQueue<IndoorLocation>(20,
+					new Comparator<IndoorLocation>() {
+	
+						@Override
+						public int compare(IndoorLocation lhs, IndoorLocation rhs) {
+							return Double.compare(dists.get(lhs), dists.get(rhs));
+						}
+					});
+			queue.add(from);
+	
+			while (!queue.isEmpty()) {
+				IndoorLocation u = queue.poll();
+	
+				// Visit each edge exiting u
+				for (GraphEdge e : u.getEdges()) {
+					// check wether this is an allowed node
+					if (e.isStairs() && !staircase) { // edge has steps, but not allowed -> skip
+						continue;
+					}
+					if (e.isElevator() && !elevator) { // edge is elevator, but not allowed -> skip
+						continue;
+					}
+					if (!e.isIndoor() && !outside) { // edge is outdoors, but not allowed -> skip
+						continue;
+					}
+	
+					// get the neigbor-node
+					IndoorLocation v = (e.getNode0().equals(u)) ? e.getNode1() : e.getNode0();
+	
+					double dist = e.getLen();
+					double distOverU = dists.get(u) + dist;
+	
+					// the map may not yet contain an entry for v
+					double distOfV = (dists.containsKey(v)) ? dists.get(v) : Double.POSITIVE_INFINITY;
+	
+					// relax edge?
+					if (distOverU < distOfV) {
+						// remove from queue as it wont be up to date on the dist-change
+						queue.remove(v);
+	
+						// update new dist
+						dists.put(v, distOverU);
+	
+						// keep track of path
+						previous.put(v, u);
+	
+						// stop computing as soon as target is reached
+						if (v.equals(to)) {
+							break;
+						}
+	
+						// re-add this node with updated dists
+						queue.add(v);
+					}
 				}
 			}
+	
+			this.computed = true;
 		}
-		// return array which had no nulls
-		return node_array;
+	
+		/**
+		 * return the shortest path from source to target<br>
+		 * it will compute the needed paths if necessary
+		 * 
+		 * @return
+		 */
+		public Stack<IndoorLocation> getShortestPathTo() {
+			if (computed == false) {
+				computePaths();
+			}
+	
+			// did we find a path?
+			if (!previous.containsKey(to)) {
+				return null;
+			}
+	
+			// yes.
+			Stack<IndoorLocation> path = new Stack<IndoorLocation>();
+			for (IndoorLocation vertex = to; vertex != null; vertex = previous.get(vertex)) {
+				path.add(vertex);
+			}
+	
+			return path;
+		}
 	}
 
 	/**
-	 * creates an array,sorted by id ascending
+	 * TODO maybe move directly into IndoorLocation
 	 * 
-	 * @param nodes
-	 * @return
+	 * @author helge
 	 */
-	@Deprecated
-	private IndoorLocation[] sortNodesById(List<IndoorLocation> nodes) {
-		IndoorLocation[] node_array;
-		IndoorLocation temp = null;
-		int c = 0;
-		boolean not_sorted = true;
-		// create an array for all nodes
-		node_array = new IndoorLocation[nodes.size()];
-		for (IndoorLocation node : nodes) {
-			if (node != null) {
-				// insert node
-				node_array[c] = node;
-				c++;
-			}
+	public class IndoorLocationComparator implements Comparator<IndoorLocation> {
+		@Override
+		public int compare(IndoorLocation lhs, IndoorLocation rhs) {
+			return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
 		}
-		// sort by id (bubble sort)
-		while (not_sorted) {
-			not_sorted = false;
-			for (int i = 0; i < node_array.length - 1; i++) {
-				if (node_array[i].getId() > node_array[i + 1].getId()) {
-					temp = node_array[i];
-					node_array[i] = node_array[i + 1];
-					node_array[i + 1] = temp;
-					not_sorted = true;
-				}
-			}
-		}
-		return node_array;
 	}
 }
