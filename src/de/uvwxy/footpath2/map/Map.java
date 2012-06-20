@@ -62,8 +62,7 @@ public class Map {
 	public OSM2DBuilding getOsm2Dbuilding() {
 		return osm2Dbuilding;
 	}
-	
-	
+
 	public synchronized boolean writeGraphToXMLFile(String filePath) throws IOException {
 
 		boolean mExternalStorageAvailable = false;
@@ -285,52 +284,50 @@ public class Map {
 
 		for (GraphWay way : allWays) { // find ways which are indoors at some point
 			List<Integer> refs = way.getRefs();
-			if (way.getBuildingpart()!=null){
-				if (way.getBuildingpart().equals("wall")){
-					if (way.getIndoor().equals("yes")){
-						if (way.getArea().equals("yes")){
-							LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
-							addWayAsEdgesToList(temp,way,allNodes);
-							// areas are lists of lists
-							osm2Dbuilding.walls_inner_area.add(temp);
-						} else  {
-							addWayAsEdgesToList(osm2Dbuilding.walls_inner,way,allNodes);
-							// areas are lists of lists
-						}
-					} else if (way.getIndoor().equals("no")){
-						if (way.getArea().equals("yes")){
-							LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
-							addWayAsEdgesToList(temp,way,allNodes);
-							// areas are lists of lists
-							osm2Dbuilding.walls_outer_area.add(temp);
-						} else  {
-							addWayAsEdgesToList(osm2Dbuilding.walls_outer,way,allNodes);
-							// areas are lists of lists
-						}
-					}
-				} else if (way.getBuildingpart().equals("elevator"))  {
-					if (way.getArea().equals("yes")){
+			if (way.getBuildingpart() != null && way.getBuildingpart().equals("wall")) {
+				if (way.getIndoor() != null && way.getIndoor().equals("yes")) {
+					if (way.getArea() != null && way.getArea().equals("yes")) {
 						LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
-						addWayAsEdgesToList(temp,way,allNodes);
+						addWayAsEdgesToList(temp, way, allNodes);
 						// areas are lists of lists
-						osm2Dbuilding.elevators_area.add(temp);
-					} else  {
-						addWayAsEdgesToList(osm2Dbuilding.elevators,way,allNodes);
+						osm2Dbuilding.walls_inner_area.add(temp);
+					} else {
+						addWayAsEdgesToList(osm2Dbuilding.walls_inner, way, allNodes);
 						// areas are lists of lists
 					}
-				} else if (way.getBuildingpart().equals("steps"))  {
-					if (way.getArea().equals("yes")){
+				} else if (way.getIndoor() != null && way.getIndoor().equals("no")) {
+					if (way.getArea() != null && way.getArea().equals("yes")) {
 						LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
-						addWayAsEdgesToList(temp,way,allNodes);
+						addWayAsEdgesToList(temp, way, allNodes);
 						// areas are lists of lists
-						osm2Dbuilding.stairs_area.add(temp);
-					} else  {
-						addWayAsEdgesToList(osm2Dbuilding.stairs,way,allNodes);
+						osm2Dbuilding.walls_outer_area.add(temp);
+					} else {
+						addWayAsEdgesToList(osm2Dbuilding.walls_outer, way, allNodes);
 						// areas are lists of lists
 					}
 				}
+			} else if (way.getBuildingpart() != null && way.getBuildingpart().equals("elevator")) {
+				if (way.getArea() != null && way.getArea().equals("yes")) {
+					LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
+					addWayAsEdgesToList(temp, way, allNodes);
+					// areas are lists of lists
+					osm2Dbuilding.elevators_area.add(temp);
+				} else {
+					addWayAsEdgesToList(osm2Dbuilding.elevators, way, allNodes);
+					// areas are lists of lists
+				}
+			} else if (way.getBuildingpart() != null && way.getBuildingpart().equals("steps")) {
+				if (way.getArea() != null && way.getArea().equals("yes")) {
+					LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
+					addWayAsEdgesToList(temp, way, allNodes);
+					// areas are lists of lists
+					osm2Dbuilding.stairs_area.add(temp);
+				} else {
+					addWayAsEdgesToList(osm2Dbuilding.stairs, way, allNodes);
+					// areas are lists of lists
+				}
 			}
-			
+
 			// only add things as path if it is not a building part
 			// TODO: maybe use corridor later?
 			if (way.isIndoor() && way.getBuildingpart() == null) { // whole path is indoors -> keep
@@ -384,18 +381,17 @@ public class Map {
 		return true;
 	} // -> addToGraphFromXMLFile(String filePath) { ... }
 
-	private void addWayAsEdgesToList(LinkedList<GraphEdge> insertInto, GraphWay way,
-			List<IndoorLocation> allNodes) {
-		
+	private void addWayAsEdgesToList(LinkedList<GraphEdge> insertInto, GraphWay way, List<IndoorLocation> allNodes) {
+
 		IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
-		
+
 		for (int i = 1; i <= way.getRefs().size() - 1; i++) {
-			
+
 			IndoorLocation nextNode = getNode(allNodes, way.getRefs().get(i).intValue());
 
-			GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, firstNode.distanceTo(nextNode), firstNode.bearingTo(nextNode), way.getWheelchair(),
-					way.getLevel(), way.getIndoor());
-			
+			GraphEdge tempEdge = new GraphEdge(firstNode, nextNode, firstNode.distanceTo(nextNode),
+					firstNode.bearingTo(nextNode), way.getWheelchair(), way.getLevel(), way.getIndoor());
+
 			tempEdge.setHighway(way.getHighway());
 			tempEdge.setSteps(way.getSteps());
 			tempEdge.setBuildingpart(way.getBuildingpart());
