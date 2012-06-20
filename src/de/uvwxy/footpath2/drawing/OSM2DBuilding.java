@@ -68,8 +68,10 @@ public class OSM2DBuilding implements DrawToCanvas {
 		wallpaint.setStyle(Style.FILL);
 		for (int i = 0; i < walls_outer_area.size() - 1; i++) {
 			if (walls_outer_area.get(i) != null) {
+				
 				LinkedList<GraphEdge> es = walls_outer_area.get(i);
 				wallpath.reset(); // only needed when reusing this path for a new build
+				
 				for (int j = 0; j < es.size() - 1; j++) {
 					if (j == 0) {
 						int[] apix = GeoUtils.convertToPixelLocation(walls_inner.get(i).getNode0(), center,
