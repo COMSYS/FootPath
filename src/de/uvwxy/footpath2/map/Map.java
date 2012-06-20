@@ -350,6 +350,15 @@ public class Map {
 			}
 		}
 
+		Log.i("FOOTPATH", "MAP: items in elevators" + osm2Dbuilding.elevators);
+		Log.i("FOOTPATH", "MAP: items in elevators_area" + osm2Dbuilding.elevators_area);
+		Log.i("FOOTPATH", "MAP: items in stairs" + osm2Dbuilding.stairs);
+		Log.i("FOOTPATH", "MAP: items in stairs_area" + osm2Dbuilding.stairs_area);
+		Log.i("FOOTPATH", "MAP: items in walls_inner" + osm2Dbuilding.walls_inner);
+		Log.i("FOOTPATH", "MAP: items in walls_inner_area" + osm2Dbuilding.walls_inner_area);
+		Log.i("FOOTPATH", "MAP: items in walls_outer" + osm2Dbuilding.walls_outer);
+		Log.i("FOOTPATH", "MAP: items in walls_outer_area" + osm2Dbuilding.walls_outer_area);
+
 		if (remainingWays.size() == 0) // return false, nothing to be added to graph
 			return false;
 

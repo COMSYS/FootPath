@@ -2,7 +2,6 @@ package de.uvwxy.footpath2.tools;
 
 import android.graphics.PointF;
 import android.util.FloatMath;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -33,14 +32,14 @@ public class PanZoomListener implements OnTouchListener {
 		switch (event.getAction() & MotionEvent.ACTION_MASK) {
 		case MotionEvent.ACTION_DOWN:
 			state = PanZoomType.PAN;
-			Log.i("FOOTPATH", "PanZoomListener: primary: " + event.getX() + "/" + event.getY());
+//			Log.i("FOOTPATH", "PanZoomListener: primary: " + event.getX() + "/" + event.getY());
 			start.set(event.getX(), event.getY());
 			
 			panZoomResult.resetResult();
 			break;
 		case MotionEvent.ACTION_POINTER_DOWN:
 			// second finger down
-			Log.i("FOOTPATH", "PanZoomListener: secondary: " + event.getX() + "/" + event.getY());
+//			Log.i("FOOTPATH", "PanZoomListener: secondary: " + event.getX() + "/" + event.getY());
 			state = PanZoomType.ZOOM;
 			oldZoomDistPixels = 1f;
 			reset_first_scale_value = true;
@@ -56,7 +55,7 @@ public class PanZoomListener implements OnTouchListener {
 			switch (state) {
 			case PAN:
 				PointF pan = new PointF(event.getX() - start.x, event.getY() - start.y);
-				Log.i("FOOTPATH", "PanZoomListener: pan: " + pan.x + "/" + pan.y);
+//				Log.i("FOOTPATH", "PanZoomListener: pan: " + pan.x + "/" + pan.y);
 				start.set(event.getX(), event.getY());
 				
 				panZoomResult.type = PanZoomType.PAN;
@@ -72,7 +71,7 @@ public class PanZoomListener implements OnTouchListener {
 					s = 1f;
 					reset_first_scale_value = false;
 				}
-				Log.i("FOOTPATH", "PanZoomListener: scaled: " + (s));
+//				Log.i("FOOTPATH", "PanZoomListener: scaled: " + (s));
 				oldZoomDistPixels = d;
 				
 				panZoomResult.type = PanZoomType.ZOOM;
