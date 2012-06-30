@@ -71,6 +71,7 @@ public abstract class MatchingAlgorithm implements StepEventListener {
 						+ " = " + tempProgress /  x.distanceTo(path.get(i + 1)));
 
 				ret.moveIntoDirection(path.get(i + 1),tempProgress / x.distanceTo(path.get(i + 1)) );
+				ret.setLevel(x.getLevel());
 				// ret=path.get(i);
 				break;
 			}

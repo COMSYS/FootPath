@@ -42,7 +42,7 @@ import de.uvwxy.footpath2.types.FP_MovementDetection;
  */
 public class FootPath {
 
-	private static final long EXPORT_INTERVALL = 15000;
+	private static final long EXPORT_INTERVALL = 1000*60;
 
 	private static FootPath thisInstance = null;
 
@@ -257,7 +257,7 @@ public class FootPath {
 	public void _h_start() throws FootPathException {
 		// TODO:
 		matchingAlgorithm.init();
-		exportManager.startIntervalExporting(EXPORT_INTERVALL);
+		//exportManager.startIntervalExporting(EXPORT_INTERVALL);
 		sensorEventDistributor._a_startSensorUpdates();
 		movementDetection._a_startMovementDetection();
 
@@ -265,8 +265,8 @@ public class FootPath {
 
 	public void _i1_pause() {
 		if (exportManager != null) {
-			exportManager.stopIntervalExporting();
-			exportManager.export_recentData();
+			//exportManager.stopIntervalExporting();
+			//exportManager.export_recentData();
 		}
 		if (sensorEventDistributor != null)
 			sensorEventDistributor._b1_pauseSensorUpdates();
@@ -275,15 +275,15 @@ public class FootPath {
 	}
 
 	public void _i2_unpause() {
-		exportManager.startIntervalExporting(EXPORT_INTERVALL);
+		//exportManager.startIntervalExporting(EXPORT_INTERVALL);
 		sensorEventDistributor._b2_unPauseSensorUpdates();
 		movementDetection._b2_unPauseMovementDetection();
 	}
 
 	public void _j_stop() {
 		if (exportManager != null) {
-			exportManager.stopIntervalExporting();
-			exportManager.export_recentData();
+			//exportManager.stopIntervalExporting();
+			//exportManager.export_recentData();
 		}
 		if (sensorEventDistributor != null)
 			sensorEventDistributor._c_stopSensorUpdates();
