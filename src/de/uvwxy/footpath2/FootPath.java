@@ -209,11 +209,7 @@ public class FootPath {
 		Stack<IndoorLocation> buf = map.getShortestPath(location, destination, staircase, elevator, outside);
 		if (buf != null) {
 			for (IndoorLocation n : buf) {
-				IndoorLocation x = new IndoorLocation(n.getName(), "FootPath");
-				x.setLatitude(n.getLatitude());
-				x.setLongitude(n.getLongitude());
-				// Note this reverses the stack, which is from destination to target:
-				ret.addFirst(x);
+				ret.addFirst(n);
 			}
 		}
 		return ret;
