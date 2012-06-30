@@ -5,12 +5,19 @@
     android:layout_height="fill_parent"
     android:keepScreenOn="true" >
 
+    <TextView
+        android:id="@+id/lbl01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Please enter id"
+        android:textSize="24px" >
+    </TextView>
+    
     <EditText
         android:id="@+id/txt01"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/lbl01"
-        android:layout_toRightOf="@+id/btn01"
         android:text="h263"
         android:width="96dp" >
     </EditText>
@@ -25,14 +32,7 @@
         android:textSize="24px" >
     </Button>
 
-    <TextView
-        android:id="@+id/lbl01"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btn01"
-        android:text="Please enter id"
-        android:textSize="24px" >
-    </TextView>
+    
 
     <TextView
         android:id="@+id/lblParserInfo"
