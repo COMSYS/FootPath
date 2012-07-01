@@ -469,6 +469,11 @@ public class H263Parser {
 		if (p.hExtraInsertionInformation) {
 			// TODO: extra insertion information not implemented
 
+			do {
+				readBits(8);
+				Log.i("FLOWPATH","(" + decTry + ") EIB");
+			} while (readBits(1) == 1);
+			
 			// A codeword of variable length consisting of less than 8
 			// zero-bits. Encoders may insert this codeword directly before an
 			// EOS codeword. Encoders shall insert this codeword as necessary to
@@ -478,7 +483,7 @@ public class H263Parser {
 			// the EOS or EOSBS codeword is byte aligned. Decoders shall be
 			// designed to discard ESTUF. See Annex C for a description of
 			// EOSBS and its use.
-			printAndroidLogError("extra instertion information not implemented");
+			//printAndroidLogError("extra instertion information not implemented");
 		}
 
 		// TODO: Remove Stuffing here for byte alignment?
@@ -513,7 +518,7 @@ public class H263Parser {
 							// if (detailedError)
 							// e.printStackTrace();
 							numBrokenFrames++;
-
+							Log.i("FLOWPATH", "(" + decTry + ") FAILED");
 							return null;
 						}
 
@@ -588,8 +593,11 @@ public class H263Parser {
 		if (p.hMVDs != null) {
 			return mvs;
 		} else {
+			Log.i("FLOWPATH", "(" + decTry + ") FAILED");
 			return null;
 		}
+		
+
 	}
 
 	private float a;
