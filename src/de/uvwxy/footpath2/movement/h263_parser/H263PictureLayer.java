@@ -77,4 +77,75 @@ public class H263PictureLayer {
 		hMVDs = new float[blockWidth][blockHeight][2][2];
 	}
 	
+	public void reset(){
+		hTemporalReference = -1; // Temporal Reference
+		hSplitScreen = false;
+		hDocumentCamera = false;
+		hFullPictureFreezeRelease = false;
+		hSourceFormat = -1; // enum if needed
+		
+		hExtendedPTYPE = false; // if true PLUSTYPE is present
+		
+		// To determine if OPTYPE fields are present, or only MPTYPE
+		hUFEP = -1;
+		
+		// Optional PlustTYPE fields
+		hOptionalPTYPE = false;
+		hCustomPCF = false;
+		hAdvanceINTRACoding = false;
+		hDeblockingFilter = false;
+		hSliceStructured = false;
+		hReferencePicureSelection = false;
+		hIndependentSegmentDecoding = false;
+		hAlternativeINTERVLC = false;
+		hModifiedQuantization = false;
+		
+		// Mandatory PlustTYPE fields
+		hReferencePictureResampling = false;
+		hReducedResolutionUpdate = false;
+		hRoundingType = false;
+		
+		hPictureCodingType = H263PCT.Undefined;
+		hUnrestrictedMotionVector = false;
+		hSyntaxArithmeticCoding = false;
+		hAdvancedPrediction = false;
+		hPBFrames = false;
+		
+		hCPM = false; // Continuous Presence Multipoint and Video Multiplex mode
+		hPSBI = -1;
+		
+//		public int hCustomPictureFormat = -1; // CPFMT is divided as below
+		hCPFMTPixelAspectRatio = -1;
+		hCPFMTPictureWidthIndication = -1;
+		hCPFMTPictureHeightIndication = -1;
+		
+//		public int hExtendedPixelAspectRatio = -1; // EPAR is divided as below
+		hEPARWidth = -1;
+		hEPARHeight = -1;
+		
+//		public int hCustomPictureClockFrequencyCode = -1;
+		hCPCFClockConversion = false;
+		hCPCFClockDivisor = -1;
+		
+		hExtendedTemporalReference = -1;
+		hUnlimitedUnrestrictedMotionVectorsIndicator = -1;
+		hSliceStructuredSubmodeBits = -1;
+		hEnhancementLayerNumber = -1;
+		hReferenceLayerNumber = -1;
+		hReferencePictureSelectionModeFlags = -1;
+		hTemporalReferenceForPredictionIndication = false;
+		hTemporalReferenceForPrediction = -1;
+		hBackChannelMessageIndication = -1;
+		hBackChannelMessage = -1; // TODO length unknown if above = 1 else 0
+		hReferencePictureResamplingParameters = -1;
+		hQuantizerInformation = -1;
+		
+		// CPM; PSBI, see above
+		
+		hTemporalReferenceForBPicturesInPBFrames = -1;
+		hQuantizationInformationForBPicturesInPBFrames = -1;
+		hExtraInsertionInformation = false;
+		// EII == true indicates the following two fields
+		hSupplementalEnhancmentInformation = -1;
+	}
 }

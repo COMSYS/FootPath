@@ -124,7 +124,7 @@ public class H263Parser {
 	private int decTry = 0;
 
 	private float[][][] decodePicture() throws IOException, EOSException {
-
+		p.reset();
 		decTry++;
 
 		// ugly hack to prevent crashing at end of file
@@ -808,7 +808,7 @@ public class H263Parser {
 				} else {
 					// read MVD component (x2) from Table D.3
 					// TODO: unrestricted vector mode is not implemented
-					Log.i("FLOWPATH", "(" + decTry + ") " + "B 4: hmMCBPC: " + hmMCBPC[0] + ", " + hmMCBPC[1] + ", "
+					Log.i("FLOWPATH", "(" + decTry + ") ["+x+"]["+y+"]" + ": hmMCBPC: " + hmMCBPC[0] + ", " + hmMCBPC[1] + ", "
 							+ hmMCBPC[2] + "  ### hmCBPY: " + hmCBPY[0] + ", " + hmCBPY[1] + ", " + hmCBPY[2] + ", "
 							+ hmCBPY[3]);
 
@@ -3091,7 +3091,7 @@ public class H263Parser {
 
 	private void printAndroidLogError(String s) {
 		// Log.i("FLOWPATH", "\n>>>>\n" + decTry + " " + s + "\n@" + (fisPtr + 1));
-		Log.i("FLOWPATH", "\n>>>>\n" + decTry + " " + s);
+		Log.d("FLOWPATH", "\n" + decTry + " " + s);
 		if (detailedError) {
 			String bits = "";
 
