@@ -50,6 +50,8 @@ public class H263Parser {
 	private boolean breakOnBitErrors = true;
 	private boolean noGSCMode = true;
 
+	private boolean fastPSC = true;
+	
 	private long STARTUP = 0;
 
 	// there are even small frames -> 24 (as seen with 320x240@30fps)
@@ -105,7 +107,7 @@ public class H263Parser {
 	}
 
 	public void findPictureStart() throws IOException, EOSException {
-		checkForPictureStartCodeFaster();
+		checkForPictureStartCode();
 	}
 
 	// used for MV calculation:
@@ -511,7 +513,7 @@ public class H263Parser {
 						} catch (H263MBException e) {
 							mbAreOk = false;
 							// if (detailedError)
-							// e.printStackTrace();
+							 e.printStackTrace();
 							numBrokenFrames++;
 
 							return null;
@@ -755,14 +757,14 @@ public class H263Parser {
 					// + ", " + hmMCBPC[2]);
 					// // // + "\n" + lastTCOEFF[0] + ", " + lastTCOEFF[1] + ", " + lastTCOEFF[2] + ", " +
 					// lastTCOEFF[3]);
-					throw new H263MBException("hCBPY failed, " + x + ", " + y);
+					throw new H263MBException("(" + decTry + ") hCBPY failed, " + x + ", " + y);
 				}
 			} else {
 				// here we have hMCBPC == null so we are borked
 				// printAndroidLogError("hMCBPC failed, " + x + ", " + y + ", " + p.hMVDs[(x - 1 + 20) % 20][y][0][0]
 				// + "|" + p.hMVDs[(x - 1 + 20) % 20][y][0][1] + "  " + p.hMVDs[(x - 1 + 20) % 20][y][1][0] + "|"
 				// + p.hMVDs[(x - 1 + 20) % 20][y][1][1]);
-				throw new H263MBException("hMCBPC failed, " + x + ", " + y);
+				throw new H263MBException("(" + decTry + ") hMCBPC failed, " + x + ", " + y);
 
 			}
 			boolean d = false;
@@ -813,6 +815,7 @@ public class H263Parser {
 							+ hmCBPY[3]);
 
 					Log.i("FLOWPATH", "(" + decTry + ") unrestricted vector mode is not implemented");
+					throw new H263MBException("(" + decTry + ") unrestricted vector mode is not implemented, " + x + ", " + y);
 				}
 			} else if (hmMCBPC[0] == 3) {
 				// no MVD data
@@ -826,16 +829,8 @@ public class H263Parser {
 				p.hMVDs[x][y][0] = empty;
 				p.hMVDs[x][y][1] = empty;
 
-				// Log.i("FLOWPATH", "(" + decTry + ") " + "PING " + x + ", " + y + " , type: " + p.hPictureCodingType
-				// + ", d =" + d);
-				// throw new H263MBException("BLOCKTYPE 4 found what to do?, " + x + ", " + y);
-				// TODO CONTINUE HERE?
 			} else {
-				// TODO: MCPBC decoding failed (something is unimplemented here)
-				// printAndroidLogError("MCPBC decoding failed (something is unimplemented here, block type" +
-				// hmMCBPC[0]
-				// + ") " + x + ", " + y);
-				throw new H263MBException("MCBPC failed, " + x + ", " + y);
+				throw new H263MBException("(" + decTry + ") MCBPC failed, " + x + ", " + y);
 			}
 
 			// Log.i("FLOWPATH", "MVS @ " + x + ", " + y + ", "
@@ -921,7 +916,7 @@ public class H263Parser {
 				} else {
 					// block decoding failed
 					// printAndroidLogError("block decoding failed: ret == -1");
-					throw new H263MBException("block decoding failed: ret == -1");
+					throw new H263MBException("(" + decTry + ") block decoding failed: ret == -1");
 				}
 			}
 		}
@@ -943,6 +938,11 @@ public class H263Parser {
 		// "0000 0000 0011 1111 1111 1111 1111 1111" "clear mask";
 		// 0x 0 0 3 f f f f f"
 		// long ts = System.currentTimeMillis();
+		
+		if(fastPSC){
+			checkForPictureStartCodeFasterX();
+			return;
+		}
 
 		int bitsBufPSC = 0;
 		int bitCount = 0;
@@ -966,7 +966,7 @@ public class H263Parser {
 		}
 	}
 
-	private void checkForPictureStartCodeFaster() throws IOException, EOSException {
+	private void checkForPictureStartCodeFasterX() throws IOException, EOSException {
 		// We assume PSC is byte aligned, thus only check for trailing 10 0000
 		//
 		// long ts = System.currentTimeMillis();
@@ -3091,7 +3091,7 @@ public class H263Parser {
 
 	private void printAndroidLogError(String s) {
 		// Log.i("FLOWPATH", "\n>>>>\n" + decTry + " " + s + "\n@" + (fisPtr + 1));
-		Log.d("FLOWPATH", "\n" + decTry + " " + s);
+		Log.i("FLOWPATH", "\n" + decTry + " " + s);
 		if (detailedError) {
 			String bits = "";
 
