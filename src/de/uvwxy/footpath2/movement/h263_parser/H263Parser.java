@@ -51,7 +51,7 @@ public class H263Parser {
 	private boolean noGSCMode = true;
 
 	private boolean fastPSC = true;
-	
+
 	private long STARTUP = 0;
 
 	// there are even small frames -> 24 (as seen with 320x240@30fps)
@@ -508,16 +508,13 @@ public class H263Parser {
 				for (int y = 0; y < blockHeight; y++) {
 					for (int x = 0; x < blockWidth; x++) {
 
-						try {
-							decodeMacroBlock(p, x, y);
-						} catch (H263MBException e) {
+						if (!decodeMacroBlock(p, x, y)) {
 							mbAreOk = false;
 							// if (detailedError)
-							 e.printStackTrace();
+							// e.printStackTrace();
 							numBrokenFrames++;
 
 							return null;
-
 						}
 
 						if (p.hMVDs != null && mbAreOk) {
@@ -707,7 +704,7 @@ public class H263Parser {
 	private float mvdHorizontal[];
 	private float mvdVertical[];
 
-	private void decodeMacroBlock(H263PictureLayer p, int x, int y) throws IOException, H263MBException {
+	private boolean decodeMacroBlock(H263PictureLayer p, int x, int y) throws IOException {
 		hMCOD = readBits(1) == 1; // false = coded
 
 		if (hMCOD) {
@@ -757,15 +754,16 @@ public class H263Parser {
 					// + ", " + hmMCBPC[2]);
 					// // // + "\n" + lastTCOEFF[0] + ", " + lastTCOEFF[1] + ", " + lastTCOEFF[2] + ", " +
 					// lastTCOEFF[3]);
-					throw new H263MBException("(" + decTry + ") hCBPY failed, " + x + ", " + y);
+					Log.i("FLOWPATH", "(" + decTry + ") hCBPY failed, " + x + ", " + y);
+					return false;
 				}
 			} else {
 				// here we have hMCBPC == null so we are borked
 				// printAndroidLogError("hMCBPC failed, " + x + ", " + y + ", " + p.hMVDs[(x - 1 + 20) % 20][y][0][0]
 				// + "|" + p.hMVDs[(x - 1 + 20) % 20][y][0][1] + "  " + p.hMVDs[(x - 1 + 20) % 20][y][1][0] + "|"
 				// + p.hMVDs[(x - 1 + 20) % 20][y][1][1]);
-				throw new H263MBException("(" + decTry + ") hMCBPC failed, " + x + ", " + y);
-
+				Log.i("FLOWPATH", "(" + decTry + ") hMCBPC failed, " + x + ", " + y);
+				return false;
 			}
 			boolean d = false;
 			if (!p.hModifiedQuantization && (hmMCBPC[0] == 1 || hmMCBPC[0] == 4 || hmMCBPC[0] == 5)) {
@@ -810,12 +808,13 @@ public class H263Parser {
 				} else {
 					// read MVD component (x2) from Table D.3
 					// TODO: unrestricted vector mode is not implemented
-					Log.i("FLOWPATH", "(" + decTry + ") ["+x+"]["+y+"]" + ": hmMCBPC: " + hmMCBPC[0] + ", " + hmMCBPC[1] + ", "
-							+ hmMCBPC[2] + "  ### hmCBPY: " + hmCBPY[0] + ", " + hmCBPY[1] + ", " + hmCBPY[2] + ", "
-							+ hmCBPY[3]);
+					Log.i("FLOWPATH", "(" + decTry + ") [" + x + "][" + y + "]" + ": hmMCBPC: " + hmMCBPC[0] + ", "
+							+ hmMCBPC[1] + ", " + hmMCBPC[2] + "  ### hmCBPY: " + hmCBPY[0] + ", " + hmCBPY[1] + ", "
+							+ hmCBPY[2] + ", " + hmCBPY[3]);
 
 					Log.i("FLOWPATH", "(" + decTry + ") unrestricted vector mode is not implemented");
-					throw new H263MBException("(" + decTry + ") unrestricted vector mode is not implemented, " + x + ", " + y);
+					Log.i("FLOWPATH", "(" + decTry + ") unrestricted vector mode is not implemented, " + x + ", " + y);
+					return false;
 				}
 			} else if (hmMCBPC[0] == 3) {
 				// no MVD data
@@ -830,7 +829,8 @@ public class H263Parser {
 				p.hMVDs[x][y][1] = empty;
 
 			} else {
-				throw new H263MBException("(" + decTry + ") MCBPC failed, " + x + ", " + y);
+				Log.i("FLOWPATH", "(" + decTry + ") MCBPC failed, " + x + ", " + y);
+				return false;
 			}
 
 			// Log.i("FLOWPATH", "MVS @ " + x + ", " + y + ", "
@@ -847,51 +847,59 @@ public class H263Parser {
 			boolean bINTRADC = (hmMCBPC[0] == 3 || hmMCBPC[0] == 4);
 
 			// TCOEF is present if indicated by MCBPC or CBPY
+			boolean blockOK = true;
 
 			if (hmCBPY != null) {
 
 				if (hmMCBPC[0] == 3) {
 					// LUMINANCE 0 BLOCK
-					decodeBlockLayer(bINTRADC, !(hmCBPY[0] == 1));
+					blockOK &= decodeBlockLayer(bINTRADC, !(hmCBPY[0] == 1));
 
 					// LUMINANCE 1 BLOCK
-					decodeBlockLayer(bINTRADC, !(hmCBPY[1] == 1));
+					blockOK &= decodeBlockLayer(bINTRADC, !(hmCBPY[1] == 1));
 
 					// LUMINANCE 2 BLOCK
-					decodeBlockLayer(bINTRADC, !(hmCBPY[2] == 1));
+					blockOK &= decodeBlockLayer(bINTRADC, !(hmCBPY[2] == 1));
 
 					// LUMINANCE 3 BLOCK
-					decodeBlockLayer(bINTRADC, !(hmCBPY[3] == 1));
+					blockOK &= decodeBlockLayer(bINTRADC, !(hmCBPY[3] == 1));
 				} else {
 					// LUMINANCE 0 BLOCK
-					decodeBlockLayer(bINTRADC, (hmCBPY[0] == 1));
+					blockOK &= decodeBlockLayer(bINTRADC, (hmCBPY[0] == 1));
 
 					// LUMINANCE 1 BLOCK
-					decodeBlockLayer(bINTRADC, (hmCBPY[1] == 1));
+					blockOK &= decodeBlockLayer(bINTRADC, (hmCBPY[1] == 1));
 
 					// LUMINANCE 2 BLOCK
-					decodeBlockLayer(bINTRADC, (hmCBPY[2] == 1));
+					blockOK &= decodeBlockLayer(bINTRADC, (hmCBPY[2] == 1));
 
 					// LUMINANCE 3 BLOCK
-					decodeBlockLayer(bINTRADC, (hmCBPY[3] == 1));
+					blockOK &= decodeBlockLayer(bINTRADC, (hmCBPY[3] == 1));
 				}
 			}
 
 			if (hmCBPY != null) {
 				// COLOR DIFF 0 BLOCK
-				decodeBlockLayer(bINTRADC, hmMCBPC[1] == 1);
+				blockOK &= decodeBlockLayer(bINTRADC, hmMCBPC[1] == 1);
 
 				// COLOR DIFF 1 BLOCK
-				decodeBlockLayer(bINTRADC, hmMCBPC[2] == 1);
+				blockOK &= decodeBlockLayer(bINTRADC, hmMCBPC[2] == 1);
+			}
+
+			if (!blockOK) {
+				Log.i("FLOWPATH", "(" + decTry + ") some block(s) failed---");
+				return false;
 			}
 		} // else if (hMCOD)
+		
+		return true;
 	}
 
 	private boolean tcoef_alive = true;
 	private int ret = -1;
 	private int[] lastTCOEFF = null;
 
-	private void decodeBlockLayer(boolean intradc, boolean tcoef) throws IOException, H263MBException {
+	private boolean decodeBlockLayer(boolean intradc, boolean tcoef) throws IOException {
 		if (intradc) {
 			// read INTRADC
 			readBits(8);
@@ -916,10 +924,13 @@ public class H263Parser {
 				} else {
 					// block decoding failed
 					// printAndroidLogError("block decoding failed: ret == -1");
-					throw new H263MBException("(" + decTry + ") block decoding failed: ret == -1");
+					Log.i("FLOWPATH", "(" + decTry + ") block decoding failed: ret == -1");
+					return false;
 				}
 			}
 		}
+
+		return true;
 	}
 
 	private void dumpNextByteToOut() throws IOException {
@@ -938,8 +949,8 @@ public class H263Parser {
 		// "0000 0000 0011 1111 1111 1111 1111 1111" "clear mask";
 		// 0x 0 0 3 f f f f f"
 		// long ts = System.currentTimeMillis();
-		
-		if(fastPSC){
+
+		if (fastPSC) {
 			checkForPictureStartCodeFasterX();
 			return;
 		}
