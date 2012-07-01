@@ -1,5 +1,6 @@
 package de.uvwxy.footpath2.movement.h263_parser;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -15,8 +16,8 @@ import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
  */
 public class H263Parser {
 	private InputStream fis = null;
-	// private int lastFisPtr = 0; // used to calculate PSC bit pos diff
-	// private int fisPtr = 0; // points to the next unread byte
+	private int lastFisPtr = 0; // used to calculate PSC bit pos diff
+	private int fisPtr = 0; // points to the next unread byte
 	private int bitPtr = 7; // points to the current bit of the last byte read
 
 	private int numIframes = 0;
@@ -44,6 +45,7 @@ public class H263Parser {
 	private boolean blocking = false;
 
 	private boolean detailedError = false;
+	private boolean detailedLog = false;
 
 	private boolean breakOnBitErrors = true;
 	private boolean noGSCMode = true;
@@ -96,7 +98,13 @@ public class H263Parser {
 		return null;
 	}
 
-	public void skipH263Frame() throws IOException, EOSException {
+	public void skipPicture() throws IOException, EOSException {
+		findPictureStart();
+		findPictureStart();
+		numSkipframes++;
+	}
+
+	public void findPictureStart() throws IOException, EOSException {
 		checkForPictureStartCodeFaster();
 	}
 
@@ -116,7 +124,8 @@ public class H263Parser {
 	private int decTry = 0;
 
 	private float[][][] decodePicture() throws IOException, EOSException {
-		checkForPictureStartCodeFaster();
+
+		decTry++;
 
 		// ugly hack to prevent crashing at end of file
 		// if ((fisPtr - lastFisPtr) < MINIMUM_BYTES_BETWEEN_PICTURES && pictureBoxCount > 2) {
@@ -173,6 +182,7 @@ public class H263Parser {
 
 				if (!((b(hOPPTYPE_footer, 3) && !b(hOPPTYPE_footer, 2) && !b(hOPPTYPE_footer, 1) && !b(hOPPTYPE_footer,
 						0)))) {
+					Log.i("FLOWPATH", "MustBeOneBit Failed (1) " + decTry);
 					if (breakOnBitErrors)
 						return null;
 				}
@@ -225,6 +235,7 @@ public class H263Parser {
 			p.hRoundingType = b(hMPPTYPE_footer, 3);
 
 			if (!(!b(hMPPTYPE_footer, 2) && !b(hMPPTYPE_footer, 1) && b(hMPPTYPE_footer, 0))) {
+				Log.i("FLOWPATH", "MustBeOneBit Failed (2)" + decTry);
 				if (breakOnBitErrors)
 					return null;
 			}
@@ -266,7 +277,10 @@ public class H263Parser {
 
 			if (!(mustBeOne == 1)) {
 				// something went wrong here
-				return null;
+				Log.i("FLOWPATH", "MustBeOneBit Failed (3) " + decTry);
+				if (breakOnBitErrors)
+					return null;
+
 			}
 
 			// Number of lines = PHI * 4
@@ -298,8 +312,7 @@ public class H263Parser {
 			// A fixed length codeword of 2 bits which is present only if a
 			// custom picture clock frequency is in use (regardless of the
 			// value of UFEP).
-			if (detailedError)
-				printAndroidLogError("custom picture clock frequency");
+			printAndroidLogError("custom picture clock frequency");
 			p.hExtendedTemporalReference = readBits(2);
 		}
 
@@ -307,8 +320,7 @@ public class H263Parser {
 			// A variable length codeword of 1 or 2 bits that is present only
 			// if the optional Unrestricted Motion Vector mode is indicated in
 			// PLUSPTYPE and UFEP is 001.
-			if (detailedError)
-				printAndroidLogError("unrestricted motion vectors");
+			printAndroidLogError("unrestricted motion vectors");
 			int bit_1 = readBits(1);
 			if (bit_1 == 0) {
 				int bit_2 = readBits(1);
@@ -330,8 +342,7 @@ public class H263Parser {
 			// A fixed length codeword of 2 bits which is present only if the
 			// optional Slice Structured mode (see Annex K) is indicated in
 			// PLUSPTYPE and UFEP is 001.
-			if (detailedError)
-				printAndroidLogError("slice structure mode");
+			printAndroidLogError("slice structure mode");
 			p.hSliceStructuredSubmodeBits = readBits(2);
 		}
 
@@ -342,8 +353,7 @@ public class H263Parser {
 			// (regardless of the value of UFEP).
 
 			// FROM ANNEX 0, i.e. B-, EI- and EP-Pictures
-			if (detailedError)
-				printAndroidLogError("B || EI || EP Picture used");
+			printAndroidLogError("B || EI || EP Picture used");
 			p.hEnhancementLayerNumber = readBits(4);
 		}
 
@@ -358,8 +368,7 @@ public class H263Parser {
 			// A fixed length codeword of 1 bit that is present only if the
 			// optional Reference Picture Selection mode is in use (regardless
 			// of the value of UFEP).
-			if (detailedError)
-				printAndroidLogError("reference picture selection is in use");
+			printAndroidLogError("reference picture selection is in use");
 
 			p.hTemporalReferenceForPredictionIndication = readBits(1) == 1;
 
@@ -390,8 +399,7 @@ public class H263Parser {
 				} else {
 					// TODO: this is not implemented
 					// Houston we have a problem.
-					if (detailedError)
-						printAndroidLogError("something with reference picture selection not implemented");
+					printAndroidLogError("something with reference picture selection not implemented");
 				}
 			} else {
 				// When set to "1", this signals the presence of the following
@@ -413,8 +421,7 @@ public class H263Parser {
 			// Reference Picture Resampling mode bit is set in PLUSPTYPE.
 
 			// Let's hope this is not present
-			if (detailedError)
-				printAndroidLogError("reference picture resampling not implemented");
+			printAndroidLogError("reference picture resampling not implemented");
 		}
 
 		p.hQuantizerInformation = readBits(5);
@@ -436,8 +443,7 @@ public class H263Parser {
 			// It is 3 bits long for standard CIF picture clock frequency and
 			// is extended to 5 bits when a custom picture clock frequency is
 			// in use.
-			if (detailedError)
-				printAndroidLogError("improved PB frames");
+			printAndroidLogError("improved PB frames");
 
 			if (p.hCustomPCF) {
 				// custom
@@ -470,8 +476,7 @@ public class H263Parser {
 			// the EOS or EOSBS codeword is byte aligned. Decoders shall be
 			// designed to discard ESTUF. See Annex C for a description of
 			// EOSBS and its use.
-			if (detailedError)
-				printAndroidLogError("extra instertion information not implemented");
+			printAndroidLogError("extra instertion information not implemented");
 		}
 
 		// TODO: Remove Stuffing here for byte alignment?
@@ -505,8 +510,11 @@ public class H263Parser {
 							decodeMacroBlock(p, x, y);
 						} catch (H263MBException e) {
 							mbAreOk = false;
-							if (detailedError)
-								e.printStackTrace();
+							// if (detailedError)
+							// e.printStackTrace();
+							numBrokenFrames++;
+
+							return null;
 
 						}
 
@@ -577,7 +585,7 @@ public class H263Parser {
 		}
 
 		pictureBoxCount++;
-		decTry++;
+
 		if (p.hMVDs != null) {
 			return mvs;
 		} else {
@@ -718,38 +726,54 @@ public class H263Parser {
 
 			while (hmMCBPC != null && hmMCBPC[0] == -1) {
 				// reread hmMCBPC while we have stuffing
-				// printAndroidLogError("STUFFING REMOVED");
+				if (detailedLog)
+					Log.i("FLOWPATH", "STUFFING REMOVED");
 				hmMCBPC = readMCBPC4PFrames();
 			}
 
 			if (hmMCBPC != null && hmMCBPC[0] != -1) { // stuffing check
 				hmCBPY = readCBPY();
+				// if (hmCBPY != null && hmMCBPC[0] == 4) {
+				// if (detailedLog) {
+				// Log.i("FLOWPATH", "(" + decTry + ") " + "B 4: hmCBPY: " + hmMCBPC[0] + ", " + hmMCBPC[1] + ", "
+				// + hmMCBPC[2] + "  ### hmCBPY: " + hmCBPY[0] + ", " + hmCBPY[1] + ", "
+				// + hmCBPY[2] + ", " + hmCBPY[3]);
+				// }
+				// }
+
 				if (hmCBPY == null) {
-					numBrokenFrames++;
-					// printAndroidLogError("hCBPY failed, " + x + ", " + y + ",  "
-					// + p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
-					// + p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1] + " mbg: " + hmMCBPC[0] +
-					// ", " + hmMCBPC[1] + ", " + hmMCBPC[2]);
-					// // + "\n" + lastTCOEFF[0] + ", " + lastTCOEFF[1] + ", " + lastTCOEFF[2] + ", " + lastTCOEFF[3]);
+
+					if (detailedLog) {
+						Log.i("FLOWPATH", "(" + decTry + ") " + "B 4: hmCBPC: " + hmMCBPC[0] + ", " + hmMCBPC[1] + ", "
+								+ hmMCBPC[2]);
+					}
+
+					// printAndroidLogError("hCBPY failed, " + x + ", " + y + ",  " + p.hMVDs[(x - 1 + 20) %
+					// 20][y][0][0]
+					// + "|" + p.hMVDs[(x - 1 + 20) % 20][y][0][1] + "  " + p.hMVDs[(x - 1 + 20) % 20][y][1][0]
+					// + "|" + p.hMVDs[(x - 1 + 20) % 20][y][1][1] + " mbg: " + hmMCBPC[0] + ", " + hmMCBPC[1]
+					// + ", " + hmMCBPC[2]);
+					// // // + "\n" + lastTCOEFF[0] + ", " + lastTCOEFF[1] + ", " + lastTCOEFF[2] + ", " +
+					// lastTCOEFF[3]);
 					throw new H263MBException("hCBPY failed, " + x + ", " + y);
 				}
 			} else {
 				// here we have hMCBPC == null so we are borked
-				numBrokenFrames++;
-				// printAndroidLogError("hMCBPC failed, " + x + ", " + y + ", "
-				// + p.hMVDs[(x-1+20)%20][y][0][0] + "|" + p.hMVDs[(x-1+20)%20][y][0][1] + "  "
-				// + p.hMVDs[(x-1+20)%20][y][1][0] + "|" + p.hMVDs[(x-1+20)%20][y][1][1]);
+				// printAndroidLogError("hMCBPC failed, " + x + ", " + y + ", " + p.hMVDs[(x - 1 + 20) % 20][y][0][0]
+				// + "|" + p.hMVDs[(x - 1 + 20) % 20][y][0][1] + "  " + p.hMVDs[(x - 1 + 20) % 20][y][1][0] + "|"
+				// + p.hMVDs[(x - 1 + 20) % 20][y][1][1]);
 				throw new H263MBException("hMCBPC failed, " + x + ", " + y);
 
 			}
-
+			boolean d = false;
 			if (!p.hModifiedQuantization && (hmMCBPC[0] == 1 || hmMCBPC[0] == 4 || hmMCBPC[0] == 5)) {
 				// parse DQUANT (2bits)
 				hMDQUANT = readBits(2);
-				// printAndroidLogError("DQUANT");
+				d = true;
 			} else if (p.hModifiedQuantization) {
 				// TODO: modified quantization not implemented
-				// printAndroidLogError("modified quantization not implemented");
+				if (detailedLog)
+					Log.i("FLOWPATH", "modified quantization not implemented");
 			}
 
 			// TODO: parse MVD (two Variable Length Codes (VLC)
@@ -764,6 +788,8 @@ public class H263Parser {
 						p.hMVDs[x][y][1] = mvdVertical;
 					} else {
 						// TODO: has mvd decoding failed here?
+						Log.i("FLOWPATH", "MVD PARSING FAILED!");
+
 						p.hMVDs[x][y][0] = empty;
 						p.hMVDs[x][y][1] = empty;
 					}
@@ -782,7 +808,7 @@ public class H263Parser {
 				} else {
 					// read MVD component (x2) from Table D.3
 					// TODO: unrestricted vector mode is not implemented
-					Log.i("FLOWPATH", "unrestricted vector mode is not implemented");
+					Log.i("FLOWPATH", "(" + decTry + ") unrestricted vector mode is not implemented");
 				}
 			} else if (hmMCBPC[0] == 3) {
 				// no MVD data
@@ -796,13 +822,15 @@ public class H263Parser {
 				p.hMVDs[x][y][0] = empty;
 				p.hMVDs[x][y][1] = empty;
 
-				// printAndroidLogError("PING " + x + ", " + y);
+				// Log.i("FLOWPATH", "(" + decTry + ") " + "PING " + x + ", " + y + " , type: " + p.hPictureCodingType
+				// + ", d =" + d);
+				// throw new H263MBException("BLOCKTYPE 4 found what to do?, " + x + ", " + y);
 				// TODO CONTINUE HERE?
 			} else {
 				// TODO: MCPBC decoding failed (something is unimplemented here)
-				numBrokenFrames++;
 				// printAndroidLogError("MCPBC decoding failed (something is unimplemented here, block type" +
-				// hmMCBPC[0] +") " + x + ", " + y);
+				// hmMCBPC[0]
+				// + ") " + x + ", " + y);
 				throw new H263MBException("MCBPC failed, " + x + ", " + y);
 			}
 
@@ -1039,7 +1067,7 @@ public class H263Parser {
 		// MBTYPE = -1 = stuffing
 		// CBPC_i = -1 = none?
 
-		int tempBits = evalNext(0, 1, 1, 1);
+		int tempBits = evalNext(0, 1, 0x1, 1);
 		// 0 {0, 0,0, 1, 1}
 		if (tempBits == -1) {
 			return hMCBPC4PFrames[0];
@@ -1170,7 +1198,8 @@ public class H263Parser {
 		if (tempBits == -1) {
 			return hMCBPC4PFrames[24];
 		}
-		// printAndroidLogError("MCBPC component not found with (13bits) " + Integer.toBinaryString(tempBits));
+		if (detailedLog)
+			Log.i("FLOWPATH", "MCBPC component not found with (13bits) " + Integer.toBinaryString(tempBits));
 		return null;
 	}
 
@@ -2990,15 +3019,19 @@ public class H263Parser {
 			ret = fis.read();
 		} while (ret == -1);
 
-		// if (detailedError)
-		// errBuf[errBufPtr++ % errBufSize] = ret;
+		if (detailedError)
+			errBuf[errBufPtr++ % errBufSize] = ret;
 
 		// reset bit reader
 		bitPtr = 7;
 		lastByte = -1;
-		// fisPtr++;
+		fisPtr++;
 		return ret;
 	}
+
+	private static int[] bitMaskSingleBit = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384,
+			32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864,
+			134217728, 268435456, 536870912, 1073741824 };
 
 	private int lastByte = -1;
 
@@ -3014,15 +3047,20 @@ public class H263Parser {
 		}
 
 		// int ret = (lastByte & (0x01 << bitPtr)) >> bitPtr;
+
+		// byte = 8 bit 0111 1111 = 127
+		// int ret = lastByte & bitMaskSingleBit[bitPtr];
+		// lastByte <<=1;
+		// int ret = lastByte & bitMaskSingleBit[bitPtr];
 		int ret = (lastByte >> bitPtr) & 0x01;
 
 		bitPtr--;
 		if (bitPtr < 0) {
 			bitPtr = 7;
-			// fisPtr++;
+			fisPtr++;
 
-			// if (detailedError)
-			// errBuf[errBufPtr++ % errBufSize] = lastByte;
+			if (detailedError)
+				errBuf[errBufPtr++ % errBufSize] = lastByte;
 			// reset lastByte, such that we know we have to read a new bite
 			// to read bits from
 			lastByte = -1;
@@ -3032,13 +3070,14 @@ public class H263Parser {
 	}
 
 	private int oldFramesNum = 0;
+	private int numSkipframes = 0;
 
 	public String getStats() {
-		long lag = (((System.currentTimeMillis() - STARTUP) / 1000L) * 29) - (numIframes + numPframes);
+		long lag = (((System.currentTimeMillis() - STARTUP) / 1000L) * 29) - (numIframes + numPframes + numSkipframes);
 		String t = "I Frames: " + numIframes + ", P Frames: " + numPframes + "(+"
-				+ ((numPframes + numIframes) - oldFramesNum) + ")" + "\nSize: " + width + "x" + height
-				+ "\nBrokenFrames: " + numBrokenFrames + " Lag: " + lag + " frames";
-		oldFramesNum = numPframes + numIframes;
+				+ ((numPframes + numIframes + numSkipframes) - oldFramesNum) + ")" + "\nSkipped:" + numSkipframes
+				+ "\nSize: " + width + "x" + height + "\nBrokenFrames: " + numBrokenFrames + " Lag: " + lag + " frames";
+		oldFramesNum = numPframes + numIframes + numSkipframes;
 		return t;
 	}
 

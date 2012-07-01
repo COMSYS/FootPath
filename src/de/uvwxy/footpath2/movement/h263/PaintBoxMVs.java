@@ -89,10 +89,11 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 		canvas.drawColor(Color.BLACK);
 		
 		p.setColor(Color.WHITE);
+		p.setTextSize(16.0f);
 
 		if (mvs == null) {
 			canvas.drawText("C (@" + FlowPathConfig.PIC_FPS + "): " + mvCount
-					+ " -> " + fps + "fps", 0, 16, p);
+					+ " -> " + fps + "fps", 8, 16, p);
 			canvas.drawText("NO MVDS!", getWidth() / 2, getHeight() / 2, p);
 		} else {
 
