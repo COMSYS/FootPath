@@ -438,6 +438,11 @@ public class H263Parser {
 			}
 		}
 
+		if (p.hPictureCodingType == H263PCT.ImprovedPBFrame)
+			Log.i("FLOWPATH", "(" + decTry + ") ImprovedPBFrame Mode!");
+		if (p.hPBFrames)
+			Log.i("FLOWPATH", "(" + decTry + ") PBFrame Mode!");
+
 		if (p.hPBFrames || p.hPictureCodingType == H263PCT.ImprovedPBFrame) {
 			// TRB is present if PTYPE or PLUSPTYPE indicates "PB-frame" or
 			// "Improved PB-frame"
@@ -445,7 +450,6 @@ public class H263Parser {
 			// It is 3 bits long for standard CIF picture clock frequency and
 			// is extended to 5 bits when a custom picture clock frequency is
 			// in use.
-			printAndroidLogError("improved PB frames");
 
 			if (p.hCustomPCF) {
 				// custom
@@ -471,9 +475,9 @@ public class H263Parser {
 
 			do {
 				readBits(8);
-				Log.i("FLOWPATH","(" + decTry + ") EIB");
+				Log.i("FLOWPATH", "(" + decTry + ") EIB");
 			} while (readBits(1) == 1);
-			
+
 			// A codeword of variable length consisting of less than 8
 			// zero-bits. Encoders may insert this codeword directly before an
 			// EOS codeword. Encoders shall insert this codeword as necessary to
@@ -483,7 +487,7 @@ public class H263Parser {
 			// the EOS or EOSBS codeword is byte aligned. Decoders shall be
 			// designed to discard ESTUF. See Annex C for a description of
 			// EOSBS and its use.
-			//printAndroidLogError("extra instertion information not implemented");
+			// printAndroidLogError("extra instertion information not implemented");
 		}
 
 		// TODO: Remove Stuffing here for byte alignment?
@@ -519,6 +523,7 @@ public class H263Parser {
 							// e.printStackTrace();
 							numBrokenFrames++;
 							Log.i("FLOWPATH", "(" + decTry + ") FAILED");
+
 							return null;
 						}
 
@@ -586,6 +591,9 @@ public class H263Parser {
 			} // if (parseGOBs && p.hPictureCodingType == H263PCT.INTER)
 		} else {
 			// no deeper parsing, or p frame
+
+			Log.i("FLOWPATH", "(" + decTry + ") type = " + p.hPictureCodingType);
+
 		}
 
 		pictureBoxCount++;
@@ -596,7 +604,6 @@ public class H263Parser {
 			Log.i("FLOWPATH", "(" + decTry + ") FAILED");
 			return null;
 		}
-		
 
 	}
 
@@ -899,7 +906,7 @@ public class H263Parser {
 				return false;
 			}
 		} // else if (hMCOD)
-		
+
 		return true;
 	}
 
