@@ -1,12 +1,14 @@
 package de.uvwxy.footpath2.drawing;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 /**
  * A class to create a thread to repaint the graphics.
  * 
- * @author Paul Smith
+ * @author Paul
  * 
  */
 class PaintThread extends Thread {
@@ -23,16 +25,39 @@ class PaintThread extends Thread {
 		bRunning = run;
 	}
 
+	private int height = -1;
+	private int width = -1;
+
+	Bitmap buffer = null;
+	Canvas bufferedCanvas = null;
+
 	@Override
 	public void run() {
 		Canvas c;
+
 		while (bRunning) {
+
+			// draw onto back buffered canvas if everything ok. 
+			if (height != -1 && width != -1 && bufferedCanvas != null)
+				pBox.onDraw(bufferedCanvas);
+
 			c = null;
 			try {
-				c = surfaceHolder.lockCanvas(null);
+				c = surfaceHolder.lockCanvas();
 				synchronized (surfaceHolder) {
-					if (c != null)
-						pBox.onDraw(c);
+					if (c != null) {
+						// if one of the following components go bozuk, update the buffers
+						if (bufferedCanvas == null || buffer == null || c.getWidth() != width
+								|| c.getHeight() != c.getHeight()) {
+							width = c.getWidth();
+							height = c.getHeight();
+							buffer = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+							bufferedCanvas = new Canvas(buffer);
+							Log.i("PB", "Created Bitmap");
+						}
+
+						c.drawBitmap(buffer, 0, 0, null);
+					}
 				}
 			} finally {
 				if (c != null) {
