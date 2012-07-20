@@ -66,11 +66,7 @@ public class SocketAudioVideoWriter {
 	 * Starts capture
 	 */
 	public void startCapture() {
-		try {
-			recorder.start();
-		} catch (RuntimeException e) {
-			Log.i("FLOWPATH", "Caught runtime exception " + e.getLocalizedMessage());
-		}
+		recorder.start();
 	}
 
 	/**
