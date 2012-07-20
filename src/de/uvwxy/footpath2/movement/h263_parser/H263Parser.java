@@ -592,7 +592,7 @@ public class H263Parser {
 		} else {
 			// no deeper parsing, or p frame
 
-			Log.i("FLOWPATH", "(" + decTry + ") type = " + p.hPictureCodingType);
+			Log.i("FLOWPATH", "X (" + decTry + ") type = " + p.hPictureCodingType);
 
 		}
 
@@ -827,7 +827,6 @@ public class H263Parser {
 							+ hmMCBPC[1] + ", " + hmMCBPC[2] + "  ### hmCBPY: " + hmCBPY[0] + ", " + hmCBPY[1] + ", "
 							+ hmCBPY[2] + ", " + hmCBPY[3]);
 
-					Log.i("FLOWPATH", "(" + decTry + ") unrestricted vector mode is not implemented");
 					Log.i("FLOWPATH", "(" + decTry + ") unrestricted vector mode is not implemented, " + x + ", " + y);
 					return false;
 				}
