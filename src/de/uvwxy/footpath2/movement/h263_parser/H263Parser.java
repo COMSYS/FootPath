@@ -978,9 +978,9 @@ public class H263Parser {
 	private boolean decodeBlockLayer(boolean intradc, boolean tcoef) throws IOException {
 		if (intradc) {
 			// read INTRADC
-			readBits(8);
+			int x = readBits(8);
 			if (CD)
-				CD("INTRADC: " + readBits(8));
+				CD("INTRADC: " + x);
 
 		}
 
@@ -1293,8 +1293,9 @@ public class H263Parser {
 		if (tempBits == -1) {
 			return hMCBPC4PFrames[24];
 		}
-		if (CD)
+		if (CD) {
 			CD("MCBPC component not found with (13bits) " + Integer.toBinaryString(tempBits));
+		}
 		error_MCBPC4PRAMES++;
 		return null;
 	}
@@ -1396,8 +1397,9 @@ public class H263Parser {
 			return hCBPYTable[15];
 		}
 
-		if (CD)
+		if (CD) {
 			CD("(" + decTry + ") CBPY component not found with (6bits) " + Integer.toBinaryString(tempBits));
+		}
 		error_HCBPY++;
 		return null;
 	}
@@ -1757,8 +1759,9 @@ public class H263Parser {
 		if (tempBits == -1) {
 			return hMVDComponents[63];
 		}
-		if (CD)
+		if (CD) {
 			CD("(" + decTry + ") MVD component failed");
+		}
 		error_MVD++;
 		return null;
 	}
@@ -2973,8 +2976,9 @@ public class H263Parser {
 		if (tempBits == -1) {
 			return 1;
 		}
-		if (CD)
+		if (CD) {
 			CD("(" + decTry + ") TCOEFF not found with " + Integer.toBinaryString(tempBits));
+		}
 		error_TCOEFF++;
 		return -1;
 	}
@@ -3122,9 +3126,9 @@ public class H263Parser {
 				throw new EOSException("EOS");
 
 		} while (ret == -1);
-
-		if (CD)
-			errBuf[errBufPtr++ % errBufSize] = ret;
+		//
+		// if (CD)
+		// errBuf[errBufPtr++ % errBufSize] = ret;
 
 		// reset bit reader
 		bitPtr = 7;
@@ -3163,8 +3167,8 @@ public class H263Parser {
 			bitPtr = 7;
 			fisPtr++;
 
-			if (CD)
-				errBuf[errBufPtr++ % errBufSize] = lastByte;
+			// if (CD)
+			// errBuf[errBufPtr++ % errBufSize] = lastByte;
 			// reset lastByte, such that we know we have to read a new bite
 			// to read bits from
 			lastByte = -1;
@@ -3190,27 +3194,27 @@ public class H263Parser {
 		return t;
 	}
 
-	private int errBufSize = 80;
-	private int[] errBuf = new int[errBufSize];
-	private int errBufPtr = 0;
+	// private int errBufSize = 80;
+	// private int[] errBuf = new int[errBufSize];
+	// private int errBufPtr = 0;
 
-	private void printAndroidLogError(String s) {
-		CD("\n>>>>\n" + decTry + " " + s + "\n@" + (fisPtr + 1));
-		CD("\n" + decTry + " " + s);
-		if (CD) {
-			String bits = "";
-
-			for (int i = 1; i <= errBufSize; i++) {
-				bits += byteToBin((byte) errBuf[(errBufPtr + i) % errBufSize]) + " ";
-				if (i % 10 == 0) {
-					bits += "\n        ";
-				}
-			}
-
-			CD("\n## Bits " + bits);
-			CD("\n## PSC is " + (fisPtr - lastFisPtr) + " bytes old");
-		}
-	}
+	// private void printAndroidLogError(String s) {
+	// CD("\n>>>>\n" + decTry + " " + s + "\n@" + (fisPtr + 1));
+	// CD("\n" + decTry + " " + s);
+	// if (CD) {
+	// String bits = "";
+	//
+	// for (int i = 1; i <= errBufSize; i++) {
+	// bits += byteToBin((byte) errBuf[(errBufPtr + i) % errBufSize]) + " ";
+	// if (i % 10 == 0) {
+	// bits += "\n        ";
+	// }
+	// }
+	//
+	// CD("\n## Bits " + bits);
+	// CD("\n## PSC is " + (fisPtr - lastFisPtr) + " bytes old");
+	// }
+	// }
 
 	private String byteToBin(byte b) {
 		String temp = Integer.toBinaryString(b & 0x000000ff);
