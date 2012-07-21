@@ -113,7 +113,10 @@ public class H263Parser {
 	}
 
 	public void findPictureStart() throws IOException, EOSException {
-		checkForPictureStartCode();
+		if (fastPSC)
+			checkForPictureStartCodeFaster();
+		else
+			checkForPictureStartCode();
 	}
 
 	// used for MV calculation:
@@ -1023,11 +1026,6 @@ public class H263Parser {
 		// "0000 0000 0011 1111 1111 1111 1111 1111" "clear mask";
 		// 0x 0 0 3 f f f f f"
 		// long ts = System.currentTimeMillis();
-
-		if (fastPSC) {
-			checkForPictureStartCodeFaster();
-			return;
-		}
 
 		int bitsBufPSC = 0;
 		int bitCount = 0;
