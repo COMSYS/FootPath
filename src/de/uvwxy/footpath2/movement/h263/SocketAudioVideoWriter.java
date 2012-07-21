@@ -67,6 +67,20 @@ public class SocketAudioVideoWriter {
 	 */
 	public void startCapture() {
 		recorder.start();
+
+	}
+
+	
+	/**
+	 * Starting this on the phone throws an exception at start (-19)
+	 * Catch this to keep it running
+	 */
+	public void startCaptureWEC() {
+		try {
+			recorder.start();
+		} catch (RuntimeException e) {
+			Log.i("FLOWPATH", "Caught runtime exception " + e.getLocalizedMessage());
+		}
 	}
 
 	/**

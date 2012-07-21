@@ -78,7 +78,7 @@ public class FlowPathInterface {
 			return false;
 		}
 
-		avwCapture.startCapture();
+		avwCapture.startCaptureWEC();
 
 		// while (sckSrvCon == null) {
 		// try {

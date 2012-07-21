@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
-import android.widget.SlidingDrawer;
-
 import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
 
 /**
@@ -3222,11 +3220,6 @@ public class H263Parser {
 	// }
 	// }
 
-	private String byteToBin(byte b) {
-		String temp = Integer.toBinaryString(b & 0x000000ff);
-		temp = xZeros(8 - temp.length()) + temp;
-		return temp;
-	}
 
 	private String xZeros(int x) {
 		String temp = "";

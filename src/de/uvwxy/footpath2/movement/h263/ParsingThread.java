@@ -3,6 +3,7 @@ package de.uvwxy.footpath2.movement.h263;
 import java.io.IOException;
 import java.io.InputStream;
 
+import android.util.Log;
 import de.uvwxy.footpath2.movement.h263_parser.EOSException;
 import de.uvwxy.footpath2.movement.h263_parser.H263Parser;
 
@@ -39,7 +40,7 @@ public class ParsingThread extends Thread {
 	}
 
 	private int frame_count = 0;
-	private int periodicity = 2;
+	private int periodicity = 1;
 
 	@Override
 	public void run() {
@@ -50,11 +51,14 @@ public class ParsingThread extends Thread {
 			try {
 				frame_count++;
 				if (frame_count % periodicity == 0) {
-					parser.findPictureStart();
+					
 					do {
+						parser.findPictureStart();
 						mvs = parser.parseH263Frame();
 					} while (mvs == null);
 
+					Log.i("FLOWPATH", "Parsed frame");
+					
 					flowPathInterface.notifyTriggersWithMVD(System.currentTimeMillis(), mvs);
 
 					if (frame_count % 600 == 0)
