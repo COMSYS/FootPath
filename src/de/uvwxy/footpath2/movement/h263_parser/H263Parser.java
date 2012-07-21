@@ -493,11 +493,11 @@ public class H263Parser {
 		}
 
 		if (p.hPictureCodingType == H263PCT.ImprovedPBFrame)
-			if (CD)
-				CD("(" + decTry + ") ImprovedPBFrame Mode!");
+			// if (CD)
+			CD("(" + decTry + ") ImprovedPBFrame Mode!");
 		if (p.hPBFrames)
-			if (CD)
-				CD("(" + decTry + ") PBFrame Mode!");
+			// if (CD)
+			CD("(" + decTry + ") PBFrame Mode!");
 
 		if (p.hPBFrames || p.hPictureCodingType == H263PCT.ImprovedPBFrame) {
 			// TRB is present if PTYPE or PLUSPTYPE indicates "PB-frame" or
@@ -1306,11 +1306,10 @@ public class H263Parser {
 	// #########################################################################
 	// ################## There seem to be no errors in the ####################
 	// ############################# code below ################################
-	
-	
+
 	/**
-	 * This function has to be implemented for I-frames.
-	 * As we are only interested in P frames we currently do not need this.
+	 * This function has to be implemented for I-frames. As we are only interested in P frames we currently do not need
+	 * this.
 	 * 
 	 * @return
 	 */
@@ -1600,7 +1599,7 @@ public class H263Parser {
 		error_HCBPY++;
 		return null;
 	}
-	
+
 	private final float[][] hMVDComponents = { { 0, Float.NaN }, { -0.5f, 31.5f }, { 0.5f, -31.5f }, { -1, 31 },
 			{ 1, -31 }, { -1.5f, 30.5f }, { 1.5f, -30.5f }, { -2, 30 }, { 2, -30 }, { -3.5f, 28.5f }, { -3, 29 },
 			{ -2.5f, 29.5f }, { 2.5f, -29.5f }, { 3, -29 }, { 3.5f, -28.5f }, { -5, 27 }, { -4.5f, 27.5f }, { -4, 28 },
@@ -2518,9 +2517,7 @@ public class H263Parser {
 		error_TCOEFF++;
 		return -1;
 	}
-	
-	
-	
+
 	private static final int[] bitMaskLSBOnes = { 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383,
 			32767, 65535, 131071, 262143, 524287, 1048575, 2097151, 4194303, 8388607, 16777215, 33554431, 67108863,
 			134217727, 268435455, 536870911, 1073741823, 2147483647 };

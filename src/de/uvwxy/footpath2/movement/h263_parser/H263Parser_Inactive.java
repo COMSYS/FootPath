@@ -686,29 +686,7 @@ public class H263Parser_Inactive {
 	// return res;
 	// }
 	//
-	// private void checkForEndOfSequenceCode() throws IOException {
-	// // ??|E O S| = "??|00 0000 0000 0000 00 11 1111|" = 22 bits;
-	// // | 0 0 0 0 3 f
-	//
-	// // "0000 0000 0011 1111 1111 1111 1111 1111" "clear mask";
-	// // 0x 0 0 3 f f f f f"
-	//
-	// int bitsBufEOS = 0;
-	// int bitCount = 0;
-	// while (true) {
-	// // push next read bit into bitsBufPSC from right side
-	// bitsBufEOS = bitsBufEOS << 1;
-	// bitsBufEOS = bitsBufEOS | readNextBit();
-	// bitCount++;
-	// // clear left most 10 bit (only right most 22 bit are checked)
-	// int tmp = bitsBufEOS & 0x003fffff;
-	//
-	// if (bitCount >= 22 && tmp == 0x3f) {
-	// // found EOS code
-	// return;
-	// }
-	// }
-	// }
+
 	//
 
 	// private int errBufSize = 80;
