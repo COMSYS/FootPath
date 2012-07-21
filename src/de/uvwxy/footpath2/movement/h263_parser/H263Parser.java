@@ -1039,7 +1039,8 @@ public class H263Parser {
 			}
 			// push next read bit into bitsBufPSC from right side
 			bitsBufPSC = bitsBufPSC << 1;
-			bitsBufPSC = bitsBufPSC | readNextBit();
+			readNextBit();
+			bitsBufPSC = bitsBufPSC | lastBit;
 			bitCount++;
 			// clear left most 10 bit (only right most 22 bit are checked)
 			int tmp = bitsBufPSC & 0x003fffff;
@@ -1096,7 +1097,8 @@ public class H263Parser {
 			}
 			// push next read bit into bitsBufPSC from right side
 			bitsBufGOB = bitsBufGOB << 1;
-			bitsBufGOB = bitsBufGOB | readNextBit();
+			readNextBit();
+			bitsBufGOB = bitsBufGOB | lastBit;
 			bitCount++;
 			// clear left most 10 bit (only right most 17 bit are checked)
 			int tmp = bitsBufGOB & 0x0001ffff;
@@ -1120,7 +1122,8 @@ public class H263Parser {
 		while (true) {
 			// push next read bit into bitsBufPSC from right side
 			bitsBufEOS = bitsBufEOS << 1;
-			bitsBufEOS = bitsBufEOS | readNextBit();
+			readNextBit();
+			bitsBufEOS = bitsBufEOS | lastBit;
 			bitCount++;
 			// clear left most 10 bit (only right most 22 bit are checked)
 			int tmp = bitsBufEOS & 0x003fffff;
@@ -1209,7 +1212,8 @@ public class H263Parser {
 
 		for (int i = 0; i < numBits; i++) {
 			res = res << 1;
-			res = res | readNextBit();
+			readNextBit();
+			res = res | lastBit;
 		}
 
 		return res;
@@ -1234,6 +1238,7 @@ public class H263Parser {
 		fisPtr++;
 	}
 
+	private int lastBit = -1;
 	private int lastByte = -1;
 	private int bufferedByte = -1;
 
@@ -1243,7 +1248,7 @@ public class H263Parser {
 	 * @return
 	 * @throws IOException
 	 */
-	private int readNextBit() throws IOException {
+	private void readNextBit() throws IOException {
 		while (bufferedByte == -1) {
 			bufferedByte = fis.read();
 		}
@@ -1254,7 +1259,7 @@ public class H263Parser {
 		// int ret = lastByte & bitMaskSingleBit[bitPtr];
 		// lastByte <<=1;
 		// int ret = lastByte & bitMaskSingleBit[bitPtr];
-		int ret = (bufferedByte >> bitPtr) & 0x01;
+		lastBit = (bufferedByte >> bitPtr) & 0x01;
 
 		bitPtr--;
 		if (bitPtr < 0) {
@@ -1267,8 +1272,6 @@ public class H263Parser {
 			// to read bits from
 			bufferedByte = -1;
 		}
-
-		return ret;
 	}
 
 	private int oldFramesNum = 0;
