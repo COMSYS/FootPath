@@ -1149,10 +1149,7 @@ public class H263Parser {
 	 * @throws IOException
 	 */
 	private int evalNext(int tempBits, int numNewBits, int ref, int refLen) throws IOException {
-		for (int i = 0; i < numNewBits; i++) {
-			tempBits = tempBits << 1;
-			tempBits = tempBits | readNextBit();
-		}
+		tempBits = (tempBits << numNewBits) | readBits(numNewBits);
 
 		if ((tempBits & bitMaskLSBOnes[refLen]) == ref) { // getBitMask(refLen)
 			return -1;
@@ -1173,10 +1170,7 @@ public class H263Parser {
 	 * @throws IOException
 	 */
 	private int evalNextWithSBit(int tempBits, int numNewBits, int ref, int refLen) throws IOException {
-		for (int i = 0; i < numNewBits; i++) {
-			tempBits = tempBits << 1;
-			tempBits = tempBits | readNextBit();
-		}
+		tempBits = (tempBits << numNewBits) | readBits(numNewBits);
 
 		// by right shifting we ignore le right most bit!
 		if (((tempBits >> 1) & bitMaskLSBOnes[refLen]) == ref) {// getBitMask(refLen)) == ref) {
@@ -1215,8 +1209,7 @@ public class H263Parser {
 
 		for (int i = 0; i < numBits; i++) {
 			res = res << 1;
-			int nextBit = readNextBit();
-			res = res | nextBit;
+			res = res | readNextBit();
 		}
 
 		return res;
