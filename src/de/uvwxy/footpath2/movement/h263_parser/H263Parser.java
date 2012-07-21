@@ -15,7 +15,7 @@ import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
  */
 public class H263Parser {
 	// CONSOLE DEBUG = ?
-	private boolean CD = true;
+	public boolean CD = true;
 
 	private InputStream fis = null;
 	private int lastFisPtr = 0; // used to calculate PSC bit pos diff
@@ -50,6 +50,11 @@ public class H263Parser {
 	private boolean noGSCMode = true;
 
 	private boolean fastPSC = true;
+
+	private int error_MCBPC4PRAMES;
+	private int error_TCOEFF;
+	private int error_HCBPY;
+	private int error_MVD;
 
 	private long STARTUP = 0;
 
@@ -127,7 +132,7 @@ public class H263Parser {
 	private int decTry = 0;
 
 	private void CD(String s) {
-		System.out.println(2);
+		System.out.println(s);
 	}
 
 	private float[][][] decodePicture() throws IOException, EOSException {
@@ -138,12 +143,12 @@ public class H263Parser {
 		decTry++;
 
 		// ugly hack to prevent crashing at end of file
-		// if ((fisPtr - lastFisPtr) < MINIMUM_BYTES_BETWEEN_PICTURES && pictureBoxCount > 2) {
-		// lastFisPtr = fisPtr;
-		// return null;
-		// }
-		//
-		// lastFisPtr = fisPtr;
+		if ((fisPtr - lastFisPtr) < MINIMUM_BYTES_BETWEEN_PICTURES && pictureBoxCount > 2) {
+			lastFisPtr = fisPtr;
+			return null;
+		}
+
+		lastFisPtr = fisPtr;
 
 		p.hTemporalReference = readBits(8);
 
@@ -153,7 +158,7 @@ public class H263Parser {
 		if (!(b(hPTYPE, 4) && !b(hPTYPE, 3))) {
 
 			if (CD)
-				CD("integrity bits failed");
+				CD("01 integrity bits failed");
 			// break here if something goes wrong!
 			if (breakOnBitErrors)
 				return null;
@@ -172,6 +177,9 @@ public class H263Parser {
 
 			// Check if UFEP equals 001 (Extended PTYPE)
 			if (!b(p.hUFEP, 2) && !b(p.hUFEP, 1) && b(p.hUFEP, 0)) {
+
+				if (CD)
+					CD("(" + decTry + ") Extended PTYPE");
 				// When set to "001", it indicates that all extended PTYPE
 				// fields are included in the current picture header. If the
 				// picture type is INTRA or EI, this field shall be set to
@@ -202,6 +210,9 @@ public class H263Parser {
 				}
 
 			} else {
+
+				if (CD)
+					CD("(" + decTry + ") no plustype optype bits");
 				// no plustype optype bits
 				// When set to "000", it indicates that only those extended
 				// PTYPE fields which need to be signalled in every picture
@@ -249,7 +260,8 @@ public class H263Parser {
 			p.hRoundingType = b(hMPPTYPE_footer, 3);
 
 			if (!(!b(hMPPTYPE_footer, 2) && !b(hMPPTYPE_footer, 1) && b(hMPPTYPE_footer, 0))) {
-				CD("MustBeOneBit Failed (2)" + decTry);
+				if (CD)
+					CD("MustBeOneBit Failed (2)" + decTry);
 				if (breakOnBitErrors)
 					return null;
 			}
@@ -266,17 +278,28 @@ public class H263Parser {
 			p.hPBFrames = b(hPTYPE_noPLUSPTYPE, 0);
 		} // check if PLUSTYPE is present
 
+		if (CD)
+			CD("(" + decTry + ") p.hPictureCodingType = " + p.hPictureCodingType);
+
 		if (p.hExtendedPTYPE) {
 			// "If PLUSPTYPE is present, then CPM follows immediately after
 			// PLUSPTYPE in the picture header."
 			p.hCPM = readBits(1) == 1;
+
+			if (CD)
+				CD("(" + decTry + ") p.hCPM = " + p.hCPM);
 			if (p.hCPM) {
 				// "PSBI always follows immediately after CPM (if CPM = "1")"
+
+				if (CD)
+					CD("(" + decTry + ") p.hPSBI = " + p.hPSBI);
 				p.hPSBI = readBits(2);
 			}
 		}
 
 		if (p.hUFEP == 1 && p.hSourceFormat == 6) {
+			if (CD)
+				CD("(" + decTry + ") p.hSourceFormat = " + p.hSourceFormat);
 			// 6 = "110" custom source format
 
 			// A fixed length codeword of 23 bits that is present only if the
@@ -291,7 +314,8 @@ public class H263Parser {
 
 			if (!(mustBeOne == 1)) {
 				// something went wrong here
-				CD("MustBeOneBit Failed (3) " + decTry);
+				if (CD)
+					CD("MustBeOneBit Failed (3) " + decTry);
 				if (breakOnBitErrors)
 					return null;
 
@@ -305,6 +329,8 @@ public class H263Parser {
 			// A fixed length codeword of 16 bits that is present only if CPFMT
 			// is present and extended PAR is indicated therein.
 
+			if (CD)
+				CD("(" + decTry + ") p.hExtendedPixelAspectRatio");
 			// p.hExtendedPixelAspectRatio = readBits(16); // EPAR is divided as
 			// below
 			p.hEPARWidth = readBits(8);
@@ -316,6 +342,9 @@ public class H263Parser {
 			// PLUSPTYPE is present and UFEP is 001 and a custom picture clock
 			// frequency is signaled in PLUSPTYPE.
 
+			if (CD)
+				CD("(" + decTry + ") p.hCustomPCF = " + p.hCustomPCF);
+
 			// p.hCustomPictureClockFrequencyCode = readBits(8); is divided
 			// below
 			p.hCPCFClockConversion = readBits(1) == 1;
@@ -326,15 +355,17 @@ public class H263Parser {
 			// A fixed length codeword of 2 bits which is present only if a
 			// custom picture clock frequency is in use (regardless of the
 			// value of UFEP).
-			printAndroidLogError("custom picture clock frequency");
 			p.hExtendedTemporalReference = readBits(2);
+			if (CD)
+				CD("(" + decTry + ") p.hExtendedTemporalReference = " + p.hExtendedTemporalReference);
 		}
 
 		if (p.hUnrestrictedMotionVector && p.hUFEP == 1) {
 			// A variable length codeword of 1 or 2 bits that is present only
 			// if the optional Unrestricted Motion Vector mode is indicated in
 			// PLUSPTYPE and UFEP is 001.
-			printAndroidLogError("unrestricted motion vectors");
+			if (CD)
+				CD("(" + decTry + ")unrestricted motion vectors");
 			int bit_1 = readBits(1);
 			if (bit_1 == 0) {
 				int bit_2 = readBits(1);
@@ -356,7 +387,8 @@ public class H263Parser {
 			// A fixed length codeword of 2 bits which is present only if the
 			// optional Slice Structured mode (see Annex K) is indicated in
 			// PLUSPTYPE and UFEP is 001.
-			printAndroidLogError("slice structure mode");
+			if (CD)
+				CD("(" + decTry + ")slice structure mode");
 			p.hSliceStructuredSubmodeBits = readBits(2);
 		}
 
@@ -367,7 +399,8 @@ public class H263Parser {
 			// (regardless of the value of UFEP).
 
 			// FROM ANNEX 0, i.e. B-, EI- and EP-Pictures
-			printAndroidLogError("B || EI || EP Picture used");
+			if (CD)
+				CD("(" + decTry + ")B || EI || EP Picture used");
 			p.hEnhancementLayerNumber = readBits(4);
 		}
 
@@ -382,7 +415,8 @@ public class H263Parser {
 			// A fixed length codeword of 1 bit that is present only if the
 			// optional Reference Picture Selection mode is in use (regardless
 			// of the value of UFEP).
-			printAndroidLogError("reference picture selection is in use");
+			if (CD)
+				CD("(" + decTry + ")reference picture selection is in use");
 
 			p.hTemporalReferenceForPredictionIndication = readBits(1) == 1;
 
@@ -394,14 +428,16 @@ public class H263Parser {
 			// for in the case of B-pictures. For B-pictures, the picture having
 			// the temporal reference TRP is used for the prediction in the
 			// forward direction.
-
+			if (CD)
+				CD("(" + decTry + ") hTemporalReferenceForPrediction");
 			p.hTemporalReferenceForPrediction = readBits(10);
 		}
 
 		if (p.hReferencePicureSelection) {
 			// A variable length field of one or two bits that is present only
 			// if the optional Reference Picture Selection mode is in use.
-
+			if (CD)
+				CD("(" + decTry + ") hReferencePicureSelection");
 			int bit_1 = readBits(1);
 			if (bit_1 == 0) {
 				int bit_2 = readBits(1);
@@ -413,7 +449,7 @@ public class H263Parser {
 				} else {
 					// TODO: this is not implemented
 					// Houston we have a problem.
-					printAndroidLogError("something with reference picture selection not implemented");
+					CD("(" + decTry + ") something with reference picture selection not implemented");
 				}
 			} else {
 				// When set to "1", this signals the presence of the following
@@ -426,7 +462,8 @@ public class H263Parser {
 		if (p.hBackChannelMessageIndication == 1) {
 			// TODO: this is not implemented
 			// Let's hope this is not present
-			printAndroidLogError("back channel maessage indication not implemented");
+			if (CD)
+				CD("(" + decTry + ")back channel maessage indication not implemented");
 		}
 
 		if (p.hReferencePictureResampling) {
@@ -435,7 +472,8 @@ public class H263Parser {
 			// Reference Picture Resampling mode bit is set in PLUSPTYPE.
 
 			// Let's hope this is not present
-			printAndroidLogError("reference picture resampling not implemented");
+			if (CD)
+				CD("(" + decTry + ")reference picture resampling not implemented");
 		}
 
 		p.hQuantizerInformation = readBits(5);
@@ -443,17 +481,22 @@ public class H263Parser {
 		if (!p.hExtendedPTYPE) {
 			// [...] but follows PQUANT in the picture header if PLUSPTYPE is
 			// not present.
+			if (CD)
+				CD("(" + decTry + ") reads a single bit because no extended ptype");
 			p.hCPM = readBits(1) == 1;
 			if (p.hCPM) {
 				// "PSBI always follows immediately after CPM (if CPM = "1")"
+				CD("(" + decTry + ") hPSBI");
 				p.hPSBI = readBits(2);
 			}
 		}
 
 		if (p.hPictureCodingType == H263PCT.ImprovedPBFrame)
-			CD("(" + decTry + ") ImprovedPBFrame Mode!");
+			if (CD)
+				CD("(" + decTry + ") ImprovedPBFrame Mode!");
 		if (p.hPBFrames)
-			CD("(" + decTry + ") PBFrame Mode!");
+			if (CD)
+				CD("(" + decTry + ") PBFrame Mode!");
 
 		if (p.hPBFrames || p.hPictureCodingType == H263PCT.ImprovedPBFrame) {
 			// TRB is present if PTYPE or PLUSPTYPE indicates "PB-frame" or
@@ -487,7 +530,8 @@ public class H263Parser {
 
 			do {
 				readBits(8);
-				CD("(" + decTry + ") EIB");
+				if (CD)
+					CD("(" + decTry + ") EIB");
 			} while (readBits(1) == 1);
 
 			// A codeword of variable length consisting of less than 8
@@ -534,7 +578,8 @@ public class H263Parser {
 							// if (detailedError)
 							// e.printStackTrace();
 							numBrokenFrames++;
-							CD("(" + decTry + ") FAILED");
+							if (CD)
+								CD("(" + decTry + ") FAILED");
 
 							return null;
 						}
@@ -603,8 +648,8 @@ public class H263Parser {
 			} // if (parseGOBs && p.hPictureCodingType == H263PCT.INTER)
 		} else {
 			// no deeper parsing, or p frame
-
-			CD("X (" + decTry + ") type = " + p.hPictureCodingType);
+			if (CD)
+				CD("X (" + decTry + ") type = " + p.hPictureCodingType);
 
 		}
 
@@ -613,7 +658,8 @@ public class H263Parser {
 		if (p.hMVDs != null) {
 			return mvs;
 		} else {
-			CD("(" + decTry + ") FAILED");
+			if (CD)
+				CD("(" + decTry + ") FAILED");
 			return null;
 		}
 
@@ -779,7 +825,8 @@ public class H263Parser {
 					// + ", " + hmMCBPC[2]);
 					// // // + "\n" + lastTCOEFF[0] + ", " + lastTCOEFF[1] + ", " + lastTCOEFF[2] + ", " +
 					// lastTCOEFF[3]);
-					CD("(" + decTry + ") hCBPY failed, " + x + ", " + y);
+					if (CD)
+						CD("(" + decTry + ") hCBPY failed, " + x + ", " + y);
 					return false;
 				}
 			} else {
@@ -787,7 +834,8 @@ public class H263Parser {
 				// printAndroidLogError("hMCBPC failed, " + x + ", " + y + ", " + p.hMVDs[(x - 1 + 20) % 20][y][0][0]
 				// + "|" + p.hMVDs[(x - 1 + 20) % 20][y][0][1] + "  " + p.hMVDs[(x - 1 + 20) % 20][y][1][0] + "|"
 				// + p.hMVDs[(x - 1 + 20) % 20][y][1][1]);
-				CD("(" + decTry + ") hMCBPC failed, " + x + ", " + y);
+				if (CD)
+					CD("(" + decTry + ") hMCBPC failed, " + x + ", " + y);
 				return false;
 			}
 			boolean d = false;
@@ -813,7 +861,8 @@ public class H263Parser {
 						p.hMVDs[x][y][1] = mvdVertical;
 					} else {
 						// TODO: has mvd decoding failed here?
-						CD("MVD PARSING FAILED!");
+						if (CD)
+							CD("MVD PARSING FAILED!");
 
 						p.hMVDs[x][y][0] = empty;
 						p.hMVDs[x][y][1] = empty;
@@ -833,11 +882,12 @@ public class H263Parser {
 				} else {
 					// read MVD component (x2) from Table D.3
 					// TODO: unrestricted vector mode is not implemented
-					CD("(" + decTry + ") [" + x + "][" + y + "]" + ": hmMCBPC: " + hmMCBPC[0] + ", " + hmMCBPC[1]
-							+ ", " + hmMCBPC[2] + "  ### hmCBPY: " + hmCBPY[0] + ", " + hmCBPY[1] + ", " + hmCBPY[2]
-							+ ", " + hmCBPY[3]);
-
-					CD("(" + decTry + ") unrestricted vector mode is not implemented, " + x + ", " + y);
+					if (CD)
+						CD("(" + decTry + ") [" + x + "][" + y + "]" + ": hmMCBPC: " + hmMCBPC[0] + ", " + hmMCBPC[1]
+								+ ", " + hmMCBPC[2] + "  ### hmCBPY: " + hmCBPY[0] + ", " + hmCBPY[1] + ", "
+								+ hmCBPY[2] + ", " + hmCBPY[3]);
+					if (CD)
+						CD("(" + decTry + ") unrestricted vector mode is not implemented, " + x + ", " + y);
 					return false;
 				}
 			} else if (hmMCBPC[0] == 3) {
@@ -853,7 +903,8 @@ public class H263Parser {
 				p.hMVDs[x][y][1] = empty;
 
 			} else {
-				CD("(" + decTry + ") MCBPC failed, " + x + ", " + y);
+				if (CD)
+					CD("(" + decTry + ") MCBPC failed, " + x + ", " + y);
 				return false;
 			}
 
@@ -911,7 +962,8 @@ public class H263Parser {
 			}
 
 			if (!blockOK) {
-				CD("(" + decTry + ") some block(s) failed---");
+				if (CD)
+					CD("(" + decTry + ") some block(s) failed---");
 				return false;
 			}
 		} // else if (hMCOD)
@@ -927,7 +979,8 @@ public class H263Parser {
 		if (intradc) {
 			// read INTRADC
 			readBits(8);
-			// Log.i("FLOWPATH", "INTRADC: " + readBits(8));
+			if (CD)
+				CD("INTRADC: " + readBits(8));
 
 		}
 
@@ -948,7 +1001,8 @@ public class H263Parser {
 				} else {
 					// block decoding failed
 					// printAndroidLogError("block decoding failed: ret == -1");
-					CD("(" + decTry + ") block decoding failed: ret == -1");
+					if (CD)
+						CD("(" + decTry + ") block decoding failed: ret == -1");
 					return false;
 				}
 			}
@@ -1018,6 +1072,8 @@ public class H263Parser {
 				if (state > 0 && readBits(6) == 32) {
 					// We have at least two consecutive zeros, check tail:
 					// found PSC start code
+					if (CD)
+						CD("FOUND STARTCODE " + fisPtr);
 					return;
 				}
 			} else {
@@ -1239,6 +1295,7 @@ public class H263Parser {
 		}
 		if (CD)
 			CD("MCBPC component not found with (13bits) " + Integer.toBinaryString(tempBits));
+		error_MCBPC4PRAMES++;
 		return null;
 	}
 
@@ -1339,7 +1396,9 @@ public class H263Parser {
 			return hCBPYTable[15];
 		}
 
-		// printAndroidLogError("CBPY component not found with (6bits) " + Integer.toBinaryString(tempBits));
+		if (CD)
+			CD("(" + decTry + ") CBPY component not found with (6bits) " + Integer.toBinaryString(tempBits));
+		error_HCBPY++;
 		return null;
 	}
 
@@ -1698,7 +1757,9 @@ public class H263Parser {
 		if (tempBits == -1) {
 			return hMVDComponents[63];
 		}
-
+		if (CD)
+			CD("(" + decTry + ") MVD component failed");
+		error_MVD++;
 		return null;
 	}
 
@@ -2912,8 +2973,9 @@ public class H263Parser {
 		if (tempBits == -1) {
 			return 1;
 		}
-
-		// printAndroidLogError("TCOEFF not found with " + Integer.toBinaryString(tempBits));
+		if (CD)
+			CD("(" + decTry + ") TCOEFF not found with " + Integer.toBinaryString(tempBits));
+		error_TCOEFF++;
 		return -1;
 	}
 
@@ -3051,11 +3113,14 @@ public class H263Parser {
 		return res;
 	}
 
-	private int readNextByte() throws IOException {
+	private int readNextByte() throws IOException, EOSException {
 		int ret = -1;
 
 		do {
 			ret = fis.read();
+			if (ret == -1 && blocking)
+				throw new EOSException("EOS");
+
 		} while (ret == -1);
 
 		if (CD)
@@ -3111,6 +3176,11 @@ public class H263Parser {
 	private int oldFramesNum = 0;
 	private int numSkipframes = 0;
 
+	public String getErrorStats() {
+		return "Errors:  " + "\nerror_MCBPC4PRAMES " + error_MCBPC4PRAMES + "\nerror_TCOEFF " + error_TCOEFF
+				+ "\nerror_HCBPY " + error_HCBPY + "\nerror_MVD " + error_MVD;
+	}
+
 	public String getStats() {
 		long lag = (((System.currentTimeMillis() - STARTUP) / 1000L) * 29) - (numIframes + numPframes + numSkipframes);
 		String t = "I Frames: " + numIframes + ", P Frames: " + numPframes + "(+"
@@ -3125,7 +3195,7 @@ public class H263Parser {
 	private int errBufPtr = 0;
 
 	private void printAndroidLogError(String s) {
-		// Log.i("FLOWPATH", "\n>>>>\n" + decTry + " " + s + "\n@" + (fisPtr + 1));
+		CD("\n>>>>\n" + decTry + " " + s + "\n@" + (fisPtr + 1));
 		CD("\n" + decTry + " " + s);
 		if (CD) {
 			String bits = "";
@@ -3138,7 +3208,7 @@ public class H263Parser {
 			}
 
 			CD("\n## Bits " + bits);
-			// Log.i("FLOWPATH", "\n## PSC is " + (fisPtr - lastFisPtr) + " bytes old");
+			CD("\n## PSC is " + (fisPtr - lastFisPtr) + " bytes old");
 		}
 	}
 
