@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import android.widget.SlidingDrawer;
+
 import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
 
 /**
@@ -15,7 +17,7 @@ import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
  */
 public class H263Parser {
 	// CONSOLE DEBUG = ?
-	public boolean CD = true;
+	public boolean CD = false;
 
 	private InputStream fis = null;
 	private int lastFisPtr = 0; // used to calculate PSC bit pos diff
@@ -278,8 +280,12 @@ public class H263Parser {
 			p.hPBFrames = b(hPTYPE_noPLUSPTYPE, 0);
 		} // check if PLUSTYPE is present
 
-		if (CD)
+		if (CD){
 			CD("(" + decTry + ") p.hPictureCodingType = " + p.hPictureCodingType);
+		}
+		
+		if (p.hSliceStructured)
+			CD("(" + decTry + ") p.hSliceStructured = " + p.hSliceStructured);
 
 		if (p.hExtendedPTYPE) {
 			// "If PLUSPTYPE is present, then CPM follows immediately after
