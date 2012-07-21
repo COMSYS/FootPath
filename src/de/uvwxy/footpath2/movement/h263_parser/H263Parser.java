@@ -1061,8 +1061,8 @@ public class H263Parser {
 
 		int state = -1;
 		while (true) {
-
-			if (readNextByte() == 0) {
+			readNextByte();
+			if (lastByte == 0) {
 				state++;
 
 				if (state > 0 && readBits(6) == 32) {
@@ -1222,27 +1222,27 @@ public class H263Parser {
 		return res;
 	}
 
-	private int readNextByte() throws IOException, EOSException {
-		int ret = -1;
+	private void readNextByte() throws IOException, EOSException {
+		lastByte = -1;
 
 		do {
-			ret = fis.read();
-			if (ret == -1 && blocking)
+			lastByte = fis.read();
+			if (lastByte == -1 && blocking)
 				throw new EOSException("EOS");
 
-		} while (ret == -1);
+		} while (lastByte == -1);
 		//
 		// if (CD)
 		// errBuf[errBufPtr++ % errBufSize] = ret;
 
 		// reset bit reader
 		bitPtr = 7;
-		lastByte = -1;
+		bufferedByte = -1;
 		fisPtr++;
-		return ret;
 	}
 
 	private int lastByte = -1;
+	private int bufferedByte = -1;
 
 	/**
 	 * lastByte == -1 -> lastByte is not set yet.
@@ -1251,8 +1251,8 @@ public class H263Parser {
 	 * @throws IOException
 	 */
 	private int readNextBit() throws IOException {
-		while (lastByte == -1) {
-			lastByte = fis.read();
+		while (bufferedByte == -1) {
+			bufferedByte = fis.read();
 		}
 
 		// int ret = (lastByte & (0x01 << bitPtr)) >> bitPtr;
@@ -1261,7 +1261,7 @@ public class H263Parser {
 		// int ret = lastByte & bitMaskSingleBit[bitPtr];
 		// lastByte <<=1;
 		// int ret = lastByte & bitMaskSingleBit[bitPtr];
-		int ret = (lastByte >> bitPtr) & 0x01;
+		int ret = (bufferedByte >> bitPtr) & 0x01;
 
 		bitPtr--;
 		if (bitPtr < 0) {
@@ -1272,7 +1272,7 @@ public class H263Parser {
 			// errBuf[errBufPtr++ % errBufSize] = lastByte;
 			// reset lastByte, such that we know we have to read a new bite
 			// to read bits from
-			lastByte = -1;
+			bufferedByte = -1;
 		}
 
 		return ret;
