@@ -278,10 +278,10 @@ public class H263Parser {
 			p.hPBFrames = b(hPTYPE_noPLUSPTYPE, 0);
 		} // check if PLUSTYPE is present
 
-		if (CD){
+		if (CD) {
 			CD("(" + decTry + ") p.hPictureCodingType = " + p.hPictureCodingType);
 		}
-		
+
 		if (p.hSliceStructured)
 			CD("(" + decTry + ") p.hSliceStructured = " + p.hSliceStructured);
 
@@ -451,7 +451,6 @@ public class H263Parser {
 
 					p.hBackChannelMessageIndication = 2;
 				} else {
-					// TODO: this is not implemented
 					// Houston we have a problem.
 					CD("(" + decTry + ") something with reference picture selection not implemented");
 				}
@@ -464,14 +463,12 @@ public class H263Parser {
 		}
 
 		if (p.hBackChannelMessageIndication == 1) {
-			// TODO: this is not implemented
 			// Let's hope this is not present
 			if (CD)
 				CD("(" + decTry + ")back channel maessage indication not implemented");
 		}
 
 		if (p.hReferencePictureResampling) {
-			// TODO: this is not implemented
 			// A variable length field that is present only if the optional
 			// Reference Picture Resampling mode bit is set in PLUSPTYPE.
 
@@ -530,7 +527,7 @@ public class H263Parser {
 		p.hExtraInsertionInformation = readBits(1) == 1;
 
 		if (p.hExtraInsertionInformation) {
-			// TODO: extra insertion information not implemented
+			// Extra insertion information IS implemented
 
 			do {
 				readBits(8);
@@ -547,7 +544,7 @@ public class H263Parser {
 			// the EOS or EOSBS codeword is byte aligned. Decoders shall be
 			// designed to discard ESTUF. See Annex C for a description of
 			// EOSBS and its use.
-			// printAndroidLogError("extra instertion information not implemented");
+			// printAndroidLogError("extra insertion information not implemented");
 		}
 
 		// TODO: Remove Stuffing here for byte alignment?
@@ -647,6 +644,7 @@ public class H263Parser {
 					}
 				}
 			} else {
+				CD("We Should not use this!");
 				// find start code sequence and then decode macro block
 				decodeGOBS(p);
 			} // if (parseGOBs && p.hPictureCodingType == H263PCT.INTER)
@@ -1004,7 +1002,6 @@ public class H263Parser {
 					}
 				} else {
 					// block decoding failed
-					// printAndroidLogError("block decoding failed: ret == -1");
 					if (CD)
 						CD("(" + decTry + ") block decoding failed: ret == -1");
 					return false;
@@ -1013,11 +1010,6 @@ public class H263Parser {
 		}
 
 		return true;
-	}
-
-	private void dumpNextByteToOut() throws IOException {
-		int x = readBits(32);
-		System.out.println(Integer.toBinaryString(x));
 	}
 
 	// #########################################################################
@@ -1033,7 +1025,7 @@ public class H263Parser {
 		// long ts = System.currentTimeMillis();
 
 		if (fastPSC) {
-			checkForPictureStartCodeFasterX();
+			checkForPictureStartCodeFaster();
 			return;
 		}
 
@@ -1059,7 +1051,7 @@ public class H263Parser {
 		}
 	}
 
-	private void checkForPictureStartCodeFasterX() throws IOException, EOSException {
+	private void checkForPictureStartCodeFaster() throws IOException, EOSException {
 		// We assume PSC is byte aligned, thus only check for trailing 10 0000
 		//
 		// long ts = System.currentTimeMillis();
@@ -1116,8 +1108,209 @@ public class H263Parser {
 		}
 	}
 
+	private void checkForEndOfSequenceCode() throws IOException {
+		// ??|E O S| = "??|00 0000 0000 0000 00 11 1111|" = 22 bits;
+		// | 0 0 0 0 3 f
+
+		// "0000 0000 0011 1111 1111 1111 1111 1111" "clear mask";
+		// 0x 0 0 3 f f f f f"
+
+		int bitsBufEOS = 0;
+		int bitCount = 0;
+		while (true) {
+			// push next read bit into bitsBufPSC from right side
+			bitsBufEOS = bitsBufEOS << 1;
+			bitsBufEOS = bitsBufEOS | readNextBit();
+			bitCount++;
+			// clear left most 10 bit (only right most 22 bit are checked)
+			int tmp = bitsBufEOS & 0x003fffff;
+
+			if (bitCount >= 22 && tmp == 0x3f) {
+				// found EOS code
+				return;
+			}
+		}
+	}
+
 	/**
-	 * TODO: This function has to be implemented for I-frames.
+	 * This function takes tempBits and shifts this integer numNewBits to the left and adds the same number of new bits
+	 * from the bit stream to it. The resulting tempBits is AND'ed with 0001..1 (refLen ones) to check if it then equals
+	 * ref. If this is the case -1 is returned, else the new and modified version of tempBits.
+	 * 
+	 * @param tempBits
+	 *            the integer to read new bits to (from the right hand side)
+	 * @param numNewBits
+	 *            amount of bits to shift and read
+	 * @param ref
+	 *            a value to check if the right refLen bits of tempBits is equal to
+	 * @param refLen
+	 *            the length of ref bits
+	 * @return -1 if ref was equally matched, else the modified version of tempBits
+	 * @throws IOException
+	 */
+	private int evalNext(int tempBits, int numNewBits, int ref, int refLen) throws IOException {
+		for (int i = 0; i < numNewBits; i++) {
+			tempBits = tempBits << 1;
+			tempBits = tempBits | readNextBit();
+		}
+
+		if ((tempBits & bitMaskLSBOnes[refLen]) == ref) { // getBitMask(refLen)
+			return -1;
+		}
+
+		return tempBits;
+	}
+
+	/**
+	 * Similar to evalNext. only refLen bits and ref are compared, but before the pattern is right shifted such that the
+	 * LSB can be 0 or 1.
+	 * 
+	 * @param tempBits
+	 * @param numNewBits
+	 * @param ref
+	 * @param refLen
+	 * @return
+	 * @throws IOException
+	 */
+	private int evalNextWithSBit(int tempBits, int numNewBits, int ref, int refLen) throws IOException {
+		for (int i = 0; i < numNewBits; i++) {
+			tempBits = tempBits << 1;
+			tempBits = tempBits | readNextBit();
+		}
+
+		// by right shifting we ignore le right most bit!
+		if (((tempBits >> 1) & bitMaskLSBOnes[refLen]) == ref) {// getBitMask(refLen)) == ref) {
+			return -1;
+		}
+
+		return tempBits;
+	}
+
+	// #########################################################################
+	// ########################### bit stream access ###########################
+	// #########################################################################
+
+	/**
+	 * Checks if bit i in integer data is set to 1
+	 * 
+	 * @param data
+	 *            the integer to check
+	 * @param i
+	 *            the bit to check (from right to left, 0 - 31)(LSB is 0, right)
+	 * @return if bit i in integer data is set to 1
+	 */
+	private boolean b(int data, int i) {
+		return ((data >> i) & 1) != 0;
+		// return (data & (1 << i)) << (31 - i) == -2147483648;
+
+		// Java is kind of 'weird' here:
+		// if we shift (1 << 31> (0b10....) to the right java introduces new
+		// 1's from the left e.g. (1<<31)>>3 = 0b11110.... (3 new 1's)
+		// int mask = (1 << i);
+		// return (data & mask) >> i == 1;
+	}
+
+	private int readBits(int numBits) throws IOException {
+		int res = 0;
+
+		for (int i = 0; i < numBits; i++) {
+			res = res << 1;
+			int nextBit = readNextBit();
+			res = res | nextBit;
+		}
+
+		return res;
+	}
+
+	private int readNextByte() throws IOException, EOSException {
+		int ret = -1;
+
+		do {
+			ret = fis.read();
+			if (ret == -1 && blocking)
+				throw new EOSException("EOS");
+
+		} while (ret == -1);
+		//
+		// if (CD)
+		// errBuf[errBufPtr++ % errBufSize] = ret;
+
+		// reset bit reader
+		bitPtr = 7;
+		lastByte = -1;
+		fisPtr++;
+		return ret;
+	}
+
+	private int lastByte = -1;
+
+	/**
+	 * lastByte == -1 -> lastByte is not set yet.
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	private int readNextBit() throws IOException {
+		while (lastByte == -1) {
+			lastByte = fis.read();
+		}
+
+		// int ret = (lastByte & (0x01 << bitPtr)) >> bitPtr;
+
+		// byte = 8 bit 0111 1111 = 127
+		// int ret = lastByte & bitMaskSingleBit[bitPtr];
+		// lastByte <<=1;
+		// int ret = lastByte & bitMaskSingleBit[bitPtr];
+		int ret = (lastByte >> bitPtr) & 0x01;
+
+		bitPtr--;
+		if (bitPtr < 0) {
+			bitPtr = 7;
+			fisPtr++;
+
+			// if (CD)
+			// errBuf[errBufPtr++ % errBufSize] = lastByte;
+			// reset lastByte, such that we know we have to read a new bite
+			// to read bits from
+			lastByte = -1;
+		}
+
+		return ret;
+	}
+
+	private int oldFramesNum = 0;
+	private int numSkipframes = 0;
+
+	public String getErrorStats() {
+		return "Errors:  " + "\nerror_MCBPC4PRAMES " + error_MCBPC4PRAMES + "\nerror_TCOEFF " + error_TCOEFF
+				+ "\nerror_HCBPY " + error_HCBPY + "\nerror_MVD " + error_MVD;
+	}
+
+	public String getStats() {
+		long lag = (((System.currentTimeMillis() - STARTUP) / 1000L) * 29) - (numIframes + numPframes + numSkipframes);
+		String t = "I Frames: " + numIframes + ", P Frames: " + numPframes + "(+"
+				+ ((numPframes + numIframes + numSkipframes) - oldFramesNum) + ")" + "\nSkipped:" + numSkipframes
+				+ "\nSize: " + width + "x" + height + "\nBrokenFrames: " + numBrokenFrames + " Lag: " + lag + " frames";
+		oldFramesNum = numPframes + numIframes + numSkipframes;
+		return t;
+	}
+
+	public void closeFis() {
+		try {
+			fis.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// #########################################################################
+	// ################## There seem to be no errors in the ####################
+	// ############################# code below ################################
+	
+	
+	/**
+	 * This function has to be implemented for I-frames.
+	 * As we are only interested in P frames we currently do not need this.
 	 * 
 	 * @return
 	 */
@@ -1407,7 +1600,7 @@ public class H263Parser {
 		error_HCBPY++;
 		return null;
 	}
-
+	
 	private final float[][] hMVDComponents = { { 0, Float.NaN }, { -0.5f, 31.5f }, { 0.5f, -31.5f }, { -1, 31 },
 			{ 1, -31 }, { -1.5f, 30.5f }, { 1.5f, -30.5f }, { -2, 30 }, { 2, -30 }, { -3.5f, 28.5f }, { -3, 29 },
 			{ -2.5f, 29.5f }, { 2.5f, -29.5f }, { 3, -29 }, { 3.5f, -28.5f }, { -5, 27 }, { -4.5f, 27.5f }, { -4, 28 },
@@ -1767,667 +1960,6 @@ public class H263Parser {
 			CD("(" + decTry + ") MVD component failed");
 		}
 		error_MVD++;
-		return null;
-	}
-
-	private int[] getTCOEFF() throws IOException {
-		int tempBits = 0;
-		// 0 0 0 1 3 10s
-		tempBits = evalNextWithSBit(tempBits, 3, 0x02, 2);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 12 0 1 1 4 110s
-		tempBits = evalNextWithSBit(tempBits, 1, 0x06, 3);
-		if (tempBits == -1) {
-			int[] res = { 0, 1, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 1 0 0 2 5 1111s
-		// 18 0 2 1 5 1110s
-		// 58 1 0 1 5 0111s
-		tempBits = evalNextWithSBit(tempBits, 1, 0x0F, 4);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 2, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0E, 4);
-		if (tempBits == -1) {
-			int[] res = { 0, 2, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x07, 4);
-		if (tempBits == -1) {
-			int[] res = { 1, 0, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 22 0 3 1 6 0110 1s
-		// 25 0 4 1 6 0110 0s
-		// 28 0 5 1 6 0101 1s
-		tempBits = evalNextWithSBit(tempBits, 1, 0x0D, 5);
-		if (tempBits == -1) {
-			int[] res = { 0, 3, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0C, 5);
-		if (tempBits == -1) {
-			int[] res = { 0, 4, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0B, 5);
-		if (tempBits == -1) {
-			int[] res = { 0, 5, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 2 0 0 3 7 0101 01s
-		// 13 0 1 2 7 0101 00s
-		// 31 0 6 1 7 0100 11s
-		tempBits = evalNextWithSBit(tempBits, 1, 0x15, 6);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 3, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x14, 6);
-		if (tempBits == -1) {
-			int[] res = { 0, 1, 2, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x13, 6);
-		if (tempBits == -1) {
-			int[] res = { 0, 6, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 34 0 7 1 7 0100 10s
-		// 36 0 8 1 7 0100 01s
-		// 38 0 9 1 7 0100 00s
-		// 61 1 1 1 7 0011 11s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x12, 6);
-		if (tempBits == -1) {
-			int[] res = { 0, 7, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x11, 6);
-		if (tempBits == -1) {
-			int[] res = { 0, 8, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x10, 6);
-		if (tempBits == -1) {
-			int[] res = { 0, 9, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0F, 6);
-		if (tempBits == -1) {
-			int[] res = { 1, 1, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 63 1 2 1 7 0011 10s
-		// 64 1 3 1 7 0011 01s
-		// 65 1 4 1 7 0011 00s
-		// 102 ESCAPE - - 7 0000 011
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0E, 6);
-		if (tempBits == -1) {
-			int[] res = { 1, 2, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0D, 6);
-		if (tempBits == -1) {
-			int[] res = { 1, 3, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0C, 6);
-		if (tempBits == -1) {
-			int[] res = { 1, 4, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNext(tempBits, 0, 0x03, 7); // evalNext, because length
-													// is 7 and no s bit
-		if (tempBits == -1) {
-			int[] res = { readBits(1), readBits(6), readBits(8), 0xE5CA }; // sign
-																			// ==
-																			// 0xE5CA
-																			// ->
-																			// interpret
-																			// level
-																			// according
-																			// to
-																			// table
-																			// 17
-			return res;
-		}
-
-		// 42 0 11 1 8 0010 101s
-		// 43 0 12 1 8 0010 100s
-		// 40 0 10 1 8 0010 110s
-		// 3 0 0 4 8 0010 111s
-		tempBits = evalNextWithSBit(tempBits, 1, 0x15, 7);
-		if (tempBits == -1) {
-			int[] res = { 0, 11, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x14, 7);
-		if (tempBits == -1) {
-			int[] res = { 0, 12, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x16, 7);
-		if (tempBits == -1) {
-			int[] res = { 0, 10, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x17, 7);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 4, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 66 1 5 1 8 0010 011s
-		// 67 1 6 1 8 0010 010s
-		// 68 1 7 1 8 0010 001s
-		// 69 1 8 1 8 0010 000s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x13, 7);
-		if (tempBits == -1) {
-			int[] res = { 1, 5, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x12, 7);
-		if (tempBits == -1) {
-			int[] res = { 1, 6, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x11, 7);
-		if (tempBits == -1) {
-			int[] res = { 1, 7, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x10, 7);
-		if (tempBits == -1) {
-			int[] res = { 1, 8, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 4 0 0 5 9 0001 1111s
-		// 14 0 1 3 9 0001 1110s
-		// 19 0 2 2 9 0001 1101s
-		// 44 0 13 1 9 0001 1100s
-		tempBits = evalNextWithSBit(tempBits, 1, 0x1F, 8);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 5, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x1E, 8);
-		if (tempBits == -1) {
-			int[] res = { 0, 1, 3, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x1D, 8);
-		if (tempBits == -1) {
-			int[] res = { 0, 2, 2, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x1C, 8);
-		if (tempBits == -1) {
-			int[] res = { 0, 13, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 45 0 14 1 9 0001 1011s
-		// 70 1 9 1 9 0001 1010s
-		// 71 1 10 1 9 0001 1001s
-		// 72 1 11 1 9 0001 1000s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x1B, 8);
-		if (tempBits == -1) {
-			int[] res = { 0, 14, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x1A, 8);
-		if (tempBits == -1) {
-			int[] res = { 1, 9, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x19, 8);
-		if (tempBits == -1) {
-			int[] res = { 1, 10, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x18, 8);
-		if (tempBits == -1) {
-			int[] res = { 1, 11, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 73 1 12 1 9 0001 0111s
-		// 74 1 13 1 9 0001 0110s
-		// 75 1 14 1 9 0001 0101s
-		// 76 1 15 1 9 0001 0100s
-		// 77 1 16 1 9 0001 0011s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x17, 8);
-		if (tempBits == -1) {
-			int[] res = { 1, 12, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x16, 8);
-		if (tempBits == -1) {
-			int[] res = { 1, 13, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x15, 8);
-		if (tempBits == -1) {
-			int[] res = { 1, 14, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x14, 8);
-		if (tempBits == -1) {
-			int[] res = { 1, 15, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x13, 8);
-		if (tempBits == -1) {
-			int[] res = { 1, 16, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 5 0 0 6 10 0001 0010 1s
-		// 6 0 0 7 10 0001 0010 0s
-		// 23 0 3 2 10 0001 0001 1s
-		// 26 0 4 2 10 0001 0001 0s
-		tempBits = evalNextWithSBit(tempBits, 1, 0x25, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 6, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x24, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 7, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x23, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 3, 2, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x22, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 4, 2, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 46 0 15 1 10 0001 0000 1s
-		// 47 0 16 1 10 0001 0000 0s
-		// 48 0 17 1 10 0000 1111 1s
-		// 49 0 18 1 10 0000 1111 0s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x21, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 15, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x20, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 16, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x1F, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 17, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x1E, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 18, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 50 0 19 1 10 0000 1110 1s
-		// 51 0 20 1 10 0000 1110 0s
-		// 52 0 21 1 10 0000 1101 1s
-		// 53 0 22 1 10 0000 1101 0s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x1D, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 19, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x1C, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 20, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x1B, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 21, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x1A, 9);
-		if (tempBits == -1) {
-			int[] res = { 0, 22, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 59 1 0 2 10 0000 1100 1s
-		// 78 1 17 1 10 0000 1100 0s
-		// 79 1 18 1 10 0000 1011 1s
-		// 80 1 19 1 10 0000 1011 0s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x19, 9);
-		if (tempBits == -1) {
-			int[] res = { 1, 0, 2, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x18, 9);
-		if (tempBits == -1) {
-			int[] res = { 1, 17, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x17, 9);
-		if (tempBits == -1) {
-			int[] res = { 1, 18, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x16, 9);
-		if (tempBits == -1) {
-			int[] res = { 1, 19, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 81 1 20 1 10 0000 1010 1s
-		// 82 1 21 1 10 0000 1010 0s
-		// 83 1 22 1 10 0000 1001 1s
-		// 84 1 23 1 10 0000 1001 0s
-		// 85 1 24 1 10 0000 1000 1s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x15, 9);
-		if (tempBits == -1) {
-			int[] res = { 1, 20, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x14, 9);
-		if (tempBits == -1) {
-			int[] res = { 1, 21, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x13, 9);
-		if (tempBits == -1) {
-			int[] res = { 1, 22, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x12, 9);
-		if (tempBits == -1) {
-			int[] res = { 1, 23, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x11, 9);
-		if (tempBits == -1) {
-			int[] res = { 1, 24, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 7 0 0 8 11 0000 1000 01s
-		// 8 0 0 9 11 0000 1000 00s
-		// 15 0 1 4 11 0000 0011 11s
-		// 20 0 2 3 11 0000 0011 10s
-		tempBits = evalNextWithSBit(tempBits, 1, 0x21, 10);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 8, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x20, 10);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 9, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0F, 10);
-		if (tempBits == -1) {
-			int[] res = { 0, 1, 4, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0E, 10);
-		if (tempBits == -1) {
-			int[] res = { 0, 2, 3, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 24 0 3 3 11 0000 0011 01s
-		// 29 0 5 2 11 0000 0011 00s
-		// 32 0 6 2 11 0000 0010 11s
-		// 35 0 7 2 11 0000 0010 10s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0D, 10);
-		if (tempBits == -1) {
-			int[] res = { 0, 3, 3, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0C, 10);
-		if (tempBits == -1) {
-			int[] res = { 0, 5, 2, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0B, 10);
-		if (tempBits == -1) {
-			int[] res = { 0, 6, 2, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x0A, 10);
-		if (tempBits == -1) {
-			int[] res = { 0, 7, 2, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 37 0 8 2 11 0000 0010 01s
-		// 39 0 9 2 11 0000 0010 00s
-		// 86 1 25 1 11 0000 0001 11s
-		// 87 1 26 1 11 0000 0001 10s
-		// 88 1 27 1 11 0000 0001 01s
-		// 89 1 28 1 11 0000 0001 00s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x09, 10);
-		if (tempBits == -1) {
-			int[] res = { 0, 8, 2, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x08, 10);
-		if (tempBits == -1) {
-			int[] res = { 0, 9, 2, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x07, 10);
-		if (tempBits == -1) {
-			int[] res = { 1, 25, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x06, 10);
-		if (tempBits == -1) {
-			int[] res = { 1, 26, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x05, 10);
-		if (tempBits == -1) {
-			int[] res = { 1, 27, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x04, 10);
-		if (tempBits == -1) {
-			int[] res = { 1, 28, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 9 0 0 10 12 0000 0000 111s
-		// 10 0 0 11 12 0000 0000 110s
-		// 11 0 0 12 12 0000 0100 000s
-		// 16 0 1 5 12 0000 0100 001s
-		tempBits = evalNextWithSBit(tempBits, 1, 0x07, 11);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 10, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x06, 11);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 11, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x20, 11);
-		if (tempBits == -1) {
-			int[] res = { 0, 0, 12, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x21, 11);
-		if (tempBits == -1) {
-			int[] res = { 0, 1, 5, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 54 0 23 1 12 0000 0100 010s
-		// 55 0 24 1 12 0000 0100 011s
-		// 60 1 0 3 12 0000 0000 101s
-		// 62 1 1 2 12 0000 0000 100s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x22, 11);
-		if (tempBits == -1) {
-			int[] res = { 0, 23, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x23, 11);
-		if (tempBits == -1) {
-			int[] res = { 0, 24, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x05, 11);
-		if (tempBits == -1) {
-			int[] res = { 1, 0, 3, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x04, 11);
-		if (tempBits == -1) {
-			int[] res = { 1, 1, 2, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 90 1 29 1 12 0000 0100 100s
-		// 91 1 30 1 12 0000 0100 101s
-		// 92 1 31 1 12 0000 0100 110s
-		// 93 1 32 1 12 0000 0100 111s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x24, 11);
-		if (tempBits == -1) {
-			int[] res = { 1, 29, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x25, 11);
-		if (tempBits == -1) {
-			int[] res = { 1, 30, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x26, 11);
-		if (tempBits == -1) {
-			int[] res = { 1, 31, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x27, 11);
-		if (tempBits == -1) {
-			int[] res = { 1, 32, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 17 0 1 6 13 0000 0101 0000s
-		// 21 0 2 4 13 0000 0101 0001s
-		// 27 0 4 3 13 0000 0101 0010s
-		// 30 0 5 3 13 0000 0101 0011s
-		tempBits = evalNextWithSBit(tempBits, 1, 0x50, 12);
-		if (tempBits == -1) {
-			int[] res = { 0, 1, 6, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x51, 12);
-		if (tempBits == -1) {
-			int[] res = { 0, 2, 4, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x52, 12);
-		if (tempBits == -1) {
-			int[] res = { 0, 4, 3, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x53, 12);
-		if (tempBits == -1) {
-			int[] res = { 0, 5, 3, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 33 0 6 3 13 0000 0101 0100s
-		// 41 0 10 2 13 0000 0101 0101s
-		// 56 0 25 1 13 0000 0101 0110s
-		// 57 0 26 1 13 0000 0101 0111s
-
-		tempBits = evalNextWithSBit(tempBits, 0, 0x54, 12);
-		if (tempBits == -1) {
-			int[] res = { 0, 6, 3, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x55, 12);
-		if (tempBits == -1) {
-			int[] res = { 0, 10, 2, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x56, 12);
-		if (tempBits == -1) {
-			int[] res = { 0, 25, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x57, 12);
-		if (tempBits == -1) {
-			int[] res = { 0, 26, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 94 1 33 1 13 0000 0101 1000s
-		// 95 1 34 1 13 0000 0101 1001s
-		// 96 1 35 1 13 0000 0101 1010s
-		// 97 1 36 1 13 0000 0101 1011s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x58, 12);
-		if (tempBits == -1) {
-			int[] res = { 1, 33, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x59, 12);
-		if (tempBits == -1) {
-			int[] res = { 1, 34, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x5A, 12);
-		if (tempBits == -1) {
-			int[] res = { 1, 35, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x5B, 12);
-		if (tempBits == -1) {
-			int[] res = { 1, 36, 1, (tempBits & 0x1) };
-			return res;
-		}
-
-		// 98 1 37 1 13 0000 0101 1100s
-		// 99 1 38 1 13 0000 0101 1101s
-		// 100 1 39 1 13 0000 0101 1110s
-		// 101 1 40 1 13 0000 0101 1111s
-		tempBits = evalNextWithSBit(tempBits, 0, 0x5C, 12);
-		if (tempBits == -1) {
-			int[] res = { 1, 37, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x5D, 12);
-		if (tempBits == -1) {
-			int[] res = { 1, 38, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x5E, 12);
-		if (tempBits == -1) {
-			int[] res = { 1, 39, 1, (tempBits & 0x1) };
-			return res;
-		}
-		tempBits = evalNextWithSBit(tempBits, 0, 0x5F, 12);
-		if (tempBits == -1) {
-			int[] res = { 1, 40, 1, (tempBits & 0x1) };
-			return res;
-		}
-
 		return null;
 	}
 
@@ -2986,255 +2518,10 @@ public class H263Parser {
 		error_TCOEFF++;
 		return -1;
 	}
-
-	/**
-	 * This function takes tempBits and shifts this integer numNewBits to the left and adds the same number of new bits
-	 * from the bit stream to it. The resulting tempBits is AND'ed with 0001..1 (refLen ones) to check if it then equals
-	 * ref. If this is the case -1 is returned, else the new and modified version of tempBits.
-	 * 
-	 * @param tempBits
-	 *            the integer to read new bits to (from the right hand side)
-	 * @param numNewBits
-	 *            amount of bits to shift and read
-	 * @param ref
-	 *            a value to check if the right refLen bits of tempBits is equal to
-	 * @param refLen
-	 *            the length of ref bits
-	 * @return -1 if ref was equally matched, else the modified version of tempBits
-	 * @throws IOException
-	 */
-	private int evalNext(int tempBits, int numNewBits, int ref, int refLen) throws IOException {
-		for (int i = 0; i < numNewBits; i++) {
-			tempBits = tempBits << 1;
-			tempBits = tempBits | readNextBit();
-		}
-
-		if ((tempBits & bitMaskLSBOnes[refLen]) == ref) { // getBitMask(refLen)
-			return -1;
-		}
-
-		return tempBits;
-	}
-
-	/**
-	 * Similar to evalNext. only refLen bits and ref are compared, but before the pattern is right shifted such that the
-	 * LSB can be 0 or 1.
-	 * 
-	 * @param tempBits
-	 * @param numNewBits
-	 * @param ref
-	 * @param refLen
-	 * @return
-	 * @throws IOException
-	 */
-	private int evalNextWithSBit(int tempBits, int numNewBits, int ref, int refLen) throws IOException {
-		for (int i = 0; i < numNewBits; i++) {
-			tempBits = tempBits << 1;
-			tempBits = tempBits | readNextBit();
-		}
-
-		// by right shifting we ignore le right most bit!
-		if (((tempBits >> 1) & bitMaskLSBOnes[refLen]) == ref) {// getBitMask(refLen)) == ref) {
-			return -1;
-		}
-
-		return tempBits;
-	}
-
-	/**
-	 * This function returns an integer with numOnes ones on LSB side
-	 * 
-	 * @param numOnes
-	 *            number of ones
-	 * @return the generated integer
-	 */
-	private int getBitMask(int numOnes) {
-		int res = 0;
-		for (int i = 0; i < numOnes; i++) {
-			res <<= 1;
-			res |= 1;
-		}
-		return res;
-	}
-
-	private final int[] bitMaskLSBOnes = { 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767,
-			65535, 131071, 262143, 524287, 1048575, 2097151, 4194303, 8388607, 16777215, 33554431, 67108863, 134217727,
-			268435455, 536870911, 1073741823, 2147483647 };
-
-	private void checkForEndOfSequenceCode() throws IOException {
-		// ??|E O S| = "??|00 0000 0000 0000 00 11 1111|" = 22 bits;
-		// | 0 0 0 0 3 f
-
-		// "0000 0000 0011 1111 1111 1111 1111 1111" "clear mask";
-		// 0x 0 0 3 f f f f f"
-
-		int bitsBufEOS = 0;
-		int bitCount = 0;
-		while (true) {
-			// push next read bit into bitsBufPSC from right side
-			bitsBufEOS = bitsBufEOS << 1;
-			bitsBufEOS = bitsBufEOS | readNextBit();
-			bitCount++;
-			// clear left most 10 bit (only right most 22 bit are checked)
-			int tmp = bitsBufEOS & 0x003fffff;
-
-			if (bitCount >= 22 && tmp == 0x3f) {
-				// found EOS code
-				return;
-			}
-		}
-	}
-
-	// #########################################################################
-	// ########################### bit stream access ###########################
-	// #########################################################################
-
-	/**
-	 * Checks if bit i in integer data is set to 1
-	 * 
-	 * @param data
-	 *            the integer to check
-	 * @param i
-	 *            the bit to check (from right to left, 0 - 31)(LSB is 0, right)
-	 * @return if bit i in integer data is set to 1
-	 */
-	private boolean b(int data, int i) {
-		return ((data >> i) & 1) != 0;
-		// return (data & (1 << i)) << (31 - i) == -2147483648;
-
-		// Java is kind of 'weird' here:
-		// if we shift (1 << 31> (0b10....) to the right java introduces new
-		// 1's from the left e.g. (1<<31)>>3 = 0b11110.... (3 new 1's)
-		// int mask = (1 << i);
-		// return (data & mask) >> i == 1;
-	}
-
-	private int readBits(int numBits) throws IOException {
-		int res = 0;
-
-		for (int i = 0; i < numBits; i++) {
-			res = res << 1;
-			int nextBit = readNextBit();
-			res = res | nextBit;
-		}
-
-		return res;
-	}
-
-	private int readNextByte() throws IOException, EOSException {
-		int ret = -1;
-
-		do {
-			ret = fis.read();
-			if (ret == -1 && blocking)
-				throw new EOSException("EOS");
-
-		} while (ret == -1);
-		//
-		// if (CD)
-		// errBuf[errBufPtr++ % errBufSize] = ret;
-
-		// reset bit reader
-		bitPtr = 7;
-		lastByte = -1;
-		fisPtr++;
-		return ret;
-	}
-
-	private static int[] bitMaskSingleBit = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384,
-			32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864,
-			134217728, 268435456, 536870912, 1073741824 };
-
-	private int lastByte = -1;
-
-	/**
-	 * lastByte == -1 -> lastByte is not set yet.
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	private int readNextBit() throws IOException {
-		while (lastByte == -1) {
-			lastByte = fis.read();
-		}
-
-		// int ret = (lastByte & (0x01 << bitPtr)) >> bitPtr;
-
-		// byte = 8 bit 0111 1111 = 127
-		// int ret = lastByte & bitMaskSingleBit[bitPtr];
-		// lastByte <<=1;
-		// int ret = lastByte & bitMaskSingleBit[bitPtr];
-		int ret = (lastByte >> bitPtr) & 0x01;
-
-		bitPtr--;
-		if (bitPtr < 0) {
-			bitPtr = 7;
-			fisPtr++;
-
-			// if (CD)
-			// errBuf[errBufPtr++ % errBufSize] = lastByte;
-			// reset lastByte, such that we know we have to read a new bite
-			// to read bits from
-			lastByte = -1;
-		}
-
-		return ret;
-	}
-
-	private int oldFramesNum = 0;
-	private int numSkipframes = 0;
-
-	public String getErrorStats() {
-		return "Errors:  " + "\nerror_MCBPC4PRAMES " + error_MCBPC4PRAMES + "\nerror_TCOEFF " + error_TCOEFF
-				+ "\nerror_HCBPY " + error_HCBPY + "\nerror_MVD " + error_MVD;
-	}
-
-	public String getStats() {
-		long lag = (((System.currentTimeMillis() - STARTUP) / 1000L) * 29) - (numIframes + numPframes + numSkipframes);
-		String t = "I Frames: " + numIframes + ", P Frames: " + numPframes + "(+"
-				+ ((numPframes + numIframes + numSkipframes) - oldFramesNum) + ")" + "\nSkipped:" + numSkipframes
-				+ "\nSize: " + width + "x" + height + "\nBrokenFrames: " + numBrokenFrames + " Lag: " + lag + " frames";
-		oldFramesNum = numPframes + numIframes + numSkipframes;
-		return t;
-	}
-
-	// private int errBufSize = 80;
-	// private int[] errBuf = new int[errBufSize];
-	// private int errBufPtr = 0;
-
-	// private void printAndroidLogError(String s) {
-	// CD("\n>>>>\n" + decTry + " " + s + "\n@" + (fisPtr + 1));
-	// CD("\n" + decTry + " " + s);
-	// if (CD) {
-	// String bits = "";
-	//
-	// for (int i = 1; i <= errBufSize; i++) {
-	// bits += byteToBin((byte) errBuf[(errBufPtr + i) % errBufSize]) + " ";
-	// if (i % 10 == 0) {
-	// bits += "\n        ";
-	// }
-	// }
-	//
-	// CD("\n## Bits " + bits);
-	// CD("\n## PSC is " + (fisPtr - lastFisPtr) + " bytes old");
-	// }
-	// }
-
-
-	private String xZeros(int x) {
-		String temp = "";
-		while (x > 0) {
-			x--;
-			temp += "0";
-		}
-		return temp;
-	}
-
-	public void closeFis() {
-		try {
-			fis.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+	
+	
+	
+	private static final int[] bitMaskLSBOnes = { 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383,
+			32767, 65535, 131071, 262143, 524287, 1048575, 2097151, 4194303, 8388607, 16777215, 33554431, 67108863,
+			134217727, 268435455, 536870911, 1073741823, 2147483647 };
 }
