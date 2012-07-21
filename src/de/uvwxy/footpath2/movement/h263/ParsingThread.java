@@ -56,8 +56,6 @@ public class ParsingThread extends Thread {
 						parser.findPictureStart();
 						mvs = parser.parseH263Frame();
 					} while (mvs == null);
-
-					Log.i("FLOWPATH", "Parsed frame");
 					
 					flowPathInterface.notifyTriggersWithMVD(System.currentTimeMillis(), mvs);
 

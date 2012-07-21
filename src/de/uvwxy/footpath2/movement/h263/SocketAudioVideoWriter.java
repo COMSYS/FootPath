@@ -70,25 +70,29 @@ public class SocketAudioVideoWriter {
 
 	}
 
-	
 	/**
-	 * Starting this on the phone throws an exception at start (-19)
-	 * Catch this to keep it running
+	 * Starting this on the phone throws an exception at start (-19) Catch this to keep it running
 	 */
 	public void startCaptureWEC() {
 		try {
 			recorder.start();
 		} catch (RuntimeException e) {
+			runtime_exception_occured = true;
 			Log.i("FLOWPATH", "Caught runtime exception " + e.getLocalizedMessage());
 		}
 	}
+
+	private boolean runtime_exception_occured = false;
 
 	/**
 	 * Stops capture
 	 */
 	public void stopCapture() {
-		recorder.stop();
-		recorder.reset();
+		// Possible workaround to the app crashing on stop
+		if (!runtime_exception_occured) {
+			recorder.stop();
+			recorder.reset();
+		}
 		// stopClient();
 	}
 
