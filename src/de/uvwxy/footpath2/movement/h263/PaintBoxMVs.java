@@ -116,14 +116,14 @@ public class PaintBoxMVs extends SurfaceView implements SurfaceHolder.Callback,
 
 			drawHistogramm(canvas, p, x_sum);
 
-			float[][][] f = mvdFields(mvs, 4, 3);
-			paintFields(canvas, p, f, 16.0f, 0, 300);
+//			float[][][] f = mvdFields(mvs, 4, 3);
+//			paintFields(canvas, p, f, 16.0f, 0, 300);
 
-			mvdHeatMap(mvs, ++hmPtr);
+//			mvdHeatMap(mvs, ++hmPtr);
 			
 			
-			paintHeatMap(canvas, p, heatMaps[hmPtr % numOfHeatMaps], 20, 280, size);
-			paintHeatMaps(canvas, p, heatMaps, 20+size+4, 280, size);
+//			paintHeatMap(canvas, p, heatMaps[hmPtr % numOfHeatMaps], 20, 280, size);
+//			paintHeatMaps(canvas, p, heatMaps, 20+size+4, 280, size);
 		}
 		tsLast = System.currentTimeMillis();
 	}
