@@ -30,9 +30,13 @@ public class SensorEventDistributor implements SensorEventListener {
 	private List<SensorEventListener> linearAccelerometerEventListenerList;
 	private List<SensorEventListener> orientationEventListenerList;
 	private List<SensorEventListener> gravityEventListenerList;
+	private List<SensorEventListener> pressureEventListenerList;
+
 	private final SensorHistory linearAccelerometerHistory = new SensorHistory();
 	private final SensorHistory orientationHistory = new SensorHistory();
 	private final SensorHistory gravityHistory = new SensorHistory();
+	private final SensorHistory pressureHistory = new SensorHistory();
+
 	private static SensorManager sm;
 	private List<Sensor> lSensor;
 	private static Context context;
@@ -109,6 +113,22 @@ public class SensorEventDistributor implements SensorEventListener {
 		gravityEventListenerList.remove(sel);
 	}
 
+	public void addpressureListener(SensorEventListener sel) {
+		if (pressureEventListenerList == null) {
+			pressureEventListenerList = new LinkedList<SensorEventListener>();
+		}
+		Log.i("FOOTPATH", "Adding Baromter Ev Lis");
+		pressureEventListenerList.add(sel);
+	}
+
+	public void removepressureListener(SensorEventListener sel) {
+		if (pressureEventListenerList == null || sel == null) {
+			return;
+		}
+		Log.i("FOOTPATH", "Removing pressure Ev Lis");
+		pressureEventListenerList.remove(sel);
+	}
+
 	public synchronized boolean isRunning() {
 		return running;
 	}
@@ -121,6 +141,7 @@ public class SensorEventDistributor implements SensorEventListener {
 		boolean regLinAcc = true;
 		boolean regOrientation = true;
 		boolean regGravity = true;
+		boolean regpressure = true;
 
 		if (regLinAcc) {
 			em.add("linearAccelerometerHistory", linearAccelerometerHistory);
@@ -132,6 +153,10 @@ public class SensorEventDistributor implements SensorEventListener {
 
 		if (regGravity) {
 			em.add("gravityHistory", gravityHistory);
+		}
+
+		if (regpressure) {
+			em.add("baromterHistory", pressureHistory);
 		}
 	}
 
@@ -151,7 +176,10 @@ public class SensorEventDistributor implements SensorEventListener {
 				Log.i("FOOTPATH", "Registering Gravity Sensor");
 				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_GAME);
 				break;
-
+			case Sensor.TYPE_PRESSURE:
+				Log.i("FOOTPATH", "Registering Pressure Sensor");
+				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_GAME);
+				break;
 			}
 		}
 	}
@@ -224,6 +252,17 @@ public class SensorEventDistributor implements SensorEventListener {
 				}
 			}
 			break;
+		case Sensor.TYPE_PRESSURE:
+			pressureHistory.add(new SensorTriple(event.values, now, event.sensor.getType()));
+			if (gravityEventListenerList != null) {
+				for (SensorEventListener sel : pressureEventListenerList) {
+					if (sel != null) {
+						sel.onSensorChanged(event);
+					}
+				}
+			}
+			break;
+
 		}
 	}
 }

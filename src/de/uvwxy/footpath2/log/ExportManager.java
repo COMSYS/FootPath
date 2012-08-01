@@ -25,7 +25,7 @@ public class ExportManager {
 	private static ExportManager thisInstance = null;
 	private static TreeMap<String, Exporter> exporters = new TreeMap<String, Exporter>();
 	private IntervalExportBehavior behavior = IntervalExportBehavior.EXPORT_RECENTDATA;
-	private static final String directory = "footpath_exports/";
+	private static String directory = "footpath_exports/";
 	private static String subdirectory = null;
 	private int byteThreshold = 0; // number of bytes or 0 for direct save
 
@@ -42,6 +42,16 @@ public class ExportManager {
 
 	private ExportManager() {
 
+	}
+
+	/**
+	 * Set the log out put directory. Will save in the external storage directory.
+	 * 
+	 * @param directory
+	 *            of the form "directory/"
+	 */
+	public void setDirectory(String directory) {
+		this.directory = directory;
 	}
 
 	public String getDirectory() {
@@ -64,6 +74,24 @@ public class ExportManager {
 				dir.mkdir();
 			}
 		}
+		return subdirectory;
+	}
+
+	public String updateSubdirectory() {
+		subdirectory = "" + System.currentTimeMillis();
+
+		// check if first dir exists
+		File dir = new File(Environment.getExternalStorageDirectory(), directory);
+		if (!dir.exists()) {
+			dir.mkdir();
+		}
+
+		// check if second dir exists
+		dir = new File(Environment.getExternalStorageDirectory(), directory + subdirectory);
+		if (!dir.exists()) {
+			dir.mkdir();
+		}
+		
 		return subdirectory;
 	}
 
