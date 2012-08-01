@@ -1,10 +1,10 @@
 package de.uvwxy.footpath2.movement.h263_parser;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import de.uvwxy.footpath2.log.AppendWriter;
 import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
 
 /**
@@ -16,6 +16,8 @@ import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
 public class H263Parser {
 	// CONSOLE DEBUG = ?
 	public boolean CD = false;
+	public boolean LOG_TO_FILE = false;
+	public String LOG_FILE = "/mnt/sdcard/flowpath.log";
 
 	private InputStream fis = null;
 	private int lastFisPtr = 0; // used to calculate PSC bit pos diff
@@ -134,8 +136,23 @@ public class H263Parser {
 
 	private int decTry = 0;
 
+	private AppendWriter aw;
+	private boolean lRunOnce = true;
+
 	private void CD(String s) {
-		System.out.println(s);
+		if (LOG_TO_FILE) {
+			if (lRunOnce) {
+				aw = new AppendWriter(LOG_FILE);
+				aw.forceOpenFile(true);
+				lRunOnce = false;
+			}
+
+			aw.appendLineToFile(s);
+		} else {
+
+			System.out.println(s);
+
+		}
 	}
 
 	private float[][][] decodePicture() throws IOException, EOSException {
@@ -784,7 +801,8 @@ public class H263Parser {
 
 	private boolean decodeMacroBlock(H263PictureLayer p, int x, int y) throws IOException {
 		hMCOD = readBits(1) == 1; // false = coded
-
+		if (CD)
+			CD("(" + x + "/" + y + ")");
 		if (hMCOD) {
 			// no MVD data for this block
 			p.hMVDs[x][y][0] = empty;
@@ -1155,7 +1173,7 @@ public class H263Parser {
 		if ((tempBits & bitMaskLSBOnes[refLen]) == ref) { // getBitMask(refLen)
 			return -1;
 		}
-
+//		CD("evalNext: " + tempBits);
 		return tempBits;
 	}
 
@@ -1195,6 +1213,8 @@ public class H263Parser {
 	 * @return if bit i in integer data is set to 1
 	 */
 	private boolean b(int data, int i) {
+		if (CD)
+			CD("b = " + (((data >> i) & 1) != 0));
 		return ((data >> i) & 1) != 0;
 		// return (data & (1 << i)) << (31 - i) == -2147483648;
 
@@ -1213,7 +1233,8 @@ public class H263Parser {
 			readNextBit();
 			res = res | lastBit;
 		}
-
+		
+//		CD("(" + numBits + ") " + res);
 		return res;
 	}
 
