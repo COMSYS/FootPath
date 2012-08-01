@@ -12,7 +12,7 @@ public class SensorTriple {
 
 	public SensorTriple(float[] values, long ts, int type) {
 		// nicht unbedingt schön, aber generischer.
-		if (values.length != NUM_ELEMENTS)
+		if (values == null || values.length > NUM_ELEMENTS || values.length == 0)
 			throw new IllegalArgumentException();
 
 		for (int i = 0; i < NUM_ELEMENTS; i++) {
