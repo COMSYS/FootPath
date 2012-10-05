@@ -58,7 +58,6 @@ public class SocketAudioVideoWriter {
 			Log.i("FLOWPATH", "sh is null!");
 		}
 		recorder.setPreviewDisplay(sh.getSurface());
-
 		recorder.prepare();
 	}
 
