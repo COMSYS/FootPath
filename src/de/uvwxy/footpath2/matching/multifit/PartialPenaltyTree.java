@@ -1,5 +1,8 @@
 package de.uvwxy.footpath2.matching.multifit;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 
 import android.util.Log;
@@ -30,6 +33,8 @@ public class PartialPenaltyTree {
 	private LinkedList<Float> bearings = new LinkedList<Float>();
 
 	private IndoorLocation currentBestLocation = null;
+
+	private LinkedList<PPTNode> leafList = null;
 
 	public PartialPenaltyTree() {
 		root = new PPTNode(this);
@@ -63,14 +68,40 @@ public class PartialPenaltyTree {
 		PPTNode bestNode = root.getBetterChild(Float.POSITIVE_INFINITY);
 		double minIndex = bestNode.getMinIndexFromLastColumn();
 		double lastIndex = bestNode.getVirtualLength();
-		
+
 		// create new object using copy constructor
 		currentBestLocation = new IndoorLocation(bestNode.getParent().getTargetLocation());
 		// displace according to progress on edge
 		currentBestLocation.moveIntoDirection(bestNode.getTargetLocation(), minIndex / lastIndex);
 
+		int deletedNodes = pruneTree(MAX_LEAFS);
+
 		Log.i("MULTIFIT", "Step: " + currentStep);
 		Log.i("MULTIFIT", "#nodes in Tree: " + getNumberOfNodesInTree());
+		Log.i("MULTIFIT", "#pruned leafs: " + deletedNodes);
+	}
+
+	private int pruneTree(int maxLeafs) {
+		// setup new empty leaf list:
+		leafList = leafList == null ? new LinkedList<PPTNode>() : leafList;
+		leafList.clear();
+		// add all leafs to list
+		root.recursiveAddToLeafList();
+		Collections.sort(leafList, new LeafMinValueComparator());
+
+		int del = 0;
+		while (leafList.size() > maxLeafs) {
+			leafList.removeLast();
+			del++;
+		}
+
+		for (PPTNode leaf : leafList) {
+			if (leaf != null) {
+				leaf.leafTriggerRemoval();
+			}
+		}
+		leafList.clear();
+		return del;
 	}
 
 	public float getS(int i) {
@@ -87,5 +118,16 @@ public class PartialPenaltyTree {
 
 	public int getNumberOfNodesInTree() {
 		return root == null ? 0 : root.getNumberOfNodesInTree();
+	}
+
+	public void addToLeafList(PPTNode n) {
+		leafList.add(n);
+	}
+
+	public class LeafMinValueComparator implements Comparator<PPTNode> {
+		@Override
+		public int compare(PPTNode lhs, PPTNode rhs) {
+			return new Float(lhs.getMinValueFromLastColumn()).compareTo(rhs.getMinValueFromLastColumn());
+		}
 	}
 }

@@ -212,9 +212,37 @@ public class PPTNode {
 		}
 		return index;
 	}
-	
-	public IndoorLocation getTargetLocation(){
+
+	public IndoorLocation getTargetLocation() {
 		return this.targetOnEdge;
+	}
+
+	public void recursiveAddToLeafList() {
+		if (children == null || children.size() == 0) {
+			// leaves add themselves
+			ppt.addToLeafList(this);
+			return;
+		}
+		for (PPTNode n : children) {
+			if (n != null) {
+				n.recursiveAddToLeafList();
+			}
+		}
+
+	}
+	
+	public void leafTriggerRemoval(){
+		parent.recursiveRemoveMeFromYourPath(this);
+	}
+	
+	public void recursiveRemoveMeFromYourPath(PPTNode n){
+		if (children!=null){
+			children.remove(n);
+		}
+		
+		if (children.size() == 0){
+			parent.recursiveRemoveMeFromYourPath(this);
+		}
 	}
 
 }
