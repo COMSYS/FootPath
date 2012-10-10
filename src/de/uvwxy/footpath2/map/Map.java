@@ -485,6 +485,17 @@ public class Map {
 		Collections.sort(nodes, new IndoorLocationComparator());
 	}
 
+	/**
+	 * Returns a stack of nodes, with the destination at the bottom using<br>
+	 * Dykstra's algorithm<br>
+	 * 
+	 * @param from
+	 * @param to
+	 * @param staircase
+	 * @param elevator
+	 * @param outside
+	 * @return
+	 */
 	public synchronized Stack<IndoorLocation> getShortestPath(String from, String to, boolean staircase,
 			boolean elevator, boolean outside) {
 		IndoorLocation gnFrom = getNodeFromName(from);
@@ -492,6 +503,17 @@ public class Map {
 		return getShortestPath(gnFrom, gnTo, staircase, elevator, outside);
 	}
 
+	/**
+	 * Returns a stack of nodes, with the destination at the bottom using<br>
+	 * Dykstra's algorithm<br>
+	 * 
+	 * @param from
+	 * @param to
+	 * @param staircase
+	 * @param elevator
+	 * @param outside
+	 * @return
+	 */
 	public synchronized Stack<IndoorLocation> getShortestPath(int from, String to, boolean staircase, boolean elevator,
 			boolean outside) {
 		IndoorLocation gnFrom = getNode(from);

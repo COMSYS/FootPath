@@ -26,6 +26,7 @@ import de.uvwxy.footpath2.map.Map;
 import de.uvwxy.footpath2.matching.BestFit;
 import de.uvwxy.footpath2.matching.FirstFit;
 import de.uvwxy.footpath2.matching.MatchingAlgorithm;
+import de.uvwxy.footpath2.matching.multifit.MultiFit;
 import de.uvwxy.footpath2.movement.MovementDetection;
 import de.uvwxy.footpath2.movement.SensorEventDistributor;
 import de.uvwxy.footpath2.movement.steps.StepDetectionImpl;
@@ -183,6 +184,9 @@ public class FootPath {
 			movementDetection.registerOnStepListener(matchingAlgorithm);
 			break;
 		case MATCHING_MULTI_FIT:
+			MultiFit mf = new MultiFit();
+			mf.setMap(map);
+			matchingAlgorithm = mf;
 			break;
 		default:
 			throw new IllegalArgumentException(matchingType.toString());

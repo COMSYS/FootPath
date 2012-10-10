@@ -109,6 +109,24 @@ public class IndoorLocation extends Location {
 		return loc_edges;
 	}
 
+	public List<IndoorLocation> getAdjacentIndoorLocations() {
+		LinkedList<IndoorLocation> buf = new LinkedList<IndoorLocation>();
+
+		if (loc_edges != null && loc_edges.size() > 0) {
+			for (GraphEdge e : loc_edges) {
+				if (e != null) {
+					IndoorLocation a = e.getNode0();
+					IndoorLocation b = e.getNode1();
+
+					// add the "other" node
+					buf.add(equals(a) ? b : a);
+				}
+			}
+		}
+
+		return buf;
+	}
+
 	/**
 	 * Return the x value of this coordinate in meters concerning the mercator projection.
 	 * 

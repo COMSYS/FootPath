@@ -30,6 +30,8 @@ public class BestFit extends MatchingAlgorithm {
 
 	boolean firstStep = false;
 
+	// replace object below for different scoring function
+	private Score score = new Score();
 
 	@Override
 	public void onStepUpdate(double bearing, double steplength, long timestamp, double estimatedStepLengthError,
@@ -51,11 +53,11 @@ public class BestFit extends MatchingAlgorithm {
 		// calculate new line of the matrix D:
 		for (int y = 1; y < dyn[0].length; y++) {
 			// top
-			t1 = dyn[x % 2][y - 1] + score(getFromS(x - 1), getFromMap(y - 2), false);
+			t1 = dyn[x % 2][y - 1] + score.score(getFromS(x - 1), getFromMap(y - 2), false);
 			// left
-			t2 = dyn[(x - 1) % 2][y] + score(getFromS(x - 2), getFromMap(y - 1), false);
+			t2 = dyn[(x - 1) % 2][y] + score.score(getFromS(x - 2), getFromMap(y - 1), false);
 			// diagonal
-			t3 = dyn[(x - 1) % 2][y - 1] + score(getFromS(x - 1), getFromMap(y - 1), true);
+			t3 = dyn[(x - 1) % 2][y - 1] + score.score(getFromS(x - 1), getFromMap(y - 1), true);
 
 			dyn[x % 2][y] = Math.min(Math.min(t1, t2), t3);
 		}
@@ -187,27 +189,6 @@ public class BestFit extends MatchingAlgorithm {
 			return s.get(i).doubleValue();
 	}
 
-	private double score(double x, double y, boolean diagonal) {
-		double ret = 2.0; // = penalty
-
-		// Sanitize:
-		double t = Math.abs(x - y);
-		t = (t > 180.0) ? 360.0 - t : t;
-
-		// And score:
-		if (t < 45.0) {
-			ret = 0.0;
-		} else if (t < 90.0) {
-			ret = 1.0;
-		} else if (t < 120.0) {
-			ret = 2.0;
-		} else {
-			ret = 10.0;
-		}
-
-		ret = !diagonal ? ret + 1.5 : ret;
-		return ret;
-	}
 
 
 }
