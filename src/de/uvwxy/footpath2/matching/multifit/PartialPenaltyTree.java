@@ -58,9 +58,18 @@ public class PartialPenaltyTree {
 		}
 
 		root.recursiveEvaluate(currentStep);
-		
+
 		// TODO: determine best location
-		Log.i("MULTIFIT", "Step: "+  currentStep);
+		PPTNode bestNode = root.getBetterChild(Float.POSITIVE_INFINITY);
+		double minIndex = bestNode.getMinIndexFromLastColumn();
+		double lastIndex = bestNode.getVirtualLength();
+		
+		// create new object using copy constructor
+		currentBestLocation = new IndoorLocation(bestNode.getParent().getTargetLocation());
+		// displace according to progress on edge
+		currentBestLocation.moveIntoDirection(bestNode.getTargetLocation(), minIndex / lastIndex);
+
+		Log.i("MULTIFIT", "Step: " + currentStep);
 		Log.i("MULTIFIT", "#nodes in Tree: " + getNumberOfNodesInTree());
 	}
 

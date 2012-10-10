@@ -24,6 +24,21 @@ public class IndoorLocation extends Location {
 	public IndoorLocation(Location l) {
 		super(l);
 	}
+	
+	public IndoorLocation(IndoorLocation l) {
+		super(l);
+		l.door = door;
+		l.indoor = indoor;
+		l.name = name;
+		
+		l.level = level;
+		l.id = id;
+		l.mergeid = mergeid;
+		l.numSteps = numSteps;
+		l.loc_edges = loc_edges;
+	}
+	
+	
 
 	public IndoorLocation(String provider) {
 		super(provider);

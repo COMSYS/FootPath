@@ -1,5 +1,6 @@
 package de.uvwxy.footpath2.matching.multifit;
 
+import java.lang.reflect.Array;
 import java.util.LinkedList;
 
 import de.uvwxy.footpath2.map.IndoorLocation;
@@ -148,15 +149,72 @@ public class PPTNode {
 			}
 		}
 	}
-	
-	public int getNumberOfNodesInTree(){
+
+	public int getNumberOfNodesInTree() {
 		int buf = 1;
-		for (PPTNode n : children){
-			if (n!=null){
+		for (PPTNode n : children) {
+			if (n != null) {
 				buf += n.getNumberOfNodesInTree();
 			}
 		}
 		return buf;
 	}
+
+	public PPTNode getBetterChild(float penalty) {
+		if (children == null || children.size() == 0) {
+			// leaves return themselves
+			return this;
+		}
+
+		PPTNode smallestChild = null;
+		for (PPTNode n : children) {
+			if (n != null) {
+				// get best
+				PPTNode otherSmallestChild = n.getBetterChild(penalty);
+				float checkPenalty = otherSmallestChild.getMinValueFromLastColumn();
+				if (checkPenalty < penalty) {
+					penalty = checkPenalty;
+					smallestChild = otherSmallestChild;
+				}
+			}
+		}
+
+		// some error avoidance, return this if the list of children was bogus
+		smallestChild = smallestChild == null ? this : smallestChild;
+
+		return smallestChild;
+	}
+
+	public float getMinValueFromLastColumn() {
+		float[] column = matrix.getLast();
+
+		float min = Float.POSITIVE_INFINITY;
+		if (column == null)
+			return min;
+
+		for (float f : column)
+			min = f < min ? f : min;
+
+		return min;
+	}
+
+	public int getMinIndexFromLastColumn() {
+		float[] column = matrix.getLast();
+
+		float min = Float.POSITIVE_INFINITY;
+		int index = -1;
+		if (column == null)
+			return index;
+
+		for (int i = 0; i < column.length; i++) {
+			if (column[i] < min)
+				index = i;
+		}
+		return index;
+	}
 	
+	public IndoorLocation getTargetLocation(){
+		return this.targetOnEdge;
+	}
+
 }
