@@ -121,9 +121,9 @@ public class PPTNode {
 		if (isRoot) {
 			return jStep == 0 ? 0 : Float.POSITIVE_INFINITY;
 		}
-		Log.i("FOOTPATH", "matrix.get(" + jStep + ")[" + iVirtStep + "])");
-		Log.i("FOOTPATH", "matrix.size()=" + matrix.size());
-		Log.i("FOOTPATH", " matrix.get(i).length = " + matrix.get(jStep).length);
+		// Log.i("FOOTPATH", "matrix.get(" + jStep + ")[" + iVirtStep + "])");
+		// Log.i("FOOTPATH", "matrix.size()=" + matrix.size());
+		// Log.i("FOOTPATH", " matrix.get(i).length = " + matrix.get(jStep).length);
 		return matrix.get(jStep)[iVirtStep];
 	}
 
@@ -140,7 +140,7 @@ public class PPTNode {
 	}
 
 	private void setPenaltyValue(int iVirtStep, int jStep, float v) {
-		Log.i("FOOTPATH", "matrix.get(" + jStep + ")[" + iVirtStep + "] = " + v);
+		// Log.i("FOOTPATH", "matrix.get(" + jStep + ")[" + iVirtStep + "] = " + v);
 		matrix.get(jStep)[iVirtStep] = v;
 	}
 
@@ -171,19 +171,19 @@ public class PPTNode {
 
 			int oldSize = matrix.size();
 			int missingNumberOfColums = (stepNumber - matrix.size() + 1);
-			Log.i("FOOTPATH", "stepNumber - matrix.size() + 1 = " + missingNumberOfColums);
+			// Log.i("FOOTPATH", "stepNumber - matrix.size() + 1 = " + missingNumberOfColums);
 			for (int i = 0; i < missingNumberOfColums; i++) {
 				float[] empty = new float[virtualLength];
 				for (float f : empty)
 					f = 0;
 				matrix.add(empty);
-				Log.i("FOOTPATH", "***Added empty column to matrix");
+				// Log.i("FOOTPATH", "***Added empty column to matrix");
 			}
 
 			// 1 <= i <= ~l(e_l); 1 <= j <= |S|
 			for (int jStep = oldSize; jStep <= stepNumber; jStep++) {
 				for (int iVirtStep = 1; iVirtStep < virtualLength; iVirtStep++) {
-					Log.i("FOOTPATH", "" + jStep + "/" + stepNumber + "  " + iVirtStep + "/" + virtualLength);
+					// Log.i("FOOTPATH", "" + jStep + "/" + stepNumber + "  " + iVirtStep + "/" + virtualLength);
 					// if this is a node that has been added due to expansion we have to recalculate all previous steps
 					// for
 					// this edge.
