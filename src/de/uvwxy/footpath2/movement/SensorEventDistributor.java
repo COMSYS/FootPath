@@ -254,7 +254,7 @@ public class SensorEventDistributor implements SensorEventListener {
 			break;
 		case Sensor.TYPE_PRESSURE:
 			pressureHistory.add(new SensorTriple(event.values, now, event.sensor.getType()));
-			if (gravityEventListenerList != null) {
+			if (pressureEventListenerList != null) {
 				for (SensorEventListener sel : pressureEventListenerList) {
 					if (sel != null) {
 						sel.onSensorChanged(event);
