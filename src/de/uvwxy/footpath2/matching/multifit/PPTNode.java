@@ -22,6 +22,8 @@ public class PPTNode {
 
 	private IndoorLocation targetOnEdge;
 
+	private float minValueOnPath = Float.POSITIVE_INFINITY;
+
 	public PPTNode(PartialPenaltyTree ppt) {
 		isRoot = true;
 		virtualLength = 1;
@@ -56,7 +58,7 @@ public class PPTNode {
 	public PPTNode getBetterChild(float penalty) {
 		if (children == null || children.size() == 0) {
 			// leaves return themselves
-			Log.i("FOOTPATH", "Returning this");
+			// Log.i("FOOTPATH", "Returning this");
 			return this;
 		}
 
@@ -80,6 +82,11 @@ public class PPTNode {
 	}
 
 	public float getMinValueFromLastColumn() {
+		// Fix Nullpointer on startup?
+		if (matrix.size() == 0) {
+			return Float.POSITIVE_INFINITY;
+		}
+
 		float[] column = matrix.getLast();
 
 		float min = Float.POSITIVE_INFINITY;
@@ -182,7 +189,7 @@ public class PPTNode {
 				for (float f : empty)
 					f = 0;
 				matrix.add(empty);
-				Log.i("FOOTPATH", "***Added empty column to matrix");
+				// Log.i("FOOTPATH", "***Added empty column to matrix");
 			}
 
 			// 1 <= i <= ~l(e_l); 1 <= j <= |S|
@@ -256,7 +263,16 @@ public class PPTNode {
 		}
 	}
 
-	public void recursiveAddToLeafList() {
+	public float getMinValueOnPath() {
+		return minValueOnPath;
+	}
+
+	public void recursiveAddToLeafListAndCalcMinValueOnPath(float minv) {
+		float mMinV = getMinValueFromLastColumn();
+		// updates smallest value
+		minv = minv < mMinV ? minv : mMinV;
+		minValueOnPath = minv;
+
 		if (children == null || children.size() == 0) {
 			// leaves add themselves
 			ppt.addToLeafList(this);
@@ -264,7 +280,7 @@ public class PPTNode {
 		}
 		for (PPTNode n : children) {
 			if (n != null) {
-				n.recursiveAddToLeafList();
+				n.recursiveAddToLeafListAndCalcMinValueOnPath(minv);
 			}
 		}
 

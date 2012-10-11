@@ -92,8 +92,8 @@ public class PartialPenaltyTree {
 		leafList = leafList == null ? new LinkedList<PPTNode>() : leafList;
 		leafList.clear();
 		// add all leafs to list
-		root.recursiveAddToLeafList();
-		Collections.sort(leafList, new LeafMinValueComparator());
+		root.recursiveAddToLeafListAndCalcMinValueOnPath(Float.POSITIVE_INFINITY);
+		Collections.sort(leafList, new LeafMinValueOnPathComparator());
 
 		LinkedList<PPTNode> deleteList = new LinkedList<PPTNode>();
 
@@ -138,10 +138,10 @@ public class PartialPenaltyTree {
 		leafList.add(n);
 	}
 
-	public class LeafMinValueComparator implements Comparator<PPTNode> {
+	public class LeafMinValueOnPathComparator implements Comparator<PPTNode> {
 		@Override
 		public int compare(PPTNode lhs, PPTNode rhs) {
-			return new Float(lhs.getMinValueFromLastColumn()).compareTo(rhs.getMinValueFromLastColumn());
+			return new Float(lhs.getMinValueOnPath()).compareTo(rhs.getMinValueOnPath());
 		}
 	}
 }
