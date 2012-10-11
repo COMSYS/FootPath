@@ -63,6 +63,7 @@ public class PartialPenaltyTree {
 		}
 
 		root.recursiveEvaluate(currentStep);
+		int deletedNodes = pruneTree(MAX_LEAFS);
 
 		// TODO: determine best location
 		PPTNode bestNode = root.getBetterChild(Float.POSITIVE_INFINITY);
@@ -75,11 +76,11 @@ public class PartialPenaltyTree {
 		Log.i("FOOTPATH", "factor = " + factor);
 		// create new object using copy constructor
 		currentBestLocation = new IndoorLocation(bestNode.getParent().getTargetLocation());
-		
+		Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
+
 		// displace according to progress on edge
 		currentBestLocation.moveIntoDirection(bestNode.getTargetLocation(), factor);
-
-		int deletedNodes = pruneTree(MAX_LEAFS);
+		Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
 
 		Log.i("FOOTPATH", "Step: " + currentStep);
 		Log.i("FOOTPATH", "#nodes in Tree: " + getNumberOfNodesInTree());

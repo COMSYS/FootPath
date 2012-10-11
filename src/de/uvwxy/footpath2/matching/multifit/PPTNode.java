@@ -66,7 +66,7 @@ public class PPTNode {
 				// get best
 				PPTNode otherSmallestChild = n.getBetterChild(penalty);
 				float checkPenalty = otherSmallestChild.getMinValueFromLastColumn();
-				if (checkPenalty < penalty) {
+				if (checkPenalty <= penalty) {
 					penalty = checkPenalty;
 					smallestChild = otherSmallestChild;
 				}
@@ -167,7 +167,7 @@ public class PPTNode {
 	 * @param stepNumber
 	 */
 	public void recursiveEvaluate(int stepNumber) {
-		Log.i("FOOTPATH", "Pre Evaluation:" + printMatrix());
+		// Log.i("FOOTPATH", "Pre Evaluation:" + printMatrix());
 
 		// TODO: evaluate this node if it is not a root node
 		if (!isRoot) {
@@ -215,7 +215,7 @@ public class PPTNode {
 			}
 		}
 
-		Log.i("FOOTPATH", "Post Evaluation:" + printMatrix());
+		// Log.i("FOOTPATH", "Post Evaluation:" + printMatrix());
 
 		for (PPTNode node : children) {
 			if (node != null)
