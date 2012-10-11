@@ -3,6 +3,8 @@ package de.uvwxy.footpath2.matching.multifit;
 import java.lang.reflect.Array;
 import java.util.LinkedList;
 
+import android.util.Log;
+
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.matching.Score;
 
@@ -15,8 +17,8 @@ public class PPTNode {
 
 	private boolean isRoot = false;
 	private PPTNode parent;
-	private LinkedList<PPTNode> children;
-	private LinkedList<float[]> matrix;
+	private LinkedList<PPTNode> children = new LinkedList<PPTNode>();
+	private LinkedList<float[]> matrix = new LinkedList<float[]>();
 
 	private IndoorLocation targetOnEdge;
 
@@ -37,6 +39,7 @@ public class PPTNode {
 		float[] firstColumn = new float[virtualLength];
 		for (float f : firstColumn)
 			f = Float.POSITIVE_INFINITY;
+		matrix.add(firstColumn);
 	}
 
 	public void setTargetOnEdge(IndoorLocation l) {
@@ -45,17 +48,25 @@ public class PPTNode {
 
 	/**
 	 * 
-	 * @param i
+	 * @param iVirtStep
 	 *            (<= virtual length)
-	 * @param j
+	 * @param jStep
 	 *            (number of detected step)
 	 * @return
 	 */
-	public float getPenaltyValue(int i, int j) {
+	public float getPenaltyValue(int iVirtStep, int jStep) {
 		if (isRoot) {
-			return j == 0 ? 0 : Float.POSITIVE_INFINITY;
+			return jStep == 0 ? 0 : Float.POSITIVE_INFINITY;
 		}
-		return matrix.get(j)[i];
+		Log.i("FOOTPATH", "matrix.get(" + jStep + ")[" + iVirtStep + "])");
+		Log.i("FOOTPATH", "matrix.size()=" + matrix.size());
+		Log.i("FOOTPATH", " matrix.get(i).length = " + matrix.get(jStep).length);
+		return matrix.get(jStep)[iVirtStep];
+	}
+
+	private void setPenaltyValue(int iVirtStep, int jStep, float v) {
+		Log.i("FOOTPATH", "matrix.get(" + jStep + ")[" + iVirtStep + "] = " + v);
+		matrix.get(jStep)[iVirtStep] = v;
 	}
 
 	public float getBearing(int virtualStep) {
@@ -88,9 +99,24 @@ public class PPTNode {
 	public void recursiveEvaluate(int stepNumber) {
 		// TODO: evaluate this node if it is not a root node
 		if (!isRoot) {
+			// check for missing columns:
+			// matrix := [initColumns, step=1, step=2,...]
+
+			int oldSize = matrix.size();
+
+			Log.i("FOOTPATH", "stepNumber - matrix.size() + 1 = " + (stepNumber - matrix.size() + 1));
+			for (int i = 0; i < (stepNumber - matrix.size() + 1); i++) {
+				float[] empty = new float[virtualLength];
+				for (float f : empty)
+					f = 0;
+				matrix.add(empty);
+				Log.i("FOOTPATH", "Added empty column to matrix");
+			}
+
 			// 1 <= i <= ~l(e_l); 1 <= j <= |S|
-			for (int j = matrix.size(); j <= stepNumber; j++) {
-				for (int i = 1; i < virtualLength; i++) {
+			for (int jStep = oldSize; jStep <= stepNumber; jStep++) {
+				for (int iVirtStep = 1; iVirtStep < virtualLength; iVirtStep++) {
+					Log.i("FOOTPATH", "" + jStep + "/" + stepNumber + "  " + iVirtStep + "/" + virtualLength);
 					// if this is a node that has been added due to expansion we have to recalculate all previous steps
 					// for
 					// this edge.
@@ -103,12 +129,16 @@ public class PPTNode {
 					// below is done with getBearing(vstep).
 					// D(e_l)(0,j) = D(e_(l-1))(|e_(l-1)|,j) <- TOP row accesses previous edge last row
 
-					double a = getPenaltyValue(i - 1, j - 1) + score.score(getBearing(i), ppt.getS(j), false);
-					double b = getPenaltyValue(i - 1, j) + score.score(getBearing(i), ppt.getS(j - 1), true);
-					double c = getPenaltyValue(i, j - 1) + score.score(getBearing(i - 1), ppt.getS(j), true);
+					double a = getPenaltyValue(iVirtStep - 1, jStep - 1)
+							+ score.score(getBearing(iVirtStep), ppt.getS(jStep), false);
+					double b = getPenaltyValue(iVirtStep - 1, jStep)
+							+ score.score(getBearing(iVirtStep), ppt.getS(jStep - 1), true);
+					double c = getPenaltyValue(iVirtStep, jStep - 1)
+							+ score.score(getBearing(iVirtStep - 1), ppt.getS(jStep), true);
 
 					double d = Math.min(a, Math.min(b, c));
 
+					setPenaltyValue(iVirtStep, jStep, (float) d);
 				}
 			}
 		}
@@ -141,7 +171,7 @@ public class PPTNode {
 				// is this nearest integer? floor (x + 0.5) -> yes!
 				int e_l = Math.round(targetOnEdge.distanceTo(adjn) / ppt.getVirtualStepLength());
 				PPTNode newNode = new PPTNode(this.ppt, e_l, targetOnEdge.bearingTo(adjn), this);
-
+				newNode.setTargetOnEdge(adjn);
 				// not needed as it is still calld by PPT after these recursion steps.
 				// newNode.recursiveEvaluate(matrix.size());
 
@@ -230,17 +260,17 @@ public class PPTNode {
 		}
 
 	}
-	
-	public void leafTriggerRemoval(){
+
+	public void leafTriggerRemoval() {
 		parent.recursiveRemoveMeFromYourPath(this);
 	}
-	
-	public void recursiveRemoveMeFromYourPath(PPTNode n){
-		if (children!=null){
+
+	public void recursiveRemoveMeFromYourPath(PPTNode n) {
+		if (children != null) {
 			children.remove(n);
 		}
-		
-		if (children.size() == 0){
+
+		if (children.size() == 0) {
 			parent.recursiveRemoveMeFromYourPath(this);
 		}
 	}

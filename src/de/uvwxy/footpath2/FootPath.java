@@ -187,6 +187,9 @@ public class FootPath {
 			MultiFit mf = new MultiFit();
 			mf.setMap(map);
 			matchingAlgorithm = mf;
+			Log.i("FOOTPATH", "Registering MultiFit for movement detection");
+			movementDetection.registerOnStepListener(mf);
+
 			break;
 		default:
 			throw new IllegalArgumentException(matchingType.toString());
@@ -221,10 +224,10 @@ public class FootPath {
 
 	public void _fg_setPath(IndoorLocationList path) throws FootPathException {
 		if (matchingAlgorithm != null) {
-			if (path != null) {
+			if (path != null || path.size() == 0) {
 				matchingAlgorithm.setPath(path);
 			} else {
-				throw new FootPathException("Path was null, bad boy!"); // ;)
+				throw new FootPathException("Path was null/empty!");
 			}
 		} else {
 			throw new FootPathException("No matching algorithm selected!");

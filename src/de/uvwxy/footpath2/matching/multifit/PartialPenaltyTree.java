@@ -69,6 +69,8 @@ public class PartialPenaltyTree {
 		double minIndex = bestNode.getMinIndexFromLastColumn();
 		double lastIndex = bestNode.getVirtualLength();
 
+		Log.i("FOOTPATH", "bestNode = " + bestNode);
+		Log.i("FOOTPATH", "bestNode.getTargetLocation() = " + bestNode.getTargetLocation());
 		// create new object using copy constructor
 		currentBestLocation = new IndoorLocation(bestNode.getParent().getTargetLocation());
 		// displace according to progress on edge
@@ -76,9 +78,9 @@ public class PartialPenaltyTree {
 
 		int deletedNodes = pruneTree(MAX_LEAFS);
 
-		Log.i("MULTIFIT", "Step: " + currentStep);
-		Log.i("MULTIFIT", "#nodes in Tree: " + getNumberOfNodesInTree());
-		Log.i("MULTIFIT", "#pruned leafs: " + deletedNodes);
+		Log.i("FOOTPATH", "Step: " + currentStep);
+		Log.i("FOOTPATH", "#nodes in Tree: " + getNumberOfNodesInTree());
+		Log.i("FOOTPATH", "#pruned leafs: " + deletedNodes);
 	}
 
 	private int pruneTree(int maxLeafs) {
@@ -89,13 +91,16 @@ public class PartialPenaltyTree {
 		root.recursiveAddToLeafList();
 		Collections.sort(leafList, new LeafMinValueComparator());
 
+		LinkedList<PPTNode> deleteList = new LinkedList<PPTNode>();
+		
 		int del = 0;
 		while (leafList.size() > maxLeafs) {
+			deleteList.add(leafList.getLast());
 			leafList.removeLast();
 			del++;
 		}
 
-		for (PPTNode leaf : leafList) {
+		for (PPTNode leaf : deleteList) {
 			if (leaf != null) {
 				leaf.leafTriggerRemoval();
 			}
@@ -105,6 +110,11 @@ public class PartialPenaltyTree {
 	}
 
 	public float getS(int i) {
+		i--;
+		// penalty matrix is looking for step 0 -> -1
+		i = i < 0 ? 0 : i;
+
+		Log.i("FOOTPATH", "get(" + i + ")");
 		return bearings.get(i).floatValue();
 	}
 

@@ -280,6 +280,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	 * @return
 	 */
 	private float[] getOrientation() {
+		// TOOD: paul: I encountered a null pointer here (once):
 		final float sum = orientationGravityVals[0] + orientationGravityVals[1] + orientationGravityVals[2];
 		final float[] retVal = new float[3];
 

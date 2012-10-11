@@ -1,5 +1,6 @@
 package de.uvwxy.footpath2.matching.multifit;
 
+import android.util.Log;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.IndoorLocationList;
 import de.uvwxy.footpath2.map.Map;
@@ -51,6 +52,7 @@ public class MultiFit extends MatchingAlgorithm {
 	@Override
 	public void onStepUpdate(double bearing, double steplength, long timestamp, double estimatedStepLengthError,
 			double estimatedBearingError) {
+		Log.i("FOOTPATH", "MultFit working...");
 		currentStep++;
 		ppt.onStepUpdate((float) bearing, steplength, timestamp, estimatedStepLengthError, estimatedBearingError);
 		returnedPositions.add(ppt.getCurrentBestLocation());
