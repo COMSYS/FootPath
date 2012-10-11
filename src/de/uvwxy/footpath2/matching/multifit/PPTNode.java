@@ -53,8 +53,12 @@ public class PPTNode {
 	}
 
 	public PPTNode getBetterChild(float penalty) {
+
+		Log.i("FOOTPATH", "Checking Matrix for penalty(" + penalty + "):" + printMatrix());
+
 		if (children == null || children.size() == 0) {
 			// leaves return themselves
+			Log.i("FOOTPATH", "Returning this");
 			return this;
 		}
 
@@ -99,7 +103,7 @@ public class PPTNode {
 			return index;
 
 		for (int i = 0; i < column.length; i++) {
-			if (column[i] < min)
+			if (column[i] <= min)
 				index = i;
 		}
 		return index;
@@ -273,6 +277,17 @@ public class PPTNode {
 		if (children.size() == 0) {
 			parent.recursiveRemoveMeFromYourPath(this);
 		}
+	}
+
+	public String printMatrix() {
+		String buf = isRoot ? "Root:\n" : "Node:\n";
+		for (int y = 0; y < virtualLength; y++) {
+			for (int x = 0; x < matrix.size(); x++) {
+				buf += matrix.get(x)[y] + " ";
+			}
+			buf += "\n";
+		}
+		return buf;
 	}
 
 }
