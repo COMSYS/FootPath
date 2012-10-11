@@ -37,8 +37,9 @@ public class PPTNode {
 		this.ppt = ppt;
 		// create and fill first column with infty.
 		float[] firstColumn = new float[virtualLength];
-		for (float f : firstColumn)
-			f = Float.POSITIVE_INFINITY;
+		for (int i = 0; i < virtualLength; i++) {
+			firstColumn[i] = Float.POSITIVE_INFINITY;
+		}
 		matrix.add(firstColumn);
 	}
 
@@ -53,9 +54,6 @@ public class PPTNode {
 	}
 
 	public PPTNode getBetterChild(float penalty) {
-
-		Log.i("FOOTPATH", "Checking Matrix for penalty(" + penalty + "):" + printMatrix());
-
 		if (children == null || children.size() == 0) {
 			// leaves return themselves
 			Log.i("FOOTPATH", "Returning this");
@@ -168,6 +166,8 @@ public class PPTNode {
 	 * @param stepNumber
 	 */
 	public void recursiveEvaluate(int stepNumber) {
+		Log.i("FOOTPATH", "Pre Evaluation:" + printMatrix());
+
 		// TODO: evaluate this node if it is not a root node
 		if (!isRoot) {
 			// check for missing columns:
@@ -181,7 +181,7 @@ public class PPTNode {
 				for (float f : empty)
 					f = 0;
 				matrix.add(empty);
-				// Log.i("FOOTPATH", "***Added empty column to matrix");
+				Log.i("FOOTPATH", "***Added empty column to matrix");
 			}
 
 			// 1 <= i <= ~l(e_l); 1 <= j <= |S|
@@ -213,10 +213,15 @@ public class PPTNode {
 				}
 			}
 		}
+		
+		Log.i("FOOTPATH", "Post Evaluation:" + printMatrix());
+
 		for (PPTNode node : children) {
 			if (node != null)
 				node.recursiveEvaluate(stepNumber);
 		}
+
+
 	}
 
 	public void recursiveDescentExpand() {
