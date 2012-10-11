@@ -123,10 +123,11 @@ public class PPTNode {
 		if (isRoot) {
 			return jStep == 0 ? 0 : Float.POSITIVE_INFINITY;
 		}
-		// Log.i("FOOTPATH", "matrix.get(" + jStep + ")[" + iVirtStep + "])");
-		// Log.i("FOOTPATH", "matrix.size()=" + matrix.size());
-		// Log.i("FOOTPATH", " matrix.get(i).length = " + matrix.get(jStep).length);
-		return matrix.get(jStep)[iVirtStep];
+		// TODO: do we ask for a value from above? NO!
+		if (iVirtStep >= 0)
+			return matrix.get(jStep)[iVirtStep];
+		else
+			return getParent().getPenaltyValue(getParent().getVirtualLength() - 1, jStep);
 	}
 
 	public float getBearing(int virtualStep) {
@@ -186,7 +187,7 @@ public class PPTNode {
 
 			// 1 <= i <= ~l(e_l); 1 <= j <= |S|
 			for (int jStep = oldSize; jStep <= stepNumber; jStep++) {
-				for (int iVirtStep = 1; iVirtStep < virtualLength; iVirtStep++) {
+				for (int iVirtStep = 0; iVirtStep < virtualLength; iVirtStep++) {
 					// Log.i("FOOTPATH", "" + jStep + "/" + stepNumber + "  " + iVirtStep + "/" + virtualLength);
 					// if this is a node that has been added due to expansion we have to recalculate all previous steps
 					// for
@@ -201,11 +202,11 @@ public class PPTNode {
 					// D(e_l)(0,j) = D(e_(l-1))(|e_(l-1)|,j) <- TOP row accesses previous edge last row
 
 					double a = getPenaltyValue(iVirtStep - 1, jStep - 1)
-							+ score.score(getBearing(iVirtStep), ppt.getS(jStep), false);
+							+ score.score(getBearing(iVirtStep), ppt.getS(jStep), true);
 					double b = getPenaltyValue(iVirtStep - 1, jStep)
-							+ score.score(getBearing(iVirtStep), ppt.getS(jStep - 1), true);
+							+ score.score(getBearing(iVirtStep), ppt.getS(jStep - 1), false);
 					double c = getPenaltyValue(iVirtStep, jStep - 1)
-							+ score.score(getBearing(iVirtStep - 1), ppt.getS(jStep), true);
+							+ score.score(getBearing(iVirtStep - 1), ppt.getS(jStep), false);
 
 					double d = Math.min(a, Math.min(b, c));
 
@@ -213,14 +214,13 @@ public class PPTNode {
 				}
 			}
 		}
-		
+
 		Log.i("FOOTPATH", "Post Evaluation:" + printMatrix());
 
 		for (PPTNode node : children) {
 			if (node != null)
 				node.recursiveEvaluate(stepNumber);
 		}
-
 
 	}
 

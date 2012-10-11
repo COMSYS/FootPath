@@ -46,7 +46,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	private MovementType currentMovement = MovementType.STANDING;
 
 	private final Context context;
-	private float[] orientationGravityVals;
+	private float[] orientationGravityVals = { 1.0f, 0.0f, 0.0f };
 
 	public StepDetectionImpl(Context context) {
 		super();
@@ -280,7 +280,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	 * @return
 	 */
 	private float[] getOrientation() {
-		// TOOD: paul: I encountered a null pointer here (once):
+		// TOOD: paul: I encountered a null pointer here (twice):
 		final float sum = orientationGravityVals[0] + orientationGravityVals[1] + orientationGravityVals[2];
 		final float[] retVal = new float[3];
 
