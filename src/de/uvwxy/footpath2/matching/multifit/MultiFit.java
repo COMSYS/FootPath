@@ -56,6 +56,7 @@ public class MultiFit extends MatchingAlgorithm {
 		currentStep++;
 		ppt.onStepUpdate((float) bearing, steplength, timestamp, estimatedStepLengthError, estimatedBearingError);
 		returnedPositions.add(ppt.getCurrentBestLocation());
+		Log.i("FOOTPATH", "Returned Pos Size: "+ returnedPositions.size());
 	}
 
 }

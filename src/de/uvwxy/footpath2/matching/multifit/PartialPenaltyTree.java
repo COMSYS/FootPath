@@ -23,7 +23,7 @@ public class PartialPenaltyTree {
 	// repeat expansion check every EXPANSION_FREQUENZY number of steps (and on first step!)
 	public static final int EXPANSION_FREQUENZY = 5; // we'll keep the typo for now. FEEEEEEELIX
 	// maximum number of leafs to keep in the tree
-	public static final int MAX_LEAFS = 15;
+	public static final int MAX_LEAFS = 64;
 
 	private float virtualStepLength;
 	private PPTNode root;
@@ -71,20 +71,20 @@ public class PartialPenaltyTree {
 		double lastIndex = bestNode.getVirtualLength();
 		double factor = minIndex / lastIndex;
 
-		Log.i("FOOTPATH", "bestNode = " + bestNode);
-		Log.i("FOOTPATH", "bestNode.getTargetLocation() = " + bestNode.getTargetLocation());
-		Log.i("FOOTPATH", "factor = " + factor);
+		// Log.i("FOOTPATH", "bestNode = " + bestNode);
+		// Log.i("FOOTPATH", "bestNode.getTargetLocation() = " + bestNode.getTargetLocation());
+		// Log.i("FOOTPATH", "factor = " + factor);
 		// create new object using copy constructor
 		currentBestLocation = new IndoorLocation(bestNode.getParent().getTargetLocation());
-		Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
+		// Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
 
 		// displace according to progress on edge
 		currentBestLocation.moveIntoDirection(bestNode.getTargetLocation(), factor);
-		Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
+		// Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
 
-		Log.i("FOOTPATH", "Step: " + currentStep);
-		Log.i("FOOTPATH", "#nodes in Tree: " + getNumberOfNodesInTree());
-		Log.i("FOOTPATH", "#pruned leafs: " + deletedNodes);
+		// Log.i("FOOTPATH", "Level: " + currentBestLocation.getLevel() + " Step: " + currentStep);
+		// Log.i("FOOTPATH", "#nodes in Tree: " + getNumberOfNodesInTree());
+		// Log.i("FOOTPATH", "#pruned leafs: " + deletedNodes);
 	}
 
 	private int pruneTree(int maxLeafs) {

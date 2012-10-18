@@ -27,15 +27,15 @@ public class IndoorLocation extends Location {
 	
 	public IndoorLocation(IndoorLocation l) {
 		super(l);
-		l.door = door;
-		l.indoor = indoor;
-		l.name = name;
+		this.door = l.door;
+		this.indoor = l.indoor;
+		this.name = l.name;
 		
-		l.level = level;
-		l.id = id;
-		l.mergeid = mergeid;
-		l.numSteps = numSteps;
-		l.loc_edges = loc_edges;
+		this.level = l.level;
+		this.id = l.id;
+		this.mergeid = l.mergeid;
+		this.numSteps = l.numSteps;
+		this.loc_edges = l.loc_edges;
 	}
 	
 	
