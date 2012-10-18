@@ -28,7 +28,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 	// repeat expansion check every EXPANSION_FREQUENZY number of steps (and on first step!)
 	public static final int EXPANSION_FREQUENZY = 4; // we'll keep the typo for now. FEEEEEEELIX
 	// maximum number of leafs to keep in the tree
-	public static final int MAX_LEAFS = 20;
+	public static final int MAX_LEAFS = 320;
 
 	private float virtualStepLength;
 	private PPTNode root;
@@ -105,11 +105,11 @@ public class PartialPenaltyTree implements DrawToCanvas {
 		// TODO: determine best location
 		PPTNode bestNode = root.getBetterChild(Float.POSITIVE_INFINITY);
 		Log.i("FOOTPATH", "bestNode: " + bestNode.getTargetLocation() + "\n" + bestNode.printMatrix());
-		
+
 		double minIndex = bestNode.getMinIndexFromLastColumn();
 		double lastIndex = bestNode.getVirtualLength();
 		double factor = minIndex / lastIndex;
-
+		Log.i("FOOTPATH", "factor = " + minIndex + "/" + lastIndex);
 		LinkedList<PPTNode> path = new LinkedList<PPTNode>();
 		bestNode.getPath(path);
 

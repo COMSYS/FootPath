@@ -125,8 +125,10 @@ public class PPTNode {
 			return index;
 
 		for (int i = 0; i < column.length; i++) {
-			if (column[i] <= min)
+			if (column[i] <= min) {
 				index = i;
+				min = column[i];
+			}
 		}
 		return index;
 	}
@@ -271,15 +273,15 @@ public class PPTNode {
 					&& (loc.distanceTo(targetOnEdge) / ppt.getVirtualStepLength()) <= PartialPenaltyTree.MIN_STEP_EXPANSION) {
 
 				// get nodes connected to the node we want to expand to
-				LinkedList<IndoorLocation> adjacentNodeAdjacentNodes = (LinkedList<IndoorLocation>) adjacentNode
-						.getAdjacentIndoorLocations();
-				if (adjacentNodeAdjacentNodes != null && adjacentNodeAdjacentNodes.size() <= 1
-						&& !adjacentNodeAdjacentNodes.getFirst().equals(ppt.getDestination())) {
-					// if this is a dead end, and not our destination, skip!
-					Log.i("FOOTPATH", "BREAK due to dead end");
-					Log.i("FOOTPATH", "Break at " + adjacentNode.getId());
-					break;
-				}
+//				LinkedList<IndoorLocation> adjacentNodeAdjacentNodes = (LinkedList<IndoorLocation>) adjacentNode
+//						.getAdjacentIndoorLocations();
+//				if (adjacentNodeAdjacentNodes != null && adjacentNodeAdjacentNodes.size() <= 1
+//						&& !adjacentNodeAdjacentNodes.getFirst().equals(ppt.getDestination())) {
+//					// if this is a dead end, and not our destination, skip!
+//					Log.i("FOOTPATH", "BREAK due to dead end");
+//					Log.i("FOOTPATH", "Break at " + adjacentNode.getId());
+//					break;
+//				}
 
 				// e_l: edge virtual length: is this nearest integer? floor (x + 0.5) -> yes!
 				int e_l = Math.round(targetOnEdge.distanceTo(adjacentNode) / ppt.getVirtualStepLength());
