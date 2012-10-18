@@ -24,9 +24,9 @@ public class PartialPenaltyTree implements DrawToCanvas {
 	 */
 
 	// if a leaf is in range of MIN_STEP_EXPANSION: expand it
-	public static final int MIN_STEP_EXPANSION = 16; // originally
+	public static final int MIN_STEP_EXPANSION = 8; // originally 8
 	// repeat expansion check every EXPANSION_FREQUENZY number of steps (and on first step!)
-	public static final int EXPANSION_FREQUENZY = 4; // we'll keep the typo for now. FEEEEEEELIX
+	public static final int EXPANSION_FREQUENZY = 2; // we'll keep the typo for now. FEEEEEEELIX
 	// maximum number of leafs to keep in the tree
 	public static final int MAX_LEAFS = 320;
 
@@ -78,17 +78,9 @@ public class PartialPenaltyTree implements DrawToCanvas {
 
 		if (currentStep == 1) {
 			root.recursiveDescentExpand();
-			root.recursiveDescentExpand();
-			root.recursiveDescentExpand();
-			root.recursiveDescentExpand();
-			root.recursiveDescentExpand();
-			root.recursiveDescentExpand();
-
-			// call this to setup the list of expanded nodes to draw
-			root.getAllNodes(nodesInTree);
 		}
 
-		if ((currentStep) % EXPANSION_FREQUENZY == 0) {
+		if ((currentStep - 1) % EXPANSION_FREQUENZY == 0) {
 			root.recursiveDescentExpand();
 
 			root.recursiveEvaluate(currentStep);
@@ -104,22 +96,22 @@ public class PartialPenaltyTree implements DrawToCanvas {
 
 		// TODO: determine best location
 		PPTNode bestNode = root.getBetterChild(Float.POSITIVE_INFINITY);
-		Log.i("FOOTPATH", "bestNode: " + bestNode.getTargetLocation() + "\n" + bestNode.printMatrix());
+//		Log.i("FOOTPATH", "bestNode: " + bestNode.getTargetLocation() + "\n" + bestNode.printMatrix());
 
 		double minIndex = bestNode.getMinIndexFromLastColumn();
 		double lastIndex = bestNode.getVirtualLength();
 		double factor = minIndex / lastIndex;
-		Log.i("FOOTPATH", "factor = " + minIndex + "/" + lastIndex);
-		LinkedList<PPTNode> path = new LinkedList<PPTNode>();
-		bestNode.getPath(path);
-
-		for (PPTNode n : path) {
-			Log.i("FOOTPATH", "Path: " + n.printMatrix());
-		}
+		// Log.i("FOOTPATH", "factor = " + minIndex + "/" + lastIndex);
+		// LinkedList<PPTNode> path = new LinkedList<PPTNode>();
+		// bestNode.getPath(path);
+		//
+		// for (PPTNode n : path) {
+		// Log.i("FOOTPATH", "Path: " + n.printMatrix());
+		// }
 
 		// Log.i("FOOTPATH", "bestNode = " + bestNode);
 		// Log.i("FOOTPATH", "bestNode.getTargetLocation() = " + bestNode.getTargetLocation());
-		Log.i("FOOTPATH", "factor = " + factor);
+		// Log.i("FOOTPATH", "factor = " + factor);
 		// create new object using copy constructor
 		currentBestLocation = new IndoorLocation(bestNode.getParent().getTargetLocation());
 		// Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
@@ -140,6 +132,11 @@ public class PartialPenaltyTree implements DrawToCanvas {
 		// add all leafs to list
 		root.recursiveAddToLeafListAndCalcMinValueOnPath(Float.POSITIVE_INFINITY);
 		Collections.sort(leafList, new LeafMinValueOnPathComparator());
+
+		// returns an ascending list of scores:
+		// for (PPTNode n : leafList) {
+		// Log.i("FOOTPATH", "[[[" + n.getMinValueOnPath() + "]]]");
+		// }
 
 		LinkedList<PPTNode> deleteList = new LinkedList<PPTNode>();
 

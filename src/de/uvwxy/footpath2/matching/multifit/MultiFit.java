@@ -61,7 +61,7 @@ public class MultiFit extends MatchingAlgorithm implements DrawToCanvas {
 		ppt.onStepUpdate((float) bearing, steplength, timestamp, estimatedStepLengthError, estimatedBearingError);
 		returnedPositions.add(ppt.getCurrentBestLocation());
 		currentLocation = ppt.getCurrentBestLocation();
-		Log.i("FOOTPATH", "Returned Pos Size: " + returnedPositions.size());
+		Log.i("FOOTPATH", "MultiFit done.");
 	}
 
 	@Override
