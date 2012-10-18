@@ -55,28 +55,45 @@ public class PPTNode {
 		return buf;
 	}
 
+	/**
+	 * Returns null if all children are worse, or self is not better!
+	 * 
+	 * @param penalty
+	 * @return
+	 */
 	public PPTNode getBetterChild(float penalty) {
 		if (children == null || children.size() == 0) {
-			// leaves return themselves
-			// Log.i("FOOTPATH", "Returning this");
-			return this;
+			if (penalty < this.getMinValueFromLastColumn())
+				return null;
+			else
+				return this;
 		}
+
+		float checkPenalty = this.getMinValueFromLastColumn();
+		// if we are better than our previous parents than we have to search for a better node with our best value
+		checkPenalty = checkPenalty < penalty ? checkPenalty : penalty;
 
 		PPTNode smallestChild = null;
 		for (PPTNode n : children) {
 			if (n != null) {
 				// get best
-				PPTNode otherSmallestChild = n.getBetterChild(penalty);
-				float checkPenalty = otherSmallestChild.getMinValueFromLastColumn();
-				if (checkPenalty <= penalty) {
-					penalty = checkPenalty;
+
+				PPTNode otherSmallestChild = n.getBetterChild(checkPenalty);
+				if (otherSmallestChild == null) {
+					continue;
+				} else {
+					checkPenalty = otherSmallestChild.getMinValueFromLastColumn();
 					smallestChild = otherSmallestChild;
 				}
 			}
 		}
 
-		// some error avoidance, return this if the list of children was bogus
-		smallestChild = smallestChild == null ? this : smallestChild;
+		// if all children are not better than us or the original penalty, return nothing from this (sub) tree
+		if (smallestChild == null && penalty < this.getMinValueFromLastColumn())
+			return null;
+
+		if (smallestChild == null && penalty >= this.getMinValueFromLastColumn())
+			return this;
 
 		return smallestChild;
 	}
@@ -249,18 +266,20 @@ public class PPTNode {
 			// we need our location here to estimate if this node expanded at all
 			// (targetOnEdge.distanceTo(my_location) / ppt.getVirtualStepLength()) <= ppt.MIN_STEP_EXPANSION
 			IndoorLocation loc = ppt.getCurrentBestLocation();
-			if (adjacentNode != null && loc != null
-					&& (loc.distanceTo(targetOnEdge) / ppt.getVirtualStepLength()) <= ppt.MIN_STEP_EXPANSION) {
+			if (adjacentNode != null
+					&& loc != null
+					&& (loc.distanceTo(targetOnEdge) / ppt.getVirtualStepLength()) <= PartialPenaltyTree.MIN_STEP_EXPANSION) {
 
 				// get nodes connected to the node we want to expand to
-//				LinkedList<IndoorLocation> adjacentNodeAdjacentNodes = (LinkedList<IndoorLocation>) adjacentNode
-//						.getAdjacentIndoorLocations();
-//				if (adjacentNodeAdjacentNodes != null && adjacentNodeAdjacentNodes.size() <= 1
-//						&& !adjacentNodeAdjacentNodes.getFirst().equals(ppt.getDestination())) {
-//					// if this is a dead end, and not our destination, skip!
-//					Log.i("FOOTPATH", "BREAK due to dead end");
-//					break;
-//				}
+				LinkedList<IndoorLocation> adjacentNodeAdjacentNodes = (LinkedList<IndoorLocation>) adjacentNode
+						.getAdjacentIndoorLocations();
+				if (adjacentNodeAdjacentNodes != null && adjacentNodeAdjacentNodes.size() <= 1
+						&& !adjacentNodeAdjacentNodes.getFirst().equals(ppt.getDestination())) {
+					// if this is a dead end, and not our destination, skip!
+					Log.i("FOOTPATH", "BREAK due to dead end");
+					Log.i("FOOTPATH", "Break at " + adjacentNode.getId());
+					break;
+				}
 
 				// e_l: edge virtual length: is this nearest integer? floor (x + 0.5) -> yes!
 				int e_l = Math.round(targetOnEdge.distanceTo(adjacentNode) / ppt.getVirtualStepLength());
@@ -327,6 +346,14 @@ public class PPTNode {
 		for (PPTNode n : children)
 			n.getAllNodes(nodesInTree);
 
+	}
+
+	public void getPath(LinkedList<PPTNode> pathlist) {
+		if (pathlist != null) {
+			pathlist.addFirst(this);
+			if (parent != null)
+				parent.getPath(pathlist);
+		}
 	}
 
 }
