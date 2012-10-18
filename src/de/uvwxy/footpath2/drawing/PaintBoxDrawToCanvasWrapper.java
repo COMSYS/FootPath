@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.AttributeSet;
 
 public class PaintBoxDrawToCanvasWrapper extends PaintBox {
 	private DrawToCanvasWrapper canvasPainter;
@@ -11,6 +12,14 @@ public class PaintBoxDrawToCanvasWrapper extends PaintBox {
 
 	public PaintBoxDrawToCanvasWrapper(Context context) {
 		super(context);
+	}
+
+	public PaintBoxDrawToCanvasWrapper(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
+
+	public PaintBoxDrawToCanvasWrapper(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
 	}
 
 	public void setCanvasPainter(DrawToCanvasWrapper dtc) {
