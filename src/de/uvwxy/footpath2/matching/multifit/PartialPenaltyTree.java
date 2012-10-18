@@ -5,11 +5,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.Log;
 
+import de.uvwxy.footpath2.drawing.DrawToCanvas;
 import de.uvwxy.footpath2.map.IndoorLocation;
+import de.uvwxy.footpath2.tools.GeoUtils;
 
-public class PartialPenaltyTree {
+public class PartialPenaltyTree implements DrawToCanvas {
 	/*
 	 * Set screw (8/5/15)
 	 * 
@@ -23,7 +28,7 @@ public class PartialPenaltyTree {
 	// repeat expansion check every EXPANSION_FREQUENZY number of steps (and on first step!)
 	public static final int EXPANSION_FREQUENZY = 5; // we'll keep the typo for now. FEEEEEEELIX
 	// maximum number of leafs to keep in the tree
-	public static final int MAX_LEAFS = 64;
+	public static final int MAX_LEAFS = 320;
 
 	private float virtualStepLength;
 	private PPTNode root;
@@ -35,6 +40,10 @@ public class PartialPenaltyTree {
 	private IndoorLocation currentBestLocation = null;
 
 	private LinkedList<PPTNode> leafList = null;
+
+	private IndoorLocation destination = null;
+
+	private LinkedList<IndoorLocation> nodesInTree = new LinkedList<IndoorLocation>();
 
 	public PartialPenaltyTree() {
 		root = new PPTNode(this);
@@ -49,6 +58,14 @@ public class PartialPenaltyTree {
 		this.virtualStepLength = stepLength;
 	}
 
+	public void _c_setEndLocation(IndoorLocation end) {
+		destination = end;
+	}
+
+	public IndoorLocation getDestination() {
+		return destination;
+	}
+
 	public float getVirtualStepLength() {
 		return this.virtualStepLength;
 	}
@@ -57,13 +74,16 @@ public class PartialPenaltyTree {
 			double estimatedBearingError) {
 		currentStep++;
 		bearings.add(new Float(bearing));
-
+		int deletedNodes = 0;
 		if ((currentStep - 1) % EXPANSION_FREQUENZY == 0) {
 			root.recursiveDescentExpand();
+
+			deletedNodes = pruneTree(MAX_LEAFS);
+			nodesInTree.clear();
+			root.getAllNodes(nodesInTree);
 		}
 
 		root.recursiveEvaluate(currentStep);
-		int deletedNodes = pruneTree(MAX_LEAFS);
 
 		// TODO: determine best location
 		PPTNode bestNode = root.getBetterChild(Float.POSITIVE_INFINITY);
@@ -73,7 +93,7 @@ public class PartialPenaltyTree {
 
 		// Log.i("FOOTPATH", "bestNode = " + bestNode);
 		// Log.i("FOOTPATH", "bestNode.getTargetLocation() = " + bestNode.getTargetLocation());
-		// Log.i("FOOTPATH", "factor = " + factor);
+		Log.i("FOOTPATH", "factor = " + factor);
 		// create new object using copy constructor
 		currentBestLocation = new IndoorLocation(bestNode.getParent().getTargetLocation());
 		// Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
@@ -126,6 +146,10 @@ public class PartialPenaltyTree {
 		return this.currentBestLocation;
 	}
 
+	public LinkedList<IndoorLocation> getAllNodesInTree() {
+		return nodesInTree;
+	}
+
 	private void ideaPruneAroundPosition(IndoorLocation l) {
 		// have multiple trees in memory pruning around different locations?
 	}
@@ -142,6 +166,24 @@ public class PartialPenaltyTree {
 		@Override
 		public int compare(PPTNode lhs, PPTNode rhs) {
 			return new Float(lhs.getMinValueOnPath()).compareTo(rhs.getMinValueOnPath());
+		}
+	}
+
+	@Override
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
+			Paint pLine, Paint pDots) {
+		int w = boundingBox.width() / 2 + boundingBox.left;
+		int h = boundingBox.height() / 2 + boundingBox.top;
+
+		if (canvas == null || center == null || pLine == null || pDots == null) {
+			return;
+		}
+
+		for (int i = 0; i < nodesInTree.size() - 1; i++) {
+			// draw line between nodes
+			IndoorLocation a = nodesInTree.get(i);
+			int[] apix = GeoUtils.convertToPixelLocation(a, center, pixelsPerMeterOrMaxValue);
+			canvas.drawCircle(w + apix[0], h + apix[1], 3.0f, pDots);
 		}
 	}
 }

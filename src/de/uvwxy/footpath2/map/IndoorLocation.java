@@ -3,9 +3,15 @@ package de.uvwxy.footpath2.map;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.uvwxy.footpath2.drawing.DrawToCanvas;
+import de.uvwxy.footpath2.tools.GeoUtils;
+
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.location.Location;
 
-public class IndoorLocation extends Location {
+public class IndoorLocation extends Location implements DrawToCanvas {
 	// planet radius in meters
 	private static final int r = 6378137;
 	// meters per degree
@@ -24,21 +30,19 @@ public class IndoorLocation extends Location {
 	public IndoorLocation(Location l) {
 		super(l);
 	}
-	
+
 	public IndoorLocation(IndoorLocation l) {
 		super(l);
 		this.door = l.door;
 		this.indoor = l.indoor;
 		this.name = l.name;
-		
+
 		this.level = l.level;
 		this.id = l.id;
 		this.mergeid = l.mergeid;
 		this.numSteps = l.numSteps;
 		this.loc_edges = l.loc_edges;
 	}
-	
-	
 
 	public IndoorLocation(String provider) {
 		super(provider);
@@ -212,5 +216,15 @@ public class IndoorLocation extends Location {
 
 	private String tag(String k, String v) {
 		return "\n    <tag k='" + k + "' v='" + v + "' />";
+	}
+
+	@Override
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
+			Paint pLine, Paint pDots) {
+		int w = boundingBox.width() / 2 + boundingBox.left;
+		int h = boundingBox.height() / 2 + boundingBox.top;
+
+		int[] apix = GeoUtils.convertToPixelLocation(this, center, pixelsPerMeterOrMaxValue);
+		canvas.drawCircle(w + apix[0], h + apix[1], (float) (pixelsPerMeterOrMaxValue * 0.5f), pDots);
 	}
 }

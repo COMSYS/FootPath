@@ -245,16 +245,27 @@ public class PPTNode {
 
 	private void expandThisNode() {
 		LinkedList<IndoorLocation> adjNodes = (LinkedList<IndoorLocation>) targetOnEdge.getAdjacentIndoorLocations();
-		for (IndoorLocation adjn : adjNodes) {
+		for (IndoorLocation adjacentNode : adjNodes) {
 			// we need our location here to estimate if this node expanded at all
 			// (targetOnEdge.distanceTo(my_location) / ppt.getVirtualStepLength()) <= ppt.MIN_STEP_EXPANSION
 			IndoorLocation loc = ppt.getCurrentBestLocation();
-			if (adjn != null && loc != null
+			if (adjacentNode != null && loc != null
 					&& (loc.distanceTo(targetOnEdge) / ppt.getVirtualStepLength()) <= ppt.MIN_STEP_EXPANSION) {
-				// is this nearest integer? floor (x + 0.5) -> yes!
-				int e_l = Math.round(targetOnEdge.distanceTo(adjn) / ppt.getVirtualStepLength());
-				PPTNode newNode = new PPTNode(this.ppt, e_l, targetOnEdge.bearingTo(adjn), this);
-				newNode.setTargetOnEdge(adjn);
+
+				// get nodes connected to the node we want to expand to
+//				LinkedList<IndoorLocation> adjacentNodeAdjacentNodes = (LinkedList<IndoorLocation>) adjacentNode
+//						.getAdjacentIndoorLocations();
+//				if (adjacentNodeAdjacentNodes != null && adjacentNodeAdjacentNodes.size() <= 1
+//						&& !adjacentNodeAdjacentNodes.getFirst().equals(ppt.getDestination())) {
+//					// if this is a dead end, and not our destination, skip!
+//					Log.i("FOOTPATH", "BREAK due to dead end");
+//					break;
+//				}
+
+				// e_l: edge virtual length: is this nearest integer? floor (x + 0.5) -> yes!
+				int e_l = Math.round(targetOnEdge.distanceTo(adjacentNode) / ppt.getVirtualStepLength());
+				PPTNode newNode = new PPTNode(this.ppt, e_l, targetOnEdge.bearingTo(adjacentNode), this);
+				newNode.setTargetOnEdge(adjacentNode);
 				// not needed as it is still calld by PPT after these recursion steps.
 				// newNode.recursiveEvaluate(matrix.size());
 				Log.i("FOOTPATH", "***###*** Expand");
@@ -309,6 +320,13 @@ public class PPTNode {
 			buf += "\n";
 		}
 		return buf;
+	}
+
+	public void getAllNodes(LinkedList<IndoorLocation> nodesInTree) {
+		nodesInTree.add(this.getTargetLocation());
+		for (PPTNode n : children)
+			n.getAllNodes(nodesInTree);
+
 	}
 
 }

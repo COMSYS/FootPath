@@ -1,6 +1,10 @@
 package de.uvwxy.footpath2.matching.multifit;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.Log;
+import de.uvwxy.footpath2.drawing.DrawToCanvas;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.map.IndoorLocationList;
 import de.uvwxy.footpath2.map.Map;
@@ -13,7 +17,7 @@ import de.uvwxy.footpath2.tools.FootPathException;
  * @author Paul Smith
  * 
  */
-public class MultiFit extends MatchingAlgorithm {
+public class MultiFit extends MatchingAlgorithm implements DrawToCanvas {
 	private Map map;
 	private PartialPenaltyTree ppt;
 
@@ -56,7 +60,15 @@ public class MultiFit extends MatchingAlgorithm {
 		currentStep++;
 		ppt.onStepUpdate((float) bearing, steplength, timestamp, estimatedStepLengthError, estimatedBearingError);
 		returnedPositions.add(ppt.getCurrentBestLocation());
-		Log.i("FOOTPATH", "Returned Pos Size: "+ returnedPositions.size());
+		currentLocation = ppt.getCurrentBestLocation();
+		Log.i("FOOTPATH", "Returned Pos Size: " + returnedPositions.size());
+	}
+
+	@Override
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
+			Paint pLine, Paint pDots) {
+		ppt.drawToCanvas(canvas, center, boundingBox, pixelsPerMeterOrMaxValue, pLine, pDots);
+
 	}
 
 }
