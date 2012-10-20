@@ -109,8 +109,12 @@ public class PartialPenaltyTree implements DrawToCanvas {
 		// Log.i("FOOTPATH", "bestNode = " + bestNode);
 		// Log.i("FOOTPATH", "bestNode.getTargetLocation() = " + bestNode.getTargetLocation());
 		// Log.i("FOOTPATH", "factor = " + factor);
-		// create new object using copy constructor
-		currentBestLocation = new IndoorLocation(bestNode.getParent().getTargetLocation());
+
+		// create new object using copy constructor plus fix if root is returned
+		if (bestNode.getParent() != null)
+			currentBestLocation = new IndoorLocation(bestNode.getParent().getTargetLocation());
+		else 
+			currentBestLocation = new IndoorLocation(bestNode.getTargetLocation());
 		// Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
 
 		// displace according to progress on edge
@@ -200,8 +204,34 @@ public class PartialPenaltyTree implements DrawToCanvas {
 					llr = lhs.getLeafPathPenalty(ll);
 				}
 
-				int stepTwo = new Float(lhs.getMinValueOnPath()).compareTo(rhs.getMinValueOnPath());
+				int stepTwo = new Double(llv).compareTo(llr);
 				;
+				return stepTwo;
+			} else {
+				return stepOne;
+			}
+		}
+	}
+
+	public class LeafMinValueOnPathComparator2 implements Comparator<PPTNode> {
+		@Override
+		public int compare(PPTNode lhs, PPTNode rhs) {
+			int ll = lhs.getPathLength();
+			int lr = rhs.getPathLength();
+			double llv, llr;
+			if (ll > lr) {
+				llv = lhs.getLeafPathPenalty(lr);
+				llr = lhs.getLeafPathPenalty(lr);
+			} else {
+				llv = lhs.getLeafPathPenalty(ll);
+				llr = lhs.getLeafPathPenalty(ll);
+			}
+			int stepOne = new Double(llv).compareTo(llr);
+
+			if (stepOne == 0) {
+
+				int stepTwo = new Float(lhs.getMinValueOnPath()).compareTo(rhs.getMinValueOnPath());
+
 				return stepTwo;
 			} else {
 				return stepOne;

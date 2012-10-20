@@ -118,6 +118,9 @@ public class PPTNode {
 	}
 
 	public int getMinIndexFromLastColumn() {
+		if (isRoot)
+			return 0;
+
 		float[] column = matrix.getLast();
 
 		float min = Float.POSITIVE_INFINITY;
@@ -300,7 +303,17 @@ public class PPTNode {
 				if (virtualStepsToGo - getVirtualLength() > 0)
 					newNode.expandThisNode(virtualStepsToGo - virtualLength);
 
-				children.add(newNode);
+				if (!isRoot && this.parent != null && !this.parent.isRoot) {
+					PPTNode me = this;
+					PPTNode meP = this.parent;
+					PPTNode mePP = meP != null ? meP.parent : null;
+					// inhibit bouncing in graph but permit going back
+					if (meP != null && mePP != null & !me.equals(mePP))
+						children.add(newNode);
+				} else {
+					// root always expands!
+					children.add(newNode);
+				}
 			}
 		}
 	}
@@ -327,7 +340,10 @@ public class PPTNode {
 		index = virtualLength - index;
 		// boundary check
 		index = (index >= virtualLength - 1) ? virtualLength - 1 : index;
-		return matrix.getLast()[index];
+		if (matrix.size() == 0)
+			return Float.MAX_VALUE;
+		else
+			return matrix.getLast()[index];
 	}
 
 	public int getPathLength() {
@@ -392,6 +408,19 @@ public class PPTNode {
 			pathlist.addFirst(this);
 			if (parent != null)
 				parent.getPath(pathlist);
+		}
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof PPTNode) {
+			if (targetOnEdge != null) {
+				return targetOnEdge.equals(((PPTNode) o).getTargetLocation());
+			} else {
+				return false;
+			}
+		} else {
+			return false;
 		}
 	}
 
