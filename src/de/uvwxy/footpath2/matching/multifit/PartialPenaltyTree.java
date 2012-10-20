@@ -28,7 +28,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 	// repeat expansion check every EXPANSION_FREQUENZY number of steps (and on first step!)
 	public static final int EXPANSION_FREQUENZY = 8; // we'll keep the typo for now. FEEEEEEELIX
 	// maximum number of leafs to keep in the tree
-	public static final int MAX_LEAFS = 20;
+	public static final int MAX_LEAFS = 16;
 
 	private float virtualStepLength;
 	private PPTNode root;
@@ -135,6 +135,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 		// Log.i("FOOTPATH", "[[[" + n.getMinValueOnPath() + "]]]");
 		// }
 
+		Log.i("FOOTPATH", "Size of list before pruning: " + leafList.size());
 		LinkedList<PPTNode> deleteList = new LinkedList<PPTNode>();
 
 		int del = 0;
@@ -191,15 +192,16 @@ public class PartialPenaltyTree implements DrawToCanvas {
 				int ll = lhs.getPathLength();
 				int lr = rhs.getPathLength();
 				double llv, llr;
-				if (ll > lr){
+				if (ll > lr) {
 					llv = lhs.getLeafPathPenalty(lr);
 					llr = lhs.getLeafPathPenalty(lr);
 				} else {
 					llv = lhs.getLeafPathPenalty(ll);
 					llr = lhs.getLeafPathPenalty(ll);
 				}
-				
-				int stepTwo = new Float(lhs.getMinValueOnPath()).compareTo(rhs.getMinValueOnPath());;
+
+				int stepTwo = new Float(lhs.getMinValueOnPath()).compareTo(rhs.getMinValueOnPath());
+				;
 				return stepTwo;
 			} else {
 				return stepOne;
