@@ -7,10 +7,11 @@ import android.util.Log;
 
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.matching.Score;
+import de.uvwxy.footpath2.matching.ScoreMultiFit;
 
 public class PPTNode {
 	private PartialPenaltyTree ppt = null;
-	private Score score = new Score();
+	private static ScoreMultiFit score = new ScoreMultiFit();
 
 	private int virtualLength;
 	private float bearing;
@@ -228,11 +229,11 @@ public class PPTNode {
 					// D(e_l)(0,j) = D(e_(l-1))(|e_(l-1)|,j) <- TOP row accesses previous edge last row
 
 					double a = getPenaltyValue(iVirtStep - 1, jStep - 1)
-							+ score.score(getBearing(iVirtStep), ppt.getS(jStep), true);
+							+ score.score(getBearing(iVirtStep), ppt.getS(jStep), 0);
 					double b = getPenaltyValue(iVirtStep - 1, jStep)
-							+ score.score(getBearing(iVirtStep), ppt.getS(jStep - 1), false);
+							+ score.score(getBearing(iVirtStep), ppt.getS(jStep - 1), 1);
 					double c = getPenaltyValue(iVirtStep, jStep - 1)
-							+ score.score(getBearing(iVirtStep - 1), ppt.getS(jStep), false);
+							+ score.score(getBearing(iVirtStep - 1), ppt.getS(jStep), -1);
 
 					double d = Math.min(a, Math.min(b, c));
 
@@ -272,7 +273,7 @@ public class PPTNode {
 	private void expandThisNode(int virtualStepsToGo) {
 		if (virtualStepsToGo <= 0)
 			return;
-		Log.i("FOOTPATH", "Stepping into " + targetOnEdge.getId() + " " + getVirtualLength());
+		// Log.i("FOOTPATH", "Stepping into " + targetOnEdge.getId() + " " + getVirtualLength());
 		LinkedList<IndoorLocation> adjNodes = (LinkedList<IndoorLocation>) targetOnEdge
 				.getAdjacentIndoorLocationsWithoutElevators();
 		for (IndoorLocation adjacentNode : adjNodes) {
@@ -298,6 +299,7 @@ public class PPTNode {
 				// recursively expand down the path until we are far enough
 				if (virtualStepsToGo - getVirtualLength() > 0)
 					newNode.expandThisNode(virtualStepsToGo - virtualLength);
+
 				children.add(newNode);
 			}
 		}
@@ -305,6 +307,33 @@ public class PPTNode {
 
 	public float getMinValueOnPath() {
 		return minValueOnPath;
+	}
+
+	public float getLeafPathPenalty(int i) {
+		int index = getPathLength() - i;
+
+		// if requested position is further than our path length return last penalty
+		if (index < 0) {
+			return matrix.getLast()[virtualLength - 1];
+		}
+
+		// if the penalty we want is above us:
+		if (index > virtualLength) {
+			return parent.getLeafPathPenalty(i);
+		}
+
+		// the difference of the path length and requested index is from end to start
+		// thus calcualte correct index
+		index = virtualLength - index;
+		// boundary check
+		index = (index >= virtualLength - 1) ? virtualLength - 1 : index;
+		return matrix.getLast()[index];
+	}
+
+	public int getPathLength() {
+		if (isRoot)
+			return virtualLength;
+		return virtualLength + parent.getPathLength();
 	}
 
 	public void recursiveAddToLeafListAndCalcMinValueOnPath(float minv) {

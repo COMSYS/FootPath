@@ -26,9 +26,9 @@ public class PartialPenaltyTree implements DrawToCanvas {
 	// if a leaf is in range of MIN_STEP_EXPANSION: expand it
 	public static final int MIN_STEP_EXPANSION = 16; // originally 8
 	// repeat expansion check every EXPANSION_FREQUENZY number of steps (and on first step!)
-	public static final int EXPANSION_FREQUENZY = 4; // we'll keep the typo for now. FEEEEEEELIX
+	public static final int EXPANSION_FREQUENZY = 8; // we'll keep the typo for now. FEEEEEEELIX
 	// maximum number of leafs to keep in the tree
-	public static final int MAX_LEAFS = 32;
+	public static final int MAX_LEAFS = 20;
 
 	private float virtualStepLength;
 	private PPTNode root;
@@ -91,7 +91,9 @@ public class PartialPenaltyTree implements DrawToCanvas {
 
 		// TODO: determine best location
 		PPTNode bestNode = root.getBetterChild(Float.POSITIVE_INFINITY);
-//		Log.i("FOOTPATH", "bestNode: " + bestNode.getTargetLocation() + "\n" + bestNode.printMatrix());
+		// Log.i("FOOTPATH", "bestNode: " + bestNode.getTargetLocation() + "\n" + bestNode.printMatrix());
+
+		Log.i("FOOTPATH", "lastNode: lastPenalty: " + bestNode.getLeafPathPenalty(bestNode.getPathLength()));
 
 		double minIndex = bestNode.getMinIndexFromLastColumn();
 		double lastIndex = bestNode.getVirtualLength();
@@ -183,7 +185,25 @@ public class PartialPenaltyTree implements DrawToCanvas {
 	public class LeafMinValueOnPathComparator implements Comparator<PPTNode> {
 		@Override
 		public int compare(PPTNode lhs, PPTNode rhs) {
-			return new Float(lhs.getMinValueOnPath()).compareTo(rhs.getMinValueOnPath());
+			int stepOne = new Float(lhs.getMinValueOnPath()).compareTo(rhs.getMinValueOnPath());
+
+			if (stepOne == 0) {
+				int ll = lhs.getPathLength();
+				int lr = rhs.getPathLength();
+				double llv, llr;
+				if (ll > lr){
+					llv = lhs.getLeafPathPenalty(lr);
+					llr = lhs.getLeafPathPenalty(lr);
+				} else {
+					llv = lhs.getLeafPathPenalty(ll);
+					llr = lhs.getLeafPathPenalty(ll);
+				}
+				
+				int stepTwo = new Float(lhs.getMinValueOnPath()).compareTo(rhs.getMinValueOnPath());;
+				return stepTwo;
+			} else {
+				return stepOne;
+			}
 		}
 	}
 
