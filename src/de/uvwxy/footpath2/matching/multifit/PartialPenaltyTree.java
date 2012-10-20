@@ -24,11 +24,11 @@ public class PartialPenaltyTree implements DrawToCanvas {
 	 */
 
 	// if a leaf is in range of MIN_STEP_EXPANSION: expand it
-	public static final int MIN_STEP_EXPANSION = 8; // originally 8
+	public static final int MIN_STEP_EXPANSION = 16; // originally 8
 	// repeat expansion check every EXPANSION_FREQUENZY number of steps (and on first step!)
-	public static final int EXPANSION_FREQUENZY = 2; // we'll keep the typo for now. FEEEEEEELIX
+	public static final int EXPANSION_FREQUENZY = 4; // we'll keep the typo for now. FEEEEEEELIX
 	// maximum number of leafs to keep in the tree
-	public static final int MAX_LEAFS = 320;
+	public static final int MAX_LEAFS = 32;
 
 	private float virtualStepLength;
 	private PPTNode root;
@@ -76,13 +76,8 @@ public class PartialPenaltyTree implements DrawToCanvas {
 		bearings.add(new Float(bearing));
 		int deletedNodes = 0;
 
-		if (currentStep == 1) {
-			root.recursiveDescentExpand();
-		}
-
 		if ((currentStep - 1) % EXPANSION_FREQUENZY == 0) {
 			root.recursiveDescentExpand();
-
 			root.recursiveEvaluate(currentStep);
 
 			deletedNodes = pruneTree(MAX_LEAFS);

@@ -128,12 +128,34 @@ public class IndoorLocation extends Location implements DrawToCanvas {
 		return loc_edges;
 	}
 
+	public int getDegree() {
+		return loc_edges.size();
+	}
+
 	public List<IndoorLocation> getAdjacentIndoorLocations() {
 		LinkedList<IndoorLocation> buf = new LinkedList<IndoorLocation>();
 
 		if (loc_edges != null && loc_edges.size() > 0) {
 			for (GraphEdge e : loc_edges) {
 				if (e != null) {
+					IndoorLocation a = e.getNode0();
+					IndoorLocation b = e.getNode1();
+
+					// add the "other" node
+					buf.add(equals(a) ? b : a);
+				}
+			}
+		}
+
+		return buf;
+	}
+
+	public List<IndoorLocation> getAdjacentIndoorLocationsWithoutElevators() {
+		LinkedList<IndoorLocation> buf = new LinkedList<IndoorLocation>();
+
+		if (loc_edges != null && loc_edges.size() > 0) {
+			for (GraphEdge e : loc_edges) {
+				if (e != null && !e.isElevator()) {
 					IndoorLocation a = e.getNode0();
 					IndoorLocation b = e.getNode1();
 

@@ -252,7 +252,11 @@ public class PPTNode {
 
 	public void recursiveDescentExpand() {
 		if (children == null || children.size() == 0) {
-			expandThisNode();
+			// number of steps left to check during expansion depend on the distance of our endnode/(a.k.a targetnode)
+			// and the best estimated location
+			expandThisNode((int) (ppt.MIN_STEP_EXPANSION - this.getTargetLocation().distanceTo(
+					ppt.getCurrentBestLocation())
+					/ ppt.getVirtualStepLength()));
 		} else {
 			for (PPTNode n : children) {
 				if (n != null) {
@@ -262,8 +266,15 @@ public class PPTNode {
 		}
 	}
 
-	private void expandThisNode() {
-		LinkedList<IndoorLocation> adjNodes = (LinkedList<IndoorLocation>) targetOnEdge.getAdjacentIndoorLocations();
+	/**
+	 * TODO: change expansions
+	 */
+	private void expandThisNode(int virtualStepsToGo) {
+		if (virtualStepsToGo <= 0)
+			return;
+		Log.i("FOOTPATH", "Stepping into " + targetOnEdge.getId() + " " + getVirtualLength());
+		LinkedList<IndoorLocation> adjNodes = (LinkedList<IndoorLocation>) targetOnEdge
+				.getAdjacentIndoorLocationsWithoutElevators();
 		for (IndoorLocation adjacentNode : adjNodes) {
 			// we need our location here to estimate if this node expanded at all
 			// (targetOnEdge.distanceTo(my_location) / ppt.getVirtualStepLength()) <= ppt.MIN_STEP_EXPANSION
@@ -272,16 +283,9 @@ public class PPTNode {
 					&& loc != null
 					&& (loc.distanceTo(targetOnEdge) / ppt.getVirtualStepLength()) <= PartialPenaltyTree.MIN_STEP_EXPANSION) {
 
-				// get nodes connected to the node we want to expand to
-				// LinkedList<IndoorLocation> adjacentNodeAdjacentNodes = (LinkedList<IndoorLocation>) adjacentNode
-				// .getAdjacentIndoorLocations();
-				// if (adjacentNodeAdjacentNodes != null && adjacentNodeAdjacentNodes.size() <= 1
-				// && !adjacentNodeAdjacentNodes.getFirst().equals(ppt.getDestination())) {
-				// // if this is a dead end, and not our destination, skip!
-				// // Log.i("FOOTPATH", "BREAK due to dead end");
-				// // Log.i("FOOTPATH", "Break at " + adjacentNode.getId());
-				// break;
-				// }
+				// do not add doors (cleanup thingy for hoern)
+				if ((adjacentNode.isDoor() && adjacentNode.getDegree() <= 1) || adjacentNode.getDegree() <= 1)
+					continue;
 
 				// e_l: edge virtual length: is this nearest integer? floor (x + 0.5) -> yes!
 				int e_l = Math.round(targetOnEdge.distanceTo(adjacentNode) / ppt.getVirtualStepLength());
@@ -290,6 +294,10 @@ public class PPTNode {
 				// not needed as it is still calld by PPT after these recursion steps.
 				// newNode.recursiveEvaluate(matrix.size());
 				// Log.i("FOOTPATH", "***###*** Expand");
+
+				// recursively expand down the path until we are far enough
+				if (virtualStepsToGo - getVirtualLength() > 0)
+					newNode.expandThisNode(virtualStepsToGo - virtualLength);
 				children.add(newNode);
 			}
 		}
