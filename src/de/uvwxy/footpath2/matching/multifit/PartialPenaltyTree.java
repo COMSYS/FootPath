@@ -24,9 +24,9 @@ public class PartialPenaltyTree implements DrawToCanvas {
 	 */
 
 	// if a leaf is in range of MIN_STEP_EXPANSION: expand it
-	public static final int MIN_STEP_EXPANSION = 16; // originally 8
+	public static final int MIN_STEP_EXPANSION = 10; // originally 8
 	// repeat expansion check every EXPANSION_FREQUENZY number of steps (and on first step!)
-	public static final int EXPANSION_FREQUENZY = 8; // we'll keep the typo for now. FEEEEEEELIX
+	public static final int EXPANSION_FREQUENZY = 5; // we'll keep the typo for now. FEEEEEEELIX
 	// maximum number of leafs to keep in the tree
 	public static final int MAX_LEAFS = 16;
 
@@ -127,18 +127,27 @@ public class PartialPenaltyTree implements DrawToCanvas {
 	}
 
 	private int pruneTree(int maxLeafs) {
+		long ms = System.currentTimeMillis();
+		
+		Log.i("FOOTPATH", "Prune start " + (System.currentTimeMillis() - ms));
 		// setup new empty leaf list:
 		leafList = leafList == null ? new LinkedList<PPTNode>() : leafList;
 		leafList.clear();
+		
+		Log.i("FOOTPATH", "Prune adding leafs to list " + (System.currentTimeMillis() - ms));
 		// add all leafs to list
 		root.recursiveAddToLeafListAndCalcMinValueOnPath(Float.POSITIVE_INFINITY);
+		Log.i("FOOTPATH", "Prune sorting leafs in list " + (System.currentTimeMillis() - ms));
 		Collections.sort(leafList, new LeafMinValueOnPathComparator());
-
+		Log.i("FOOTPATH", "Prune adding leafs to list (done) " + (System.currentTimeMillis() - ms));
+		
 		// returns an ascending list of scores:
 		// for (PPTNode n : leafList) {
 		// Log.i("FOOTPATH", "[[[" + n.getMinValueOnPath() + "]]]");
 		// }
 
+		
+		Log.i("FOOTPATH", "Prune removing leafs " + (System.currentTimeMillis() - ms));
 		Log.i("FOOTPATH", "Size of list before pruning: " + leafList.size());
 		LinkedList<PPTNode> deleteList = new LinkedList<PPTNode>();
 
@@ -155,6 +164,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 			}
 		}
 		leafList.clear();
+		Log.i("FOOTPATH", "Prune removing leafs (done) " + (System.currentTimeMillis() - ms));
 		return del;
 	}
 

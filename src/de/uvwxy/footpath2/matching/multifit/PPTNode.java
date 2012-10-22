@@ -276,7 +276,7 @@ public class PPTNode {
 	private void expandThisNode(int virtualStepsToGo) {
 		if (virtualStepsToGo <= 0)
 			return;
-		// Log.i("FOOTPATH", "Stepping into " + targetOnEdge.getId() + " " + getVirtualLength());
+//		Log.i("FOOTPATH", "Stepping into " + targetOnEdge.getId() + " " + getVirtualLength());
 		LinkedList<IndoorLocation> adjNodes = (LinkedList<IndoorLocation>) targetOnEdge
 				.getAdjacentIndoorLocationsWithoutElevators();
 		for (IndoorLocation adjacentNode : adjNodes) {
