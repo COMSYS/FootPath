@@ -3,6 +3,7 @@ package de.uvwxy.footpath2;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -43,7 +44,7 @@ import de.uvwxy.footpath2.types.FP_MovementDetection;
  */
 public class FootPath {
 
-	private static final long EXPORT_INTERVALL = 1000*60;
+	private static final long EXPORT_INTERVALL = 1000 * 60;
 
 	private static FootPath thisInstance = null;
 
@@ -104,8 +105,13 @@ public class FootPath {
 	}
 
 	public void _a1_loadMapDataFromAsset(String uri) {
-		// TODO:
-
+		FileInputStream fis = null;
+		try {
+			fis = (FileInputStream) context.getAssets().open("ipin2012demo.osm");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		_a5_loadMapDataFromFileInputStream(fis);
 	}
 
 	public void _a2_loadMapDataFromXMLResource(int resID) {
@@ -133,8 +139,8 @@ public class FootPath {
 			e.printStackTrace();
 		}
 	}
-	
-	public void _a5_loadMapDataFromFileInputStream(FileInputStream fis){
+
+	public void _a5_loadMapDataFromFileInputStream(FileInputStream fis) {
 		try {
 			map.addToGraphFromFileInputStream(fis);
 		} catch (FileNotFoundException e) {
@@ -260,7 +266,7 @@ public class FootPath {
 	public void _h_start() throws FootPathException {
 		// TODO:
 		matchingAlgorithm.init();
-		//exportManager.startIntervalExporting(EXPORT_INTERVALL);
+		// exportManager.startIntervalExporting(EXPORT_INTERVALL);
 		sensorEventDistributor._a_startSensorUpdates();
 		movementDetection._a_startMovementDetection();
 
@@ -268,8 +274,8 @@ public class FootPath {
 
 	public void _i1_pause() {
 		if (exportManager != null) {
-			//exportManager.stopIntervalExporting();
-			//exportManager.export_recentData();
+			// exportManager.stopIntervalExporting();
+			// exportManager.export_recentData();
 		}
 		if (sensorEventDistributor != null)
 			sensorEventDistributor._b1_pauseSensorUpdates();
@@ -278,15 +284,15 @@ public class FootPath {
 	}
 
 	public void _i2_unpause() {
-		//exportManager.startIntervalExporting(EXPORT_INTERVALL);
+		// exportManager.startIntervalExporting(EXPORT_INTERVALL);
 		sensorEventDistributor._b2_unPauseSensorUpdates();
 		movementDetection._b2_unPauseMovementDetection();
 	}
 
 	public void _j_stop() {
 		if (exportManager != null) {
-			//exportManager.stopIntervalExporting();
-			//exportManager.export_recentData();
+			// exportManager.stopIntervalExporting();
+			// exportManager.export_recentData();
 		}
 		if (sensorEventDistributor != null)
 			sensorEventDistributor._c_stopSensorUpdates();
@@ -298,9 +304,9 @@ public class FootPath {
 	public MatchingAlgorithm _debug_getMatchinAlgorithm() {
 		return matchingAlgorithm;
 	}
-	
+
 	@Deprecated
-	public OSM2DBuilding _debug_getOSM2DBuilding(){
+	public OSM2DBuilding _debug_getOSM2DBuilding() {
 		return map.getOsm2Dbuilding();
 	}
 }
