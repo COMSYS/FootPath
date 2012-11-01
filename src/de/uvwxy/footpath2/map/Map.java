@@ -151,7 +151,7 @@ public class Map {
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document dom = builder.parse(fis);
 
-		return addToGraphFromFileInputStream(dom);
+		return addToGraphFromDocument(dom);
 	}
 
 	/**
@@ -164,14 +164,14 @@ public class Map {
 	 * @throws SAXException
 	 * @throws IOException
 	 */
-	public synchronized boolean addToGraphFromFileInputStream(InputStream is) throws ParserConfigurationException,
+	public synchronized boolean addToGraphFromInputStream(InputStream is) throws ParserConfigurationException,
 			FileNotFoundException, SAXException, IOException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setIgnoringElementContentWhitespace(true);
 
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document dom = builder.parse(is);
-		return addToGraphFromFileInputStream(dom);
+		return addToGraphFromDocument(dom);
 	}
 
 	/**
@@ -184,7 +184,7 @@ public class Map {
 	 * @throws SAXException
 	 * @throws IOException
 	 */
-	private synchronized boolean addToGraphFromFileInputStream(Document dom) throws ParserConfigurationException,
+	private synchronized boolean addToGraphFromDocument(Document dom) throws ParserConfigurationException,
 			FileNotFoundException, SAXException, IOException {
 
 		// store all nodes found in file

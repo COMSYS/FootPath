@@ -105,13 +105,13 @@ public class FootPath {
 	}
 
 	public void _a1_loadMapDataFromAsset(String uri) {
-		FileInputStream fis = null;
+		InputStream is = null;
 		try {
-			fis = (FileInputStream) context.getAssets().open("ipin2012demo.osm");
+			is = context.getAssets().open("ipin2012demo.osm");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		_a5_loadMapDataFromFileInputStream(fis);
+		_a6_loadMapDataFromInputStream(is);
 	}
 
 	public void _a2_loadMapDataFromXMLResource(int resID) {
@@ -143,6 +143,24 @@ public class FootPath {
 	public void _a5_loadMapDataFromFileInputStream(FileInputStream fis) {
 		try {
 			map.addToGraphFromFileInputStream(fis);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void _a6_loadMapDataFromInputStream(InputStream fis) {
+		try {
+			map.addToGraphFromInputStream(fis);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
