@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -144,17 +145,52 @@ public class Map {
 	 */
 	public synchronized boolean addToGraphFromFileInputStream(FileInputStream fis) throws ParserConfigurationException,
 			FileNotFoundException, SAXException, IOException {
-
-		// store all nodes found in file
-		List<IndoorLocation> allNodes = new LinkedList<IndoorLocation>();
-		// store all ways found in file
-		List<GraphWay> allWays = new LinkedList<GraphWay>();
-
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setIgnoringElementContentWhitespace(true);
 
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document dom = builder.parse(fis);
+
+		return addToGraphFromFileInputStream(dom);
+	}
+
+	/**
+	 * 
+	 * @param fis
+	 *            the input stream to read from
+	 * @return true if succeeded
+	 * @throws ParserConfigurationException
+	 * @throws FileNotFoundException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public synchronized boolean addToGraphFromFileInputStream(InputStream is) throws ParserConfigurationException,
+			FileNotFoundException, SAXException, IOException {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setIgnoringElementContentWhitespace(true);
+
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		Document dom = builder.parse(is);
+		return addToGraphFromFileInputStream(dom);
+	}
+
+	/**
+	 * 
+	 * @param fis
+	 *            the file input stream to read from
+	 * @return true if succeeded
+	 * @throws ParserConfigurationException
+	 * @throws FileNotFoundException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	private synchronized boolean addToGraphFromFileInputStream(Document dom) throws ParserConfigurationException,
+			FileNotFoundException, SAXException, IOException {
+
+		// store all nodes found in file
+		List<IndoorLocation> allNodes = new LinkedList<IndoorLocation>();
+		// store all ways found in file
+		List<GraphWay> allWays = new LinkedList<GraphWay>();
 
 		NodeList domNodes = dom.getDocumentElement().getElementsByTagName("node");
 		NodeList domWays = dom.getDocumentElement().getElementsByTagName("way");
