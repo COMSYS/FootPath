@@ -9,10 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
-import de.uvwxy.footpath2.log.AppendWriter;
 import de.uvwxy.footpath2.log.ExportManager;
-import de.uvwxy.footpath2.log.Exporter;
-import de.uvwxy.footpath2.log.ExportManager.IntervalExportBehavior;
 
 /**
  * The current idea behind yet another SensorEventManager is that we can here, globally filter/modify/log the sensor
@@ -63,6 +60,20 @@ public class SensorEventDistributor implements SensorEventListener {
 	 * singleton.
 	 */
 	private SensorEventDistributor() {
+	}
+
+	/**
+	 * Obtain a direction of the user. Needed for example by the compass needle drawn onto the screen.
+	 * 
+	 * @return the azimuth of the heading
+	 */
+	public float getAzimuth() {
+		SensorTriple t = orientationHistory.getLast();
+
+		if (t != null)
+			return t.getValues()[0];
+		else
+			return -1f;
 	}
 
 	public void addLinearAccelerometerListener(SensorEventListener sel) {
@@ -265,4 +276,5 @@ public class SensorEventDistributor implements SensorEventListener {
 
 		}
 	}
+
 }

@@ -220,6 +220,11 @@ public class FootPath {
 		}
 	}
 
+	/**
+	 * Set the step length to use during navigation
+	 * @param f step length in meters (float)
+	 * @throws FootPathException
+	 */
 	public void _d_setInitialStepLength(float f) throws FootPathException {
 		if (matchingAlgorithm != null) {
 			matchingAlgorithm.setInitialStepLength(f);
