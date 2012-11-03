@@ -40,12 +40,50 @@ public class OSM2DBuilding implements DrawToCanvas {
 	@Override
 	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy,
 			float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
+		if (!init) {
+			initColors();
+			init = true;
+		}
+
+		resizeColors(pixelsPerMeterOrMaxValue);
 
 		if (canvas == null || center == null || pLine == null || pDots == null) {
 			return;
 		}
 
 		drawLevel(canvas, center, pixelsPerMeterOrMaxValue, pLine, ox, oy, current_level);
+
+	}
+
+	private int transparency = 192;
+	private int color0 = Color.argb(transparency, 189, 174, 173);
+	private int color1 = Color.argb(transparency, 255, 192, 203);
+	private int color2 = Color.argb(transparency, 231, 78, 78);
+	private int color3 = Color.argb(transparency, 136, 217, 114);
+	private Paint pWallsInner = new Paint();
+	private Paint pWallsOuter = new Paint();
+	private Paint pStairs = new Paint();
+	private Paint pElevators = new Paint();
+
+	private boolean init = false;
+
+	private void initColors() {
+		// #ffc0cb
+		pWallsInner.setColor(Color.argb(255, 255, 192, 203));
+		// #e4b334
+		pWallsOuter.setColor(Color.argb(255, 228, 179, 52));
+		// #e74e4e
+		pStairs.setColor(Color.argb(255, 231, 78, 78));
+		// #e4b334
+		pElevators.setColor(Color.argb(255, 136, 217, 114));
+
+	}
+
+	private void resizeColors(float pixelsPerMeterOrMaxValue) {
+		pWallsInner.setStrokeWidth(pixelsPerMeterOrMaxValue * inner_wall_width);
+		pWallsOuter.setStrokeWidth(pixelsPerMeterOrMaxValue * outer_wall_width);
+		pStairs.setStrokeWidth(pixelsPerMeterOrMaxValue * inner_wall_width);
+		pElevators.setStrokeWidth(pixelsPerMeterOrMaxValue * inner_wall_width);
 
 	}
 
@@ -61,65 +99,48 @@ public class OSM2DBuilding implements DrawToCanvas {
 			int h, float level) {
 		float oldWidth = pLine.getStrokeWidth();
 
-		int t = 192;
-		paintWallPathArea(canvas, center, pixelsPerMeterOrMaxValue, w, h, Color.argb(t, 189, 174, 173),
-				walls_outer_area, level);
-		paintWallPathArea(canvas, center, pixelsPerMeterOrMaxValue, w, h, Color.argb(t, 255, 192, 203),
-				walls_inner_area, level);
-		paintWallPathArea(canvas, center, pixelsPerMeterOrMaxValue, w, h, Color.argb(t, 231, 78, 78), stairs_area,
-				level);
-		paintWallPathArea(canvas, center, pixelsPerMeterOrMaxValue, w, h, Color.argb(t, 136, 217, 114), elevators_area,
-				level);
+		paintWallPathArea(canvas, center, pixelsPerMeterOrMaxValue, w, h, color0, walls_outer_area, level);
+		paintWallPathArea(canvas, center, pixelsPerMeterOrMaxValue, w, h, color1, walls_inner_area, level);
+		paintWallPathArea(canvas, center, pixelsPerMeterOrMaxValue, w, h, color2, stairs_area, level);
+		paintWallPathArea(canvas, center, pixelsPerMeterOrMaxValue, w, h, color3, elevators_area, level);
 
-		// #ffc0cb
-		pLine.setColor(Color.argb(255, 255, 192, 203));
-		pLine.setStrokeWidth(pixelsPerMeterOrMaxValue * inner_wall_width);
 		for (int i = 0; i < walls_inner.size() - 1; i++) {
 			if (walls_inner.get(i).getLevel() == level) {
 				int[] apix = GeoUtils.convertToPixelLocation(walls_inner.get(i).getNode0(), center,
 						pixelsPerMeterOrMaxValue);
 				int[] bpix = GeoUtils.convertToPixelLocation(walls_inner.get(i).getNode1(), center,
 						pixelsPerMeterOrMaxValue);
-				canvas.drawLine(w + apix[0], h + apix[1], w + bpix[0], h + bpix[1], pLine);
+				canvas.drawLine(w + apix[0], h + apix[1], w + bpix[0], h + bpix[1], pWallsInner);
 			}
 		}
 
-		// #e4b334
-		pLine.setColor(Color.argb(255, 228, 179, 52));
-		pLine.setStrokeWidth(pixelsPerMeterOrMaxValue * outer_wall_width);
 		for (int i = 0; i < walls_outer.size() - 1; i++) {
 			if (walls_outer.get(i).getLevel() == level) {
 				int[] apix = GeoUtils.convertToPixelLocation(walls_outer.get(i).getNode0(), center,
 						pixelsPerMeterOrMaxValue);
 				int[] bpix = GeoUtils.convertToPixelLocation(walls_outer.get(i).getNode1(), center,
 						pixelsPerMeterOrMaxValue);
-				canvas.drawLine(w + apix[0], h + apix[1], w + bpix[0], h + bpix[1], pLine);
+				canvas.drawLine(w + apix[0], h + apix[1], w + bpix[0], h + bpix[1], pWallsOuter);
 			}
 		}
 
-		// #e74e4e
-		pLine.setColor(Color.argb(255, 231, 78, 78));
-		pLine.setStrokeWidth(pixelsPerMeterOrMaxValue * inner_wall_width);
 		for (int i = 0; i < stairs.size() - 1; i++) {
 			if (walls_inner.get(i).getLevel() == level) {
 				int[] apix = GeoUtils
 						.convertToPixelLocation(stairs.get(i).getNode0(), center, pixelsPerMeterOrMaxValue);
 				int[] bpix = GeoUtils
 						.convertToPixelLocation(stairs.get(i).getNode1(), center, pixelsPerMeterOrMaxValue);
-				canvas.drawLine(w + apix[0], h + apix[1], w + bpix[0], h + bpix[1], pLine);
+				canvas.drawLine(w + apix[0], h + apix[1], w + bpix[0], h + bpix[1], pStairs);
 			}
 		}
 
-		// #e4b334
-		pLine.setColor(Color.argb(255, 136, 217, 114));
-		pLine.setStrokeWidth(pixelsPerMeterOrMaxValue * inner_wall_width);
 		for (int i = 0; i < elevators.size() - 1; i++) {
 			if (walls_inner.get(i).getLevel() == level) {
 				int[] apix = GeoUtils.convertToPixelLocation(elevators.get(i).getNode0(), center,
 						pixelsPerMeterOrMaxValue);
 				int[] bpix = GeoUtils.convertToPixelLocation(elevators.get(i).getNode1(), center,
 						pixelsPerMeterOrMaxValue);
-				canvas.drawLine(w + apix[0], h + apix[1], w + bpix[0], h + bpix[1], pLine);
+				canvas.drawLine(w + apix[0], h + apix[1], w + bpix[0], h + bpix[1], pElevators);
 			}
 		}
 
