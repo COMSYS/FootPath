@@ -53,7 +53,6 @@ public class DrawBitmapToLocation implements DrawToCanvas {
 		this.loc = loc;
 	}
 
-	private int w, h;
 	private float scale_x, scale_y;
 	private int[] apix = { 0, 0 };
 
@@ -61,17 +60,16 @@ public class DrawBitmapToLocation implements DrawToCanvas {
 	private Matrix m = new Matrix();
 
 	@Override
-	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, float pixelsPerMeterOrMaxValue,
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy, float pixelsPerMeterOrMaxValue,
 			Paint pLine, Paint pDots) {
 		if (loc == null)
 			return;
-		w = boundingBox.width() / 2 + boundingBox.left;
-		h = boundingBox.height() / 2 + boundingBox.top;
+
 		scale_x = sizeInMeters * (pixelsPerMeterOrMaxValue / bmp.getWidth());
 		scale_y = sizeInMeters * (pixelsPerMeterOrMaxValue / bmp.getHeight());
 		apix = GeoUtils.convertToPixelLocation(loc, center, pixelsPerMeterOrMaxValue);
 
-		move.setTranslate(w + apix[0] - bmp.getWidth() * scale_x * 0.5f, h + apix[1] - bmp.getHeight() * scale_y * 0.5f);
+		move.setTranslate(ox + apix[0] - bmp.getWidth() * scale_x * 0.5f, oy + apix[1] - bmp.getHeight() * scale_y * 0.5f);
 
 		m.setRotate(rotation, bmp.getWidth() / 2, bmp.getHeight() / 2);
 		m.postScale(scale_x, scale_y);

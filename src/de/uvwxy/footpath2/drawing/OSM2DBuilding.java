@@ -37,19 +37,15 @@ public class OSM2DBuilding implements DrawToCanvas {
 		return current_level;
 	}
 
-	private int w, h;
-
 	@Override
-	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox,
+	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy,
 			float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
-		w = boundingBox.width() / 2 + boundingBox.left;
-		h = boundingBox.height() / 2 + boundingBox.top;
 
 		if (canvas == null || center == null || pLine == null || pDots == null) {
 			return;
 		}
 
-		drawLevel(canvas, center, pixelsPerMeterOrMaxValue, pLine, w, h, current_level);
+		drawLevel(canvas, center, pixelsPerMeterOrMaxValue, pLine, ox, oy, current_level);
 
 	}
 

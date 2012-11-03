@@ -185,6 +185,6 @@ public class StepDetectionConfig extends Activity implements DrawToCanvasWrapper
 		Paint pDots = new Paint();
 		pLine.setColor(Color.RED);
 		pDots.setColor(Color.GREEN);
-		stepDetection.drawToCanvas(canvas, null, bb, 9, pLine, pDots);
+		stepDetection.drawToCanvas(canvas, null, canvas.getWidth() / 2, canvas.getHeight() / 2, 9, pLine, pDots);
 	}
 }

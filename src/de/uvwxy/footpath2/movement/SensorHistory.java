@@ -26,9 +26,9 @@ public class SensorHistory implements Serializable, Exporter {
 	 * super.get(location); }
 	 */
 
-	public void drawToCanvas(Canvas canvas, Location center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
+	public void drawToCanvas(Canvas canvas, Location center, int xo, int yo, double pixelsPerMeterOrMaxValue,
 			Paint pLine, Paint pDots) {
-		if (boundingBox == null || size() < 2) {
+		if (size() < 2) {
 			return;
 		}
 
@@ -38,17 +38,17 @@ public class SensorHistory implements Serializable, Exporter {
 		long max = System.currentTimeMillis();
 		long diff = max - tempLeft.getTs();
 
-		int height = boundingBox.height();
-		int width = boundingBox.width();
+		int height = canvas.getHeight();
+		int width = canvas.getWidth();
 
 		float pixelsPerMilli = width / getBackLogMillis();
 		float pixelsPerValue = (float) ((height / 2) / pixelsPerMeterOrMaxValue);
 
 		float y0r, y0g, y0b, y1r, y1g, y1b, x0, x1;
-		int yoffset = height / 2 + boundingBox.top;
+		int yoffset = height / 2 ;
 		while ((diff) <= getBackLogMillis()) {
-			x1 = (-(max - tempRight.getTs()) * pixelsPerMilli) + boundingBox.right;
-			x0 = (-diff * pixelsPerMilli) + boundingBox.right;
+			x1 = (-(max - tempRight.getTs()) * pixelsPerMilli) + width;
+			x0 = (-diff * pixelsPerMilli) + width;
 
 			y1r = yoffset - (tempRight.getValues()[0] * pixelsPerValue);
 			y1g = yoffset - (tempRight.getValues()[1] * pixelsPerValue);

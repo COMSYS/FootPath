@@ -25,6 +25,6 @@ import de.uvwxy.footpath2.map.IndoorLocation;
  * 
  */
 public interface DrawToCanvas {
-	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, float pixelsPerMeterOrMaxValue,
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy, float pixelsPerMeterOrMaxValue,
 			Paint pLine, Paint pDots);
 }

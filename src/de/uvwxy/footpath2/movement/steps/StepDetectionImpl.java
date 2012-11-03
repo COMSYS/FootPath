@@ -344,11 +344,11 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	}
 
 	@Override
-	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, float pixelsPerMeterOrMaxValue,
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy, float pixelsPerMeterOrMaxValue,
 			Paint pLine, Paint pDots) {
 		long max = System.currentTimeMillis();
-		drawSteps(canvas, boundingBox, pixelsPerMeterOrMaxValue, pLine, pDots, max);
-		drawJumps(canvas, boundingBox, pixelsPerMeterOrMaxValue, pLine, pDots, max);
+		drawSteps(canvas, ox, oy, pixelsPerMeterOrMaxValue, pLine, pDots, max);
+		drawJumps(canvas, ox, oy, pixelsPerMeterOrMaxValue, pLine, pDots, max);
 		canvas.drawText("Steps: " + steps.size() + " Jumps: " + jumps.size(), 16, 48, pDots);
 
 		String strState = "";
@@ -367,7 +367,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 			break;
 		}
 
-		linAccHistory.drawToCanvas(canvas, center, boundingBox, pixelsPerMeterOrMaxValue, pLine, pDots);
+		linAccHistory.drawToCanvas(canvas, center, ox, oy, pixelsPerMeterOrMaxValue, pLine, pDots);
 
 		pDots.setTextSize(32);
 		canvas.drawText("State: " + strState, 16, 96, pDots);
@@ -377,15 +377,13 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 
 	}
 
-	private void drawSteps(Canvas canvas, Rect boundingBox, float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots,
+	private void drawSteps(Canvas canvas, int ox, int oy, float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots,
 			long max) {
 		if (steps.size() == 0) {
 			return;
 		}
-		int height = boundingBox.height();
-		int width = boundingBox.width();
 
-		float pixelsPerMilli = width / linAccHistory.getBackLogMillis();
+		float pixelsPerMilli = canvas.getWidth() / linAccHistory.getBackLogMillis();
 
 		float x0, x1;
 		int i = steps.size() - 1;
@@ -393,12 +391,12 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		long diff = max - last.ts;
 		Step temp = last;
 		while ((diff) <= linAccHistory.getBackLogMillis()) {
-			x0 = (-diff * pixelsPerMilli) + boundingBox.right;
+			x0 = (-diff * pixelsPerMilli) + canvas.getWidth();
 
 			// Log.i("LOCMOV", "Drawing element: " + temp);
 			// Log.i("LOCMOV", "Drawing element: " + get(i+1));
 			pDots.setColor(colorStep);
-			canvas.drawLine(x0, boundingBox.top, x0, boundingBox.bottom, pDots);
+			canvas.drawLine(x0, 0, x0, canvas.getHeight(), pDots);
 
 			i--;
 			if (i < 0) {
@@ -412,15 +410,15 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		}
 	}
 
-	private void drawJumps(Canvas canvas, Rect boundingBox, float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots,
+	private void drawJumps(Canvas canvas, int ox, int oy, float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots,
 			long max) {
 		int size = jumps.size();
 		if (size == 0) {
 			return;
 		}
 
-		int height = boundingBox.height();
-		int width = boundingBox.width();
+		int height = canvas.getHeight();
+		int width = canvas.getWidth();
 
 		float pixelsPerMilli = width / linAccHistory.getBackLogMillis();
 
@@ -430,12 +428,12 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		long diff = max - last.ts;
 		Jump temp = jumps.get(i);
 		while ((diff) <= linAccHistory.getBackLogMillis()) {
-			x0 = (-diff * pixelsPerMilli) + boundingBox.right;
+			x0 = (-diff * pixelsPerMilli) + width;
 
 			// Log.i("LOCMOV", "Drawing element: " + temp);
 			// Log.i("LOCMOV", "Drawing element: " + get(i+1));
 			pDots.setColor(colorJump);
-			canvas.drawLine(x0, boundingBox.top, x0, boundingBox.bottom, pDots);
+			canvas.drawLine(x0, 0, x0, height, pDots);
 
 			i--;
 			if (i < 0) {
@@ -457,7 +455,6 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 			mHandler.removeCallbacks(handlerStepDetection);
 			if (linAccHistory.size() != 0) {
 				addSensorData(linAccHistory.getLast());
-
 				long t = System.currentTimeMillis();
 
 				// TODO: we can remove jump detection again i suppose

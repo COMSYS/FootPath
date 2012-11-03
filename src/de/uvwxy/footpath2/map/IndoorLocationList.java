@@ -49,10 +49,8 @@ public class IndoorLocationList extends LinkedList<IndoorLocation> implements Dr
 		return res;
 	}
 
-	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox,
+	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy,
 			float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
-		int w = boundingBox.width() / 2 + boundingBox.left;
-		int h = boundingBox.height() / 2 + boundingBox.top;
 
 		if (canvas == null || center == null || pLine == null || pDots == null) {
 			return;
@@ -64,16 +62,16 @@ public class IndoorLocationList extends LinkedList<IndoorLocation> implements Dr
 			IndoorLocation b = this.get(i + 1);
 			int[] apix = GeoUtils.convertToPixelLocation(a, center, pixelsPerMeterOrMaxValue);
 			int[] bpix = GeoUtils.convertToPixelLocation(b, center, pixelsPerMeterOrMaxValue);
-			canvas.drawLine(w + apix[0], h + apix[1], w + bpix[0], h + bpix[1], pLine);
+			canvas.drawLine(ox + apix[0], oy + apix[1], ox + bpix[0], oy + bpix[1], pLine);
 		}
 
 		for (int i = 0; i < this.size(); i++) {
 			// draw nodes
 			IndoorLocation a = this.get(i);
 			int[] apix = GeoUtils.convertToPixelLocation(a, center, pixelsPerMeterOrMaxValue);
-			canvas.drawCircle(w + apix[0], h + apix[1], 2, pDots);
+			canvas.drawCircle(ox + apix[0], oy + apix[1], 2, pDots);
 			if (a.getName() != null) {
-				canvas.drawText(a.getName(), w + apix[0], h + apix[1], pDots);
+				canvas.drawText(a.getName(), ox + apix[0], oy + apix[1], pDots);
 			}
 		}
 
