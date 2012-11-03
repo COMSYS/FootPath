@@ -58,6 +58,7 @@ public class IndoorLocationList extends LinkedList<IndoorLocation> implements Dr
 	private void initColors() {
 		pLine.setColor(Color.GREEN);
 		pNode.setColor(Color.GREEN);
+		pNode.setTextSize(32);
 
 	}
 

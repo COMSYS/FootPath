@@ -117,6 +117,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 			currentBestLocation = new IndoorLocation(bestNode.getTargetLocation());
 		// Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
 
+		currentBestLocation.setName(null);
 		// displace according to progress on edge
 		currentBestLocation.moveIntoDirection(bestNode.getTargetLocation(), factor);
 		// Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
