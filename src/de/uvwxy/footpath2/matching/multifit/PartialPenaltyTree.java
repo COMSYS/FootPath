@@ -264,7 +264,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 			// draw line between nodes
 			IndoorLocation a = nodesInTree.get(i);
 			int[] apix = GeoUtils.convertToPixelLocation(a, center, pixelsPerMeterOrMaxValue);
-			canvas.drawCircle(ox + apix[0], oy + apix[1], 3.0f, pTree);
+			canvas.drawCircle(ox + apix[0], oy + apix[1], 0.15f * pixelsPerMeterOrMaxValue, pTree);
 		}
 	}
 }

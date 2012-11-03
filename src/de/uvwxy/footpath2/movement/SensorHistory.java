@@ -31,6 +31,8 @@ public class SensorHistory implements Serializable, Exporter {
 	private Paint pBlue = new Paint();
 	private Paint pState = new Paint();
 
+	private boolean init = false;
+	
 	private void initColors() {
 		pRed.setColor(Color.RED);
 		pGreen.setColor(Color.GREEN);
@@ -41,6 +43,11 @@ public class SensorHistory implements Serializable, Exporter {
 	public void drawToCanvas(Canvas canvas, Location center, int xo, int yo, double pixelsPerMeterOrMaxValue) {
 		if (size() < 2) {
 			return;
+		}
+		
+		if (!init){
+			initColors();
+			init = true;
 		}
 
 		int i = size() - 2;

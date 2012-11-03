@@ -61,6 +61,18 @@ public class IndoorLocationList extends LinkedList<IndoorLocation> implements Dr
 
 	}
 
+	private void updateColorSize(float pixelsPerMeter) {
+		pLine.setStrokeWidth(pixelsPerMeter * 0.14f);
+	}
+
+	public void setpLineColor(int c) {
+		this.pLine.setColor(c);
+	}
+
+	public void setpNodeColor(int c) {
+		this.pNode.setColor(c);
+	}
+
 	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy,
 			float pixelsPerMeterOrMaxValue) {
 		if (!init) {
@@ -71,6 +83,8 @@ public class IndoorLocationList extends LinkedList<IndoorLocation> implements Dr
 		if (canvas == null || center == null) {
 			return;
 		}
+
+		updateColorSize(pixelsPerMeterOrMaxValue);
 
 		for (int i = 0; i < this.size() - 1; i++) {
 			// draw line between nodes
@@ -85,7 +99,7 @@ public class IndoorLocationList extends LinkedList<IndoorLocation> implements Dr
 			// draw nodes
 			IndoorLocation a = this.get(i);
 			int[] apix = GeoUtils.convertToPixelLocation(a, center, pixelsPerMeterOrMaxValue);
-			canvas.drawCircle(ox + apix[0], oy + apix[1], 2, pNode);
+			canvas.drawCircle(ox + apix[0], oy + apix[1], 0.2f * pixelsPerMeterOrMaxValue, pNode);
 			if (a.getName() != null) {
 				canvas.drawText(a.getName(), ox + apix[0], oy + apix[1], pNode);
 			}
