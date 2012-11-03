@@ -15,6 +15,7 @@ import android.content.res.AssetFileDescriptor;
 import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.util.Log;
+import android.view.SurfaceHolder;
 import de.uvwxy.footpath2.drawing.OSM2DBuilding;
 import de.uvwxy.footpath2.log.ExportManager;
 import de.uvwxy.footpath2.log.ExportManager.IntervalExportBehavior;
@@ -27,6 +28,7 @@ import de.uvwxy.footpath2.matching.MatchingAlgorithm;
 import de.uvwxy.footpath2.matching.multifit.MultiFit;
 import de.uvwxy.footpath2.movement.MovementDetection;
 import de.uvwxy.footpath2.movement.SensorEventDistributor;
+import de.uvwxy.footpath2.movement.h263.MVDMovementClassifier;
 import de.uvwxy.footpath2.movement.steps.StepDetectionImpl;
 import de.uvwxy.footpath2.tools.FootPathException;
 import de.uvwxy.footpath2.types.FP_LocationProvider;
@@ -118,7 +120,8 @@ public class FootPath {
 	}
 
 	public void _a3_loadMapDataFromURL(String uri) {
-		// TODO:
+		// TODO: download uri and then load map.
+		// TODO: cache map?
 
 	}
 
@@ -185,7 +188,10 @@ public class FootPath {
 		case MOVEMENT_DETECTION_SOUND_SEGWAY:
 			break;
 		case MOVEMENT_DETECTION_VIDEO_WHEELCHAIR:
-
+			// TODO: setup FLOW PATH HERE
+			// create classifier object to receive MVD data and then pass "detected" steps to onStepListener, which is
+			// added done in _c_
+			movementDetection = new MVDMovementClassifier();
 			break;
 		default:
 			throw new IllegalArgumentException(movementType.toString());
@@ -211,7 +217,6 @@ public class FootPath {
 			matchingAlgorithm = mf;
 			Log.i("FOOTPATH", "Registering MultiFit for movement detection");
 			movementDetection.registerOnStepListener(mf);
-
 			break;
 		default:
 			throw new IllegalArgumentException(matchingType.toString());
@@ -220,7 +225,9 @@ public class FootPath {
 
 	/**
 	 * Set the step length to use during navigation
-	 * @param f step length in meters (float)
+	 * 
+	 * @param f
+	 *            step length in meters (float)
 	 * @throws FootPathException
 	 */
 	public void _d_setInitialStepLength(float f) throws FootPathException {
@@ -321,6 +328,18 @@ public class FootPath {
 			movementDetection._c_stopMovementDetection();
 	}
 
+	public void passThroughSurfaceViewForFlowPath(SurfaceHolder svh) throws FootPathException {
+		if (settingsMovementDetection != FP_MovementDetection.MOVEMENT_DETECTION_VIDEO_WHEELCHAIR) {
+			throw new FootPathException("Setting SurfaceHolder allthough not using MOVEMENT_DETECTION_VIDEO_WHEELCHAIR");
+		}
+		if (!(movementDetection instanceof MVDMovementClassifier)) {
+			throw new FootPathException("Setting SurfaceHolder allthough not using MVDMovementClassifier");
+		}
+
+		((MVDMovementClassifier) movementDetection).setSurfaceHolder(svh);
+		Log.i("FOOTPATH", "Setting Surface Holder");
+	}
+
 	@Deprecated
 	public MatchingAlgorithm _debug_getMatchinAlgorithm() {
 		return matchingAlgorithm;
@@ -329,5 +348,17 @@ public class FootPath {
 	@Deprecated
 	public OSM2DBuilding _debug_getOSM2DBuilding() {
 		return map.getOsm2Dbuilding();
+	}
+
+	public FP_MovementDetection getSettingsMovementDetection() {
+		return settingsMovementDetection;
+	}
+
+	public FP_MatchingAlgorithm getSettingsMatchingAlgorithm() {
+		return settingsMatchingAlgorithm;
+	}
+
+	public FP_LocationProvider getSettingsLocationProvider() {
+		return settingsLocationProvider;
 	}
 }
