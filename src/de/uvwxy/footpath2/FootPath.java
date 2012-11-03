@@ -9,15 +9,12 @@ import java.util.Stack;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
-import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
-import android.content.res.Resources.NotFoundException;
 import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.util.Log;
-import de.uvwxy.footpath.Rev;
 import de.uvwxy.footpath2.drawing.OSM2DBuilding;
 import de.uvwxy.footpath2.log.ExportManager;
 import de.uvwxy.footpath2.log.ExportManager.IntervalExportBehavior;
@@ -77,7 +74,7 @@ public class FootPath {
 	}
 
 	public String getRevision() {
-		return Rev.rev.substring(0, 8);
+		return "B4DR3VN0";
 	}
 
 	private void exampleUsage() throws FootPathException {
@@ -188,6 +185,7 @@ public class FootPath {
 		case MOVEMENT_DETECTION_SOUND_SEGWAY:
 			break;
 		case MOVEMENT_DETECTION_VIDEO_WHEELCHAIR:
+
 			break;
 		default:
 			throw new IllegalArgumentException(movementType.toString());
