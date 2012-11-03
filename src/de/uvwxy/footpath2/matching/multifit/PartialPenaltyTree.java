@@ -247,12 +247,14 @@ public class PartialPenaltyTree implements DrawToCanvas {
 			}
 		}
 	}
+	
+	private Paint pTree = new Paint();
+	
 
 	@Override
-	public void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy, float pixelsPerMeterOrMaxValue,
-			Paint pLine, Paint pDots) {
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy, float pixelsPerMeterOrMaxValue) {
 
-		if (canvas == null || center == null || pLine == null || pDots == null) {
+		if (canvas == null || center == null) {
 			return;
 		}
 
@@ -260,7 +262,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 			// draw line between nodes
 			IndoorLocation a = nodesInTree.get(i);
 			int[] apix = GeoUtils.convertToPixelLocation(a, center, pixelsPerMeterOrMaxValue);
-			canvas.drawCircle(ox + apix[0], oy + apix[1], 3.0f, pDots);
+			canvas.drawCircle(ox + apix[0], oy + apix[1], 3.0f, pTree);
 		}
 	}
 }

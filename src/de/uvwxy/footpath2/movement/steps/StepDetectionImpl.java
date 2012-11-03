@@ -343,42 +343,58 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		vhPointer = vhPointer % vhSize;
 	}
 
+	private Paint pWhite = new Paint();
+	private Paint pStep = new Paint();
+	private Paint pJump = new Paint();
+	private Paint pState = new Paint();
+
+	private void initColors() {
+		pWhite.setColor(Color.WHITE);
+		pStep.setColor(colorStep);
+		pJump.setColor(colorJump);
+		pState.setTextSize(32);
+	}
+
+	private boolean init = false;
+
 	@Override
-	public void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy, float pixelsPerMeterOrMaxValue,
-			Paint pLine, Paint pDots) {
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy, float pixelsPerMeterOrMaxValue) {
+		if (!init) {
+			initColors();
+			init = true;
+		}
+
 		long max = System.currentTimeMillis();
-		drawSteps(canvas, ox, oy, pixelsPerMeterOrMaxValue, pLine, pDots, max);
-		drawJumps(canvas, ox, oy, pixelsPerMeterOrMaxValue, pLine, pDots, max);
-		canvas.drawText("Steps: " + steps.size() + " Jumps: " + jumps.size(), 16, 48, pDots);
+		drawSteps(canvas, ox, oy, pixelsPerMeterOrMaxValue, max);
+		drawJumps(canvas, ox, oy, pixelsPerMeterOrMaxValue, max);
+		canvas.drawText("Steps: " + steps.size() + " Jumps: " + jumps.size(), 16, 48, pWhite);
 
 		String strState = "";
 		switch (currentMovement) {
 		case JUMPING:
-			pDots.setColor(Color.YELLOW);
+			pState.setColor(Color.YELLOW);
 			strState = "JUMPING";
 			break;
 		case STANDING:
-			pDots.setColor(Color.BLUE);
+			pState.setColor(Color.BLUE);
 			strState = "STANDING";
 			break;
 		case WALKING:
-			pDots.setColor(Color.GREEN);
+			pState.setColor(Color.GREEN);
 			strState = "WALKING";
 			break;
 		}
 
-		linAccHistory.drawToCanvas(canvas, center, ox, oy, pixelsPerMeterOrMaxValue, pLine, pDots);
+		linAccHistory.drawToCanvas(canvas, center, ox, oy, pixelsPerMeterOrMaxValue);
 
-		pDots.setTextSize(32);
-		canvas.drawText("State: " + strState, 16, 96, pDots);
+		canvas.drawText("State: " + strState, 16, 96, pState);
 		// Log.i("LOCMOV", "Added type: " + t.values[0] + "/" + t.values[1] +
 		// "/" + t.values[2]);
 		// Log.i("LOCMOV", "Elements drawn: " + test);
 
 	}
 
-	private void drawSteps(Canvas canvas, int ox, int oy, float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots,
-			long max) {
+	private void drawSteps(Canvas canvas, int ox, int oy, float pixelsPerMeterOrMaxValue, long max) {
 		if (steps.size() == 0) {
 			return;
 		}
@@ -395,8 +411,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 
 			// Log.i("LOCMOV", "Drawing element: " + temp);
 			// Log.i("LOCMOV", "Drawing element: " + get(i+1));
-			pDots.setColor(colorStep);
-			canvas.drawLine(x0, 0, x0, canvas.getHeight(), pDots);
+			canvas.drawLine(x0, 0, x0, canvas.getHeight(), pStep);
 
 			i--;
 			if (i < 0) {
@@ -410,8 +425,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		}
 	}
 
-	private void drawJumps(Canvas canvas, int ox, int oy, float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots,
-			long max) {
+	private void drawJumps(Canvas canvas, int ox, int oy, float pixelsPerMeterOrMaxValue, long max) {
 		int size = jumps.size();
 		if (size == 0) {
 			return;
@@ -432,8 +446,8 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 
 			// Log.i("LOCMOV", "Drawing element: " + temp);
 			// Log.i("LOCMOV", "Drawing element: " + get(i+1));
-			pDots.setColor(colorJump);
-			canvas.drawLine(x0, 0, x0, height, pDots);
+
+			canvas.drawLine(x0, 0, x0, height, pJump);
 
 			i--;
 			if (i < 0) {

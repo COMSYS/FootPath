@@ -39,7 +39,7 @@ public class OSM2DBuilding implements DrawToCanvas {
 
 	@Override
 	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy,
-			float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
+			float pixelsPerMeterOrMaxValue) {
 		if (!init) {
 			initColors();
 			init = true;
@@ -47,11 +47,11 @@ public class OSM2DBuilding implements DrawToCanvas {
 
 		resizeColors(pixelsPerMeterOrMaxValue);
 
-		if (canvas == null || center == null || pLine == null || pDots == null) {
+		if (canvas == null || center == null) {
 			return;
 		}
 
-		drawLevel(canvas, center, pixelsPerMeterOrMaxValue, pLine, ox, oy, current_level);
+		drawLevel(canvas, center, pixelsPerMeterOrMaxValue, ox, oy, current_level);
 
 	}
 
@@ -95,9 +95,8 @@ public class OSM2DBuilding implements DrawToCanvas {
 	 * @param w
 	 * @param h
 	 */
-	private void drawLevel(Canvas canvas, IndoorLocation center, float pixelsPerMeterOrMaxValue, Paint pLine, int w,
-			int h, float level) {
-		float oldWidth = pLine.getStrokeWidth();
+	private void drawLevel(Canvas canvas, IndoorLocation center, float pixelsPerMeterOrMaxValue, int w, int h,
+			float level) {
 
 		paintWallPathArea(canvas, center, pixelsPerMeterOrMaxValue, w, h, color0, walls_outer_area, level);
 		paintWallPathArea(canvas, center, pixelsPerMeterOrMaxValue, w, h, color1, walls_inner_area, level);
@@ -144,7 +143,6 @@ public class OSM2DBuilding implements DrawToCanvas {
 			}
 		}
 
-		pLine.setStrokeWidth(oldWidth);
 	}
 
 	/**

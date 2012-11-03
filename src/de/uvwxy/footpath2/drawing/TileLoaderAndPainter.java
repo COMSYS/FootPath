@@ -203,8 +203,7 @@ public class TileLoaderAndPainter implements DrawToCanvas {
 	}
 
 	@Override
-	public void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy, float pixelsPerMeter, Paint pLine,
-			Paint pDots) {
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy, float pixelsPerMeter) {
 
 		if (tiles != null) {
 			for (int i = 0; i < tiles.length; i++) {

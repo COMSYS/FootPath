@@ -26,8 +26,19 @@ public class SensorHistory implements Serializable, Exporter {
 	 * super.get(location); }
 	 */
 
-	public void drawToCanvas(Canvas canvas, Location center, int xo, int yo, double pixelsPerMeterOrMaxValue,
-			Paint pLine, Paint pDots) {
+	private Paint pRed = new Paint();
+	private Paint pGreen = new Paint();
+	private Paint pBlue = new Paint();
+	private Paint pState = new Paint();
+
+	private void initColors() {
+		pRed.setColor(Color.RED);
+		pGreen.setColor(Color.GREEN);
+		pBlue.setColor(Color.BLUE);
+		pState.setTextSize(32);
+	}
+
+	public void drawToCanvas(Canvas canvas, Location center, int xo, int yo, double pixelsPerMeterOrMaxValue) {
 		if (size() < 2) {
 			return;
 		}
@@ -45,7 +56,7 @@ public class SensorHistory implements Serializable, Exporter {
 		float pixelsPerValue = (float) ((height / 2) / pixelsPerMeterOrMaxValue);
 
 		float y0r, y0g, y0b, y1r, y1g, y1b, x0, x1;
-		int yoffset = height / 2 ;
+		int yoffset = height / 2;
 		while ((diff) <= getBackLogMillis()) {
 			x1 = (-(max - tempRight.getTs()) * pixelsPerMilli) + width;
 			x0 = (-diff * pixelsPerMilli) + width;
@@ -58,12 +69,9 @@ public class SensorHistory implements Serializable, Exporter {
 			y0g = yoffset - (tempLeft.getValues()[1] * pixelsPerValue);
 			y0b = yoffset - (tempLeft.getValues()[2] * pixelsPerValue);
 
-			pLine.setColor(Color.RED);
-			canvas.drawLine(x0, y0r, x1, y1r, pLine);
-			pLine.setColor(Color.GREEN);
-			canvas.drawLine(x0, y0g, x1, y1g, pLine);
-			pLine.setColor(Color.BLUE);
-			canvas.drawLine(x0, y0b, x1, y1b, pLine);
+			canvas.drawLine(x0, y0r, x1, y1r, pRed);
+			canvas.drawLine(x0, y0g, x1, y1g, pGreen);
+			canvas.drawLine(x0, y0b, x1, y1b, pBlue);
 
 			// Log.i("LOCMOV", "Drawing element: " + temp);
 			// Log.i("LOCMOV", "Drawing element: " + get(i+1));
@@ -80,7 +88,7 @@ public class SensorHistory implements Serializable, Exporter {
 			diff = max - tempLeft.getTs();
 		}
 
-		canvas.drawText("Size: " + size() * 25 + " byte", 16, 16, pDots);
+		canvas.drawText("Size: " + size() * 25 + " byte", 16, 16, pGreen);
 
 		// Log.i("LOCMOV", "Added type: " + t.values[0] + "/" + t.values[1] +
 		// "/" + t.values[2]);

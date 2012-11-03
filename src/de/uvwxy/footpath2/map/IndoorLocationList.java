@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.location.Location;
@@ -49,10 +50,25 @@ public class IndoorLocationList extends LinkedList<IndoorLocation> implements Dr
 		return res;
 	}
 
-	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy,
-			float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
+	private Paint pLine = new Paint();
+	private Paint pNode = new Paint();
 
-		if (canvas == null || center == null || pLine == null || pDots == null) {
+	private boolean init = false;
+
+	private void initColors() {
+		pLine.setColor(Color.GREEN);
+		pNode.setColor(Color.GREEN);
+
+	}
+
+	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy,
+			float pixelsPerMeterOrMaxValue) {
+		if (!init) {
+			initColors();
+			init = true;
+		}
+
+		if (canvas == null || center == null) {
 			return;
 		}
 
@@ -69,9 +85,9 @@ public class IndoorLocationList extends LinkedList<IndoorLocation> implements Dr
 			// draw nodes
 			IndoorLocation a = this.get(i);
 			int[] apix = GeoUtils.convertToPixelLocation(a, center, pixelsPerMeterOrMaxValue);
-			canvas.drawCircle(ox + apix[0], oy + apix[1], 2, pDots);
+			canvas.drawCircle(ox + apix[0], oy + apix[1], 2, pNode);
 			if (a.getName() != null) {
-				canvas.drawText(a.getName(), ox + apix[0], oy + apix[1], pDots);
+				canvas.drawText(a.getName(), ox + apix[0], oy + apix[1], pNode);
 			}
 		}
 
