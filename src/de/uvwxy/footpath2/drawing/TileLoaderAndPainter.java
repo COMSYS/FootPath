@@ -203,8 +203,8 @@ public class TileLoaderAndPainter implements DrawToCanvas {
 	}
 
 	@Override
-	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeter,
-			Paint pLine, Paint pDots) {
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, float pixelsPerMeter, Paint pLine,
+			Paint pDots) {
 
 		int w = boundingBox.width() / 2 + boundingBox.left;
 		int h = boundingBox.height() / 2 + boundingBox.top;
@@ -217,10 +217,10 @@ public class TileLoaderAndPainter implements DrawToCanvas {
 							pixelsPerMeter);
 
 					RectF destRect = new RectF(w + iLT[0], h + iLT[1], w + iRB[0], h + iRB[1]);
-//					if (i == 0)
-//						Log.i("FOOTPATH", "ATile: " + i + " : " + destRect);
-//					if (i == tiles.length - 1)
-//						Log.i("FOOTPATH", "BTile: " + i + " : " + destRect);
+					// if (i == 0)
+					// Log.i("FOOTPATH", "ATile: " + i + " : " + destRect);
+					// if (i == tiles.length - 1)
+					// Log.i("FOOTPATH", "BTile: " + i + " : " + destRect);
 
 					if (tiles[i].getBitmap() != null) {
 						canvas.drawBitmap(tiles[i].getBitmap(), null, destRect, null);

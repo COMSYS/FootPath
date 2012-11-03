@@ -66,7 +66,7 @@ public class MultiFit extends MatchingAlgorithm implements DrawToCanvas {
 	}
 
 	@Override
-	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, float pixelsPerMeterOrMaxValue,
 			Paint pLine, Paint pDots) {
 		ppt.drawToCanvas(canvas, center, boundingBox, pixelsPerMeterOrMaxValue, pLine, pDots);
 

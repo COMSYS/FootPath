@@ -49,9 +49,8 @@ public class IndoorLocationList extends LinkedList<IndoorLocation> implements Dr
 		return res;
 	}
 
-
 	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox,
-			double pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
+			float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
 		int w = boundingBox.width() / 2 + boundingBox.left;
 		int h = boundingBox.height() / 2 + boundingBox.top;
 

@@ -41,7 +41,7 @@ public class OSM2DBuilding implements DrawToCanvas {
 
 	@Override
 	public synchronized void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox,
-			double pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
+			float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots) {
 		w = boundingBox.width() / 2 + boundingBox.left;
 		h = boundingBox.height() / 2 + boundingBox.top;
 
@@ -61,7 +61,7 @@ public class OSM2DBuilding implements DrawToCanvas {
 	 * @param w
 	 * @param h
 	 */
-	private void drawLevel(Canvas canvas, IndoorLocation center, double pixelsPerMeterOrMaxValue, Paint pLine, int w,
+	private void drawLevel(Canvas canvas, IndoorLocation center, float pixelsPerMeterOrMaxValue, Paint pLine, int w,
 			int h, float level) {
 		float oldWidth = pLine.getStrokeWidth();
 
@@ -77,7 +77,7 @@ public class OSM2DBuilding implements DrawToCanvas {
 
 		// #ffc0cb
 		pLine.setColor(Color.argb(255, 255, 192, 203));
-		pLine.setStrokeWidth((float) (pixelsPerMeterOrMaxValue * inner_wall_width));
+		pLine.setStrokeWidth(pixelsPerMeterOrMaxValue * inner_wall_width);
 		for (int i = 0; i < walls_inner.size() - 1; i++) {
 			if (walls_inner.get(i).getLevel() == level) {
 				int[] apix = GeoUtils.convertToPixelLocation(walls_inner.get(i).getNode0(), center,
@@ -90,7 +90,7 @@ public class OSM2DBuilding implements DrawToCanvas {
 
 		// #e4b334
 		pLine.setColor(Color.argb(255, 228, 179, 52));
-		pLine.setStrokeWidth((float) (pixelsPerMeterOrMaxValue * outer_wall_width));
+		pLine.setStrokeWidth(pixelsPerMeterOrMaxValue * outer_wall_width);
 		for (int i = 0; i < walls_outer.size() - 1; i++) {
 			if (walls_outer.get(i).getLevel() == level) {
 				int[] apix = GeoUtils.convertToPixelLocation(walls_outer.get(i).getNode0(), center,
@@ -103,7 +103,7 @@ public class OSM2DBuilding implements DrawToCanvas {
 
 		// #e74e4e
 		pLine.setColor(Color.argb(255, 231, 78, 78));
-		pLine.setStrokeWidth((float) (pixelsPerMeterOrMaxValue * inner_wall_width));
+		pLine.setStrokeWidth(pixelsPerMeterOrMaxValue * inner_wall_width);
 		for (int i = 0; i < stairs.size() - 1; i++) {
 			if (walls_inner.get(i).getLevel() == level) {
 				int[] apix = GeoUtils
@@ -116,7 +116,7 @@ public class OSM2DBuilding implements DrawToCanvas {
 
 		// #e4b334
 		pLine.setColor(Color.argb(255, 136, 217, 114));
-		pLine.setStrokeWidth((float) (pixelsPerMeterOrMaxValue * inner_wall_width));
+		pLine.setStrokeWidth(pixelsPerMeterOrMaxValue * inner_wall_width);
 		for (int i = 0; i < elevators.size() - 1; i++) {
 			if (walls_inner.get(i).getLevel() == level) {
 				int[] apix = GeoUtils.convertToPixelLocation(elevators.get(i).getNode0(), center,
@@ -139,7 +139,7 @@ public class OSM2DBuilding implements DrawToCanvas {
 	 * @param wallpaint
 	 * @param wallpath
 	 */
-	private void paintWallPathArea(Canvas canvas, IndoorLocation center, double pixelsPerMeterOrMaxValue, int w, int h,
+	private void paintWallPathArea(Canvas canvas, IndoorLocation center, float pixelsPerMeterOrMaxValue, int w, int h,
 			int color, LinkedList<LinkedList<GraphEdge>> walls_area, float level) {
 
 		Paint wallpaint = new Paint();

@@ -20,10 +20,11 @@ import de.uvwxy.footpath2.map.IndoorLocation;
  * that should be represented at the top/bottom of the screen.
  * 
  * The two paints should give a possibility of settings some colors from outside.
+ * 
  * @author Paul Smith
  * 
  */
 public interface DrawToCanvas {
-	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, float pixelsPerMeterOrMaxValue,
 			Paint pLine, Paint pDots);
 }

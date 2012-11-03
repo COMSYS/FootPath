@@ -113,7 +113,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 		// create new object using copy constructor plus fix if root is returned
 		if (bestNode.getParent() != null)
 			currentBestLocation = new IndoorLocation(bestNode.getParent().getTargetLocation());
-		else 
+		else
 			currentBestLocation = new IndoorLocation(bestNode.getTargetLocation());
 		// Log.i("FOOTPATH", "currentBestLocation = " + currentBestLocation);
 
@@ -128,25 +128,24 @@ public class PartialPenaltyTree implements DrawToCanvas {
 
 	private int pruneTree(int maxLeafs) {
 		long ms = System.currentTimeMillis();
-		
+
 		Log.i("FOOTPATH", "Prune start " + (System.currentTimeMillis() - ms));
 		// setup new empty leaf list:
 		leafList = leafList == null ? new LinkedList<PPTNode>() : leafList;
 		leafList.clear();
-		
+
 		Log.i("FOOTPATH", "Prune adding leafs to list " + (System.currentTimeMillis() - ms));
 		// add all leafs to list
 		root.recursiveAddToLeafListAndCalcMinValueOnPath(Float.POSITIVE_INFINITY);
 		Log.i("FOOTPATH", "Prune sorting leafs in list " + (System.currentTimeMillis() - ms));
 		Collections.sort(leafList, new LeafMinValueOnPathComparator());
 		Log.i("FOOTPATH", "Prune adding leafs to list (done) " + (System.currentTimeMillis() - ms));
-		
+
 		// returns an ascending list of scores:
 		// for (PPTNode n : leafList) {
 		// Log.i("FOOTPATH", "[[[" + n.getMinValueOnPath() + "]]]");
 		// }
 
-		
 		Log.i("FOOTPATH", "Prune removing leafs " + (System.currentTimeMillis() - ms));
 		Log.i("FOOTPATH", "Size of list before pruning: " + leafList.size());
 		LinkedList<PPTNode> deleteList = new LinkedList<PPTNode>();
@@ -250,7 +249,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 	}
 
 	@Override
-	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, float pixelsPerMeterOrMaxValue,
 			Paint pLine, Paint pDots) {
 		int w = boundingBox.width() / 2 + boundingBox.left;
 		int h = boundingBox.height() / 2 + boundingBox.top;

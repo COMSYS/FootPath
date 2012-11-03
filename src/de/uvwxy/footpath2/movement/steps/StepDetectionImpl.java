@@ -344,7 +344,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	}
 
 	@Override
-	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
+	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, float pixelsPerMeterOrMaxValue,
 			Paint pLine, Paint pDots) {
 		long max = System.currentTimeMillis();
 		drawSteps(canvas, boundingBox, pixelsPerMeterOrMaxValue, pLine, pDots, max);
@@ -377,7 +377,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 
 	}
 
-	private void drawSteps(Canvas canvas, Rect boundingBox, double pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots,
+	private void drawSteps(Canvas canvas, Rect boundingBox, float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots,
 			long max) {
 		if (steps.size() == 0) {
 			return;
@@ -412,7 +412,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		}
 	}
 
-	private void drawJumps(Canvas canvas, Rect boundingBox, double pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots,
+	private void drawJumps(Canvas canvas, Rect boundingBox, float pixelsPerMeterOrMaxValue, Paint pLine, Paint pDots,
 			long max) {
 		int size = jumps.size();
 		if (size == 0) {
