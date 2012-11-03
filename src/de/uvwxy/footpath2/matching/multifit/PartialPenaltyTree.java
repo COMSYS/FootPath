@@ -259,6 +259,8 @@ public class PartialPenaltyTree implements DrawToCanvas {
 		}
 
 		for (int i = 0; i < nodesInTree.size() - 1; i++) {
+			// TODO: draw branches of tree!
+			
 			// draw line between nodes
 			IndoorLocation a = nodesInTree.get(i);
 			int[] apix = GeoUtils.convertToPixelLocation(a, center, pixelsPerMeterOrMaxValue);
