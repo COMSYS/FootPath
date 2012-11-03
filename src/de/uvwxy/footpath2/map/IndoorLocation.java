@@ -240,13 +240,16 @@ public class IndoorLocation extends Location implements DrawToCanvas {
 		return "\n    <tag k='" + k + "' v='" + v + "' />";
 	}
 
+	private int w, h;
+	private int[] apix = { 0, 0 };
+
 	@Override
 	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
 			Paint pLine, Paint pDots) {
-		int w = boundingBox.width() / 2 + boundingBox.left;
-		int h = boundingBox.height() / 2 + boundingBox.top;
+		w = boundingBox.width() / 2 + boundingBox.left;
+		h = boundingBox.height() / 2 + boundingBox.top;
 
-		int[] apix = GeoUtils.convertToPixelLocation(this, center, pixelsPerMeterOrMaxValue);
+		apix = GeoUtils.convertToPixelLocation(this, center, pixelsPerMeterOrMaxValue);
 		canvas.drawCircle(w + apix[0], h + apix[1], (float) (pixelsPerMeterOrMaxValue * 0.5f), pDots);
 	}
 }

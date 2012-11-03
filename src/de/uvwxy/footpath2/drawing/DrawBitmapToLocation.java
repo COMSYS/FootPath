@@ -10,14 +10,14 @@ import de.uvwxy.footpath2.tools.GeoUtils;
 
 public class DrawBitmapToLocation implements DrawToCanvas {
 	private Bitmap bmp;
-	private float ppm; // pixels per meter
+	private float sizeInMeters; // pixels per meter
 	private float rotation = 0.0f;
 	private IndoorLocation loc;
 	private Paint p = new Paint();
 
 	public DrawBitmapToLocation(IndoorLocation l, Bitmap b, float ppm, boolean aa) {
 		this.bmp = b;
-		this.ppm = ppm;
+		this.sizeInMeters = ppm;
 		p.setAntiAlias(aa);
 	}
 
@@ -30,11 +30,11 @@ public class DrawBitmapToLocation implements DrawToCanvas {
 	}
 
 	public float getPpm() {
-		return ppm;
+		return sizeInMeters;
 	}
 
 	public void setPpm(float ppm) {
-		this.ppm = ppm;
+		this.sizeInMeters = ppm;
 	}
 
 	public float getRotation() {
@@ -53,19 +53,30 @@ public class DrawBitmapToLocation implements DrawToCanvas {
 		this.loc = loc;
 	}
 
+	private int w, h;
+	private float scale_x, scale_y;
+	private int[] apix = { 0, 0 };
+
+	private Matrix move = new Matrix();
+	private Matrix m = new Matrix();
+
 	@Override
 	public void drawToCanvas(Canvas canvas, IndoorLocation center, Rect boundingBox, double pixelsPerMeterOrMaxValue,
 			Paint pLine, Paint pDots) {
 		if (loc == null)
 			return;
-		int w = boundingBox.width() / 2 + boundingBox.left;
-		int h = boundingBox.height() / 2 + boundingBox.top;
-		int[] apix = GeoUtils.convertToPixelLocation(loc, center, pixelsPerMeterOrMaxValue);
+		w = boundingBox.width() / 2 + boundingBox.left;
+		h = boundingBox.height() / 2 + boundingBox.top;
+		scale_x = (float) (sizeInMeters * (pixelsPerMeterOrMaxValue / bmp.getWidth()));
+		scale_y = (float) (sizeInMeters * (pixelsPerMeterOrMaxValue / bmp.getHeight()));
+		apix = GeoUtils.convertToPixelLocation(loc, center, pixelsPerMeterOrMaxValue);
 
-		Matrix m = new Matrix();
-		//m.setScale((float) (ppm / pixelsPerMeterOrMaxValue), (float) (ppm / pixelsPerMeterOrMaxValue));
-		m.postRotate(rotation, bmp.getWidth() / 2, bmp.getHeight() / 2);
-		m.postTranslate(apix[0], apix[1]);
+		move.setTranslate(w + apix[0] - bmp.getWidth() * scale_x * 0.5f, h + apix[1] - bmp.getHeight() * scale_y * 0.5f);
+
+		m.setRotate(rotation, bmp.getWidth() / 2, bmp.getHeight() / 2);
+		m.postScale(scale_x, scale_y);
+		m.postConcat(move);
+
 		canvas.drawBitmap(bmp, m, p);
 		// canvas.drawCircle(w + apix[0], h + apix[1], (float) (pixelsPerMeterOrMaxValue * 0.5f), pDots);
 	}
