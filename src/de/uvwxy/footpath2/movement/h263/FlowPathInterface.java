@@ -105,7 +105,7 @@ public class FlowPathInterface {
 	}
 
 	public void stopFlowPath() {
-		if (parsingThread.isRunning())
+		if (parsingThread != null && parsingThread.isRunning())
 			parsingThread.setRunning(false);
 
 		avwCapture.stopCapture();
