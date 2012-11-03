@@ -55,7 +55,7 @@ public class OSM2DBuilding implements DrawToCanvas {
 
 	}
 
-	private int transparency = 192;
+	private int transparency = 240;
 	private int color0 = Color.argb(transparency, 189, 174, 173);
 	private int color1 = Color.argb(transparency, 255, 192, 203);
 	private int color2 = Color.argb(transparency, 231, 78, 78);
