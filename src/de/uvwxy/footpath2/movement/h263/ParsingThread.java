@@ -40,7 +40,7 @@ public class ParsingThread extends Thread {
 	}
 
 	private int frame_count = 0;
-	private int periodicity = 4;
+	private int periodicity = 2;
 
 	@Override
 	public void run() {

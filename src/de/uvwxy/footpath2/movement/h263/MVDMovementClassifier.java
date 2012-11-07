@@ -23,22 +23,34 @@ public class MVDMovementClassifier extends MovementDetection implements MVDTrigg
 	}
 
 	private float curEvalLength;
-	
+
 	@Deprecated
 	public float getCurEvalLength() {
 		return curEvalLength;
 	}
-	
+
+	private float fpsF;
+
+	public float getFPS() {
+		return fpsF;
+	}
+
+	private long s = System.currentTimeMillis();
+
 	@Override
 	public void processMVData(long now_ms, float[][][] mvds) {
-		Log.i("FOOTPATH", "RECEIVED MVD ole");
+
 		curEvalLength = mvdclassifier.classify(now_ms, mvds);
-		stepLength = curEvalLength/FlowPathConfig.PIC_FPS;
-		Log.i("FLOWPATH", "Classifier returned " + stepLength + "m");
+		stepLength = curEvalLength / FlowPathConfig.PIC_FPS;
+		fpsF = 1000f / (System.currentTimeMillis() - s);
+//		Log.i("FLOWPATH", "@ " + ((System.currentTimeMillis() - s)));
+		s = System.currentTimeMillis();
+		// Log.i("FLOWPATH", "Classifier returned " + stepLength + "m");
 		if (stepLength == 0.0f) {
 			// no speed detected
 			return;
 		}
+
 		// TODO: call parsing function as thread and wait for it to be returned. this should speed up parsing on at
 		// least dualcore devices
 		// Skip parsing of mvd data if thread is not finished yet and thus parse stream as fast as possible
