@@ -185,10 +185,6 @@ public class PartialPenaltyTree implements DrawToCanvas {
 		return nodesInTree;
 	}
 
-	private void ideaPruneAroundPosition(IndoorLocation l) {
-		// have multiple trees in memory pruning around different locations?
-	}
-
 	public int getNumberOfNodesInTree() {
 		return root == null ? 0 : root.getNumberOfNodesInTree();
 	}

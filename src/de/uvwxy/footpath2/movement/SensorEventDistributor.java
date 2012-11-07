@@ -177,19 +177,19 @@ public class SensorEventDistributor implements SensorEventListener {
 			switch (lSensor.get(i).getType()) {
 			case Sensor.TYPE_LINEAR_ACCELERATION:
 				Log.i("FOOTPATH", "Registering Linear Acceleration Sensor");
-				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_GAME);
+				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_FASTEST);
 				break;
 			case Sensor.TYPE_ORIENTATION:
 				Log.i("FOOTPATH", "Registering Orientation Sensor");
-				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_GAME);
+				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_FASTEST);
 				break;
 			case Sensor.TYPE_GRAVITY:
 				Log.i("FOOTPATH", "Registering Gravity Sensor");
-				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_GAME);
+				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_FASTEST);
 				break;
 			case Sensor.TYPE_PRESSURE:
 				Log.i("FOOTPATH", "Registering Pressure Sensor");
-				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_GAME);
+				sm.registerListener(this, lSensor.get(i), SensorManager.SENSOR_DELAY_FASTEST);
 				break;
 			}
 		}

@@ -126,7 +126,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
 			orientationGravityVals = event.values.clone();
 		} else if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-			linAccHistory.add(new SensorTriple(event.values, event.timestamp, event.sensor.getType()));
+			linAccHistory.add(new SensorTriple(event.values.clone(), event.timestamp, event.sensor.getType()));
 		} else if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) { // TODO: TYPE_ORIENTATION is deprecated.
 			bearing = event.values;
 		}

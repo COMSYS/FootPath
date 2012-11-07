@@ -22,7 +22,10 @@ public class BestFit extends MatchingAlgorithm {
 	// private List<GraphEdge> edges = null;
 	private double[][] c = null;
 	private double all_dist = 0.0;
-	private double avg_steplength = 0.0;
+	private float avg_steplength = 0.0f;
+	// with the following float we try to integrate the possibility of passing varying step lengths into the algorithm
+	// from the camera speed estimation
+	private float trackedDistance = 0.0f;
 	private double[] from_map = null;
 	private LinkedList<Double> s = null;
 	private double[][] dyn = null;
@@ -36,6 +39,10 @@ public class BestFit extends MatchingAlgorithm {
 	@Override
 	public void onStepUpdate(double bearing, double steplength, long timestamp, double estimatedStepLengthError,
 			double estimatedBearingError) {
+
+		trackedDistance += steplength;
+		trackedDistance -= avg_steplength;
+
 		// TODO Auto-generated method stub
 		if (firstStep) {
 			dyn[0][0] = Double.POSITIVE_INFINITY;
@@ -83,10 +90,10 @@ public class BestFit extends MatchingAlgorithm {
 			tempLen += edges.get(edgeIndex).getLen();
 		}
 
-//		double tmp = progress;
-//		for (int i = 0; i < edgeIndex; i++) {
-//			tmp -= edges.get(i).getLen();
-//		}
+		// double tmp = progress;
+		// for (int i = 0; i < edgeIndex; i++) {
+		// tmp -= edges.get(i).getLen();
+		// }
 
 		currentLocation = getPositionFromProgress();
 		returnedPositions.add(currentLocation);
@@ -97,6 +104,13 @@ public class BestFit extends MatchingAlgorithm {
 		// conf.setNpLastMatchedStep(y_min);
 		// conf.setNpMatchedSteps(conf.getNpMatchedSteps() + 1);
 		// conf.setNpUnmatchedSteps(conf.getNpMatchedSteps() - y_min);
+
+		if (trackedDistance >= avg_steplength) {
+			Log.i("FOOTPATH", "RETRACKING");
+			// if we have detected a "longer" step than we have walked with the algorithm then repaeat with a further
+			// step but do not add anything to the length -> 0.0f
+			onStepUpdate(bearing, 0.0f, timestamp, estimatedStepLengthError, estimatedBearingError);
+		}
 	}
 
 	@Override
@@ -119,7 +133,6 @@ public class BestFit extends MatchingAlgorithm {
 			e.setLevel(l0.getLevel());
 			edges.add(e);
 		}
-
 
 		c = new double[edges.size()][2];
 		// Setup c:
@@ -188,7 +201,5 @@ public class BestFit extends MatchingAlgorithm {
 		else
 			return s.get(i).doubleValue();
 	}
-
-
 
 }

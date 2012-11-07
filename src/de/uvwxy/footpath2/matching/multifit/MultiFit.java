@@ -23,7 +23,8 @@ public class MultiFit extends MatchingAlgorithm implements DrawToCanvas {
 
 	private IndoorLocation start;
 	private IndoorLocation target;
-
+	private float trackedDistance = 0.0f;
+	
 	public MultiFit() {
 		ppt = new PartialPenaltyTree();
 	}
@@ -56,6 +57,10 @@ public class MultiFit extends MatchingAlgorithm implements DrawToCanvas {
 	@Override
 	public void onStepUpdate(double bearing, double steplength, long timestamp, double estimatedStepLengthError,
 			double estimatedBearingError) {
+
+		trackedDistance += steplength;
+		trackedDistance -= initialStepLength;
+		
 		Log.i("FOOTPATH", "MultFit working...");
 		long ms = System.currentTimeMillis();
 		currentStep++;
@@ -63,6 +68,13 @@ public class MultiFit extends MatchingAlgorithm implements DrawToCanvas {
 		returnedPositions.add(ppt.getCurrentBestLocation());
 		currentLocation = ppt.getCurrentBestLocation();
 		Log.i("FOOTPATH", "MultiFit done. (" + (System.currentTimeMillis() - ms) + "ms)");
+		
+		if (trackedDistance >= initialStepLength) {
+			Log.i("FOOTPATH", "RETRACKING");
+			// if we have detected a "longer" step than we have walked with the algorithm then repaeat with a further
+			// step but do not add anything to the length -> 0.0f
+			onStepUpdate(bearing, 0.0f, timestamp, estimatedStepLengthError, estimatedBearingError);
+		}
 	}
 
 	@Override

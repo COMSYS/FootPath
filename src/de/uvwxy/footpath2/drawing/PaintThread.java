@@ -65,5 +65,6 @@ class PaintThread extends Thread {
 				}
 			}
 		}
+		Log.i("FOOTPATH", "Paintbox died correctly");
 	}
 }

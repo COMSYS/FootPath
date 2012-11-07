@@ -12,7 +12,7 @@ public class MVDMovementClassifier extends MovementDetection implements MVDTrigg
 	private FlowPathInterface flowpath;
 	private SurfaceHolder flowPathSurfaceHolder = null;
 	private MVDClasssifier mvdclassifier = new MVDClassifierMWC();
-	private int numOfDetectedStep;
+	private float stepLength;
 	private SensorEventDistributor sde = SensorEventDistributor.getInstance(null);
 
 	public void setSurfaceHolder(SurfaceHolder flowPathSurfaceHolder) {
@@ -25,8 +25,11 @@ public class MVDMovementClassifier extends MovementDetection implements MVDTrigg
 	@Override
 	public void processMVData(long now_ms, float[][][] mvds) {
 		Log.i("FOOTPATH", "RECEIVED MVD ole");
-		numOfDetectedStep = mvdclassifier.classify(now_ms, mvds);
-
+		stepLength = mvdclassifier.classify(now_ms, mvds);
+		if (stepLength == 0.0f){
+			// no speed detected
+			return;
+		}
 		// TODO: call parsing function as thread and wait for it to be returned. this should speed up parsing on at
 		// least dualcore devices
 		// Skip parsing of mvd data if thread is not finished yet and thus parse stream as fast as possible
@@ -34,10 +37,8 @@ public class MVDMovementClassifier extends MovementDetection implements MVDTrigg
 		// prevent NPE
 		if (onStepListenerList != null && onStepListenerList.size() > 0) {
 			for (StepEventListener l : onStepListenerList) {
-				for (int i = 0; i < numOfDetectedStep; i++) {
-					// TODO: Documentation 0.0 = not defined similar to accuracy in Location
-					l.onStepUpdate(sde.getAzimuth(), 0.5, now_ms, 0.0, 0.0);
-				}
+				// TODO: Documentation 0.0 = not defined similar to accuracy in Location
+				l.onStepUpdate(sde.getAzimuth(), stepLength, now_ms, 0.0, 0.0);
 			}
 		}
 

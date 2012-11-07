@@ -6,7 +6,7 @@ import de.uvwxy.footpath2.movement.h263.FlowPathConfig;
 public class MVDClassifierMWC implements MVDClasssifier {
 
 	@Override
-	public int classify(long now_ms, float[][][] mvds) {
+	public float classify(long now_ms, float[][][] mvds) {
 		return processMVData(now_ms, mvds);
 	}
 
@@ -19,8 +19,8 @@ public class MVDClassifierMWC implements MVDClasssifier {
 	private int[] lastSpeeds = { 0, 0, 0 };
 	private int numSpeeds = 0;
 
-	public int processMVData(long now_ms, float[][][] mvds) {
-		int ret = 0;
+	public float processMVData(long now_ms, float[][][] mvds) {
+		float ret = 0;
 
 		long tsNow = System.currentTimeMillis();
 		// totalStepsWalked++;
@@ -50,7 +50,7 @@ public class MVDClassifierMWC implements MVDClasssifier {
 			// posFirstFit.addStep(compassValue);
 			// posBestFit.addStep(compassValue);
 			// posFirstFit.addStep(compassValue);
-			ret = 2;
+			ret = 0.5f;
 
 			// Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress() + " "
 			// + (tsNow - tsLastMove));
@@ -67,7 +67,7 @@ public class MVDClassifierMWC implements MVDClasssifier {
 			// TODO: fix this: trigger steps:
 			// posBestFit.addStep(compassValue);
 			// posFirstFit.addStep(compassValue);
-			ret = 1;
+			ret = 0.25f;
 			// Log.i("FLOWPATH", "posBestFit: " + posBestFit.getProgress() + " "
 			// + (tsNow - tsLastMove));
 			// Log.i("FLOWPATH", "posFirstFit: " + posFirstFit.getProgress());
