@@ -41,8 +41,10 @@ public class BestFit extends MatchingAlgorithm {
 			double estimatedBearingError) {
 
 		trackedDistance += steplength;
-		trackedDistance -= avg_steplength;
-
+		// do not step if not a step length was traveled
+		if (trackedDistance < initialStepLength) {
+			return;
+		}
 		// TODO Auto-generated method stub
 		if (firstStep) {
 			dyn[0][0] = Double.POSITIVE_INFINITY;
@@ -104,7 +106,10 @@ public class BestFit extends MatchingAlgorithm {
 		// conf.setNpLastMatchedStep(y_min);
 		// conf.setNpMatchedSteps(conf.getNpMatchedSteps() + 1);
 		// conf.setNpUnmatchedSteps(conf.getNpMatchedSteps() - y_min);
-
+		
+		
+		// and now remove the walked step
+		trackedDistance -= initialStepLength;
 		if (trackedDistance >= avg_steplength) {
 			Log.i("FOOTPATH", "RETRACKING");
 			// if we have detected a "longer" step than we have walked with the algorithm then repaeat with a further

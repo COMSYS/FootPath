@@ -233,6 +233,7 @@ public class FootPath {
 	public void _d_setInitialStepLength(float f) throws FootPathException {
 		if (matchingAlgorithm != null) {
 			matchingAlgorithm.setInitialStepLength(f);
+			movementDetection.setInitialStepLength(f);
 		} else {
 			throw new FootPathException("No matching algorithm selected!");
 		}
@@ -340,6 +341,11 @@ public class FootPath {
 		Log.i("FOOTPATH", "Setting Surface Holder");
 	}
 
+	@Deprecated
+	public MovementDetection _debug_getMovementDetection() {
+		return movementDetection;
+	}
+	
 	@Deprecated
 	public MatchingAlgorithm _debug_getMatchinAlgorithm() {
 		return matchingAlgorithm;

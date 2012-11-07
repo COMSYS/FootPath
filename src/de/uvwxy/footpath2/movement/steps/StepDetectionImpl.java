@@ -48,6 +48,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 	private final Context context;
 	private float[] orientationGravityVals = { 1.0f, 0.0f, 0.0f };
 
+	
 	public StepDetectionImpl(Context context) {
 		super();
 		this.context = context;
@@ -57,7 +58,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 		step_timeout_ms = settings.getInt("step_timeout_ms", 666);
 		standing_timeout_ms = settings.getInt("standing_timeout_ms", 1234);
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -498,7 +499,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 								// l.onStepUpdate(bearing, steplength, timestamp, estimatedStepLengthError,
 								// estimatedBearingError)
 								// TODO: Documentation 0.0 = not defined similar to accuracy in Location
-								l.onStepUpdate(bearing[0], 0.0, t, 0.0, 0.0);
+								l.onStepUpdate(bearing[0], initialStepLength, t, 0.0, 0.0);
 							}
 						}
 					}

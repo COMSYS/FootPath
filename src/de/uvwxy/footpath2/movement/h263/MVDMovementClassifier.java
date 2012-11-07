@@ -5,13 +5,13 @@ import android.view.SurfaceHolder;
 import de.uvwxy.footpath2.movement.MovementDetection;
 import de.uvwxy.footpath2.movement.SensorEventDistributor;
 import de.uvwxy.footpath2.movement.StepEventListener;
-import de.uvwxy.footpath2.movement.h263.classifier.MVDClassifierMWC;
+import de.uvwxy.footpath2.movement.h263.classifier.MVDClassifierIPIN;
 import de.uvwxy.footpath2.movement.h263.classifier.MVDClasssifier;
 
 public class MVDMovementClassifier extends MovementDetection implements MVDTrigger {
 	private FlowPathInterface flowpath;
 	private SurfaceHolder flowPathSurfaceHolder = null;
-	private MVDClasssifier mvdclassifier = new MVDClassifierMWC();
+	private MVDClasssifier mvdclassifier = new MVDClassifierIPIN();
 	private float stepLength;
 	private SensorEventDistributor sde = SensorEventDistributor.getInstance(null);
 
@@ -22,11 +22,20 @@ public class MVDMovementClassifier extends MovementDetection implements MVDTrigg
 		flowpath.addMVDTrigger((MVDTrigger) this);
 	}
 
+	private float curEvalLength;
+	
+	@Deprecated
+	public float getCurEvalLength() {
+		return curEvalLength;
+	}
+	
 	@Override
 	public void processMVData(long now_ms, float[][][] mvds) {
 		Log.i("FOOTPATH", "RECEIVED MVD ole");
-		stepLength = mvdclassifier.classify(now_ms, mvds);
-		if (stepLength == 0.0f){
+		curEvalLength = mvdclassifier.classify(now_ms, mvds);
+		stepLength = curEvalLength/FlowPathConfig.PIC_FPS;
+		Log.i("FLOWPATH", "Classifier returned " + stepLength + "m");
+		if (stepLength == 0.0f) {
 			// no speed detected
 			return;
 		}

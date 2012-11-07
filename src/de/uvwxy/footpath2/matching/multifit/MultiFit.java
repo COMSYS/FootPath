@@ -59,7 +59,12 @@ public class MultiFit extends MatchingAlgorithm implements DrawToCanvas {
 			double estimatedBearingError) {
 
 		trackedDistance += steplength;
-		trackedDistance -= initialStepLength;
+		
+		// do not step if not a step length was traveled
+		if (trackedDistance < initialStepLength){
+			return;
+		}
+		
 		
 		Log.i("FOOTPATH", "MultFit working...");
 		long ms = System.currentTimeMillis();
@@ -68,6 +73,9 @@ public class MultiFit extends MatchingAlgorithm implements DrawToCanvas {
 		returnedPositions.add(ppt.getCurrentBestLocation());
 		currentLocation = ppt.getCurrentBestLocation();
 		Log.i("FOOTPATH", "MultiFit done. (" + (System.currentTimeMillis() - ms) + "ms)");
+		
+		// and now remove the walked step
+		trackedDistance-=initialStepLength;
 		
 		if (trackedDistance >= initialStepLength) {
 			Log.i("FOOTPATH", "RETRACKING");
