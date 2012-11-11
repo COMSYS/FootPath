@@ -145,6 +145,10 @@ public class OSM2DBuilding implements DrawToCanvas {
 
 	}
 
+	Paint wallpaint = new Paint();
+	LinkedList<GraphEdge> es;
+	int[] apix;
+	
 	/**
 	 * @param canvas
 	 * @param center
@@ -157,7 +161,6 @@ public class OSM2DBuilding implements DrawToCanvas {
 	private void paintWallPathArea(Canvas canvas, IndoorLocation center, float pixelsPerMeterOrMaxValue, int w, int h,
 			int color, LinkedList<LinkedList<GraphEdge>> walls_area, float level) {
 
-		Paint wallpaint = new Paint();
 
 		wallpaint.setColor(color);
 		wallpaint.setStyle(Style.FILL);
@@ -167,18 +170,18 @@ public class OSM2DBuilding implements DrawToCanvas {
 			if (walls_area.get(i) != null && walls_area.get(i).getFirst() != null
 					&& walls_area.get(i).getFirst().getLevel() == level) {
 
-				LinkedList<GraphEdge> es = walls_area.get(i);
+				es = walls_area.get(i);
 				wallpath.reset(); // only needed when reusing this path for a new build
 
 				if (es.size() > 0) {
 					for (int j = 0; j < es.size(); j++) {
 						if (j == 0) {
-							int[] apix = GeoUtils.convertToPixelLocation(es.get(j).getNode0(), center,
+							apix = GeoUtils.convertToPixelLocation(es.get(j).getNode0(), center,
 									pixelsPerMeterOrMaxValue);
 							wallpath.moveTo(w + apix[0], h + apix[1]); // used for first point
 							// Log.i("FOOTPATH", "Draw first line from " + apix[0] + "/" + apix[1]);
 						} else {
-							int[] apix = GeoUtils.convertToPixelLocation(es.get(j).getNode0(), center,
+							apix = GeoUtils.convertToPixelLocation(es.get(j).getNode0(), center,
 									pixelsPerMeterOrMaxValue);
 							wallpath.lineTo(w + apix[0], h + apix[1]);
 							if (j == es.size() - 1) {

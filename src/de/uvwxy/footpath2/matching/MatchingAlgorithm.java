@@ -104,7 +104,8 @@ public abstract class MatchingAlgorithm implements StepEventListener {
 		trackedDistance += steplength;
 		if (trackedDistance < initialStepLength) {
 			// virtual step length not reached, return; nothing to add to queue
-			Log.i("FOOTPATH", "Steps not long enough yet trackedDistance = " + trackedDistance + " ; steplength = " + steplength);
+			// Log.i("FOOTPATH", "Steps not long enough yet trackedDistance = " + trackedDistance + " ; steplength = " +
+			// steplength);
 			return;
 		}
 
@@ -115,7 +116,7 @@ public abstract class MatchingAlgorithm implements StepEventListener {
 			// length we do not change too much of the value, but still:
 			// TODO: !
 			stepQueue.addLast(new Step(bearing, initialStepLength, timestamp));
-			Log.i("FOOTPATH", "Added step to queue " + bearing + ", " + initialStepLength + "m");
+			// Log.i("FOOTPATH", "Added step to queue " + bearing + ", " + initialStepLength + "m");
 			trackedDistance -= initialStepLength;
 		}
 

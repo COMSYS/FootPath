@@ -491,7 +491,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 						// detected a step
 						steps.add(new Step(t));
 						currentMovement = MovementType.WALKING;
-						Log.i("FOOTPATH", "StepDetectionImpl: detected step, distributing");
+//						Log.i("FOOTPATH", "StepDetectionImpl: detected step, distributing");
 
 						// prevent NPE
 						if (onStepListenerList != null && onStepListenerList.size() > 0) {
