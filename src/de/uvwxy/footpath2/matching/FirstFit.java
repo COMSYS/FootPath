@@ -65,8 +65,8 @@ public class FirstFit extends MatchingAlgorithm {
 	}
 
 	@Override
-	public void onStepUpdate(double compValue, double steplength, long timestamp, double estimatedStepLengthError,
-			double estimatedBearingError) {
+	public void onStepUpdateOnThread(float compValue, float steplength, long timestamp, float estimatedStepLengthError,
+			float estimatedBearingError) {
 		// TODO Auto-generated method stub
 
 		currentStep++;

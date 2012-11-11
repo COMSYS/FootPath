@@ -42,6 +42,7 @@ import de.uvwxy.footpath2.types.FP_MovementDetection;
  * 
  */
 public class FootPath {
+	public static final boolean INVERTED_SRC_COMPASS = false;
 
 	private static final long EXPORT_INTERVALL = 1000 * 60;
 

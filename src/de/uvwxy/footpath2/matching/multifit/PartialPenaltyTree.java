@@ -70,8 +70,8 @@ public class PartialPenaltyTree implements DrawToCanvas {
 		return this.virtualStepLength;
 	}
 
-	public void onStepUpdate(float bearing, double steplength, long timestamp, double estimatedStepLengthError,
-			double estimatedBearingError) {
+	public void onStepUpdate(float bearing, float steplength, long timestamp, float estimatedStepLengthError,
+			float estimatedBearingError) {
 		currentStep++;
 		bearings.add(new Float(bearing));
 		int deletedNodes = 0;

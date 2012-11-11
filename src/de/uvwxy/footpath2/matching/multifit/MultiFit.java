@@ -24,7 +24,7 @@ public class MultiFit extends MatchingAlgorithm implements DrawToCanvas {
 	private IndoorLocation start;
 	private IndoorLocation target;
 	private float trackedDistance = 0.0f;
-	
+
 	public MultiFit() {
 		ppt = new PartialPenaltyTree();
 	}
@@ -55,34 +55,16 @@ public class MultiFit extends MatchingAlgorithm implements DrawToCanvas {
 	}
 
 	@Override
-	public void onStepUpdate(double bearing, double steplength, long timestamp, double estimatedStepLengthError,
-			double estimatedBearingError) {
+	public void onStepUpdateOnThread(float bearing, float steplength, long timestamp, float estimatedStepLengthError,
+			float estimatedBearingError) {
 
-		trackedDistance += steplength;
-		
-		// do not step if not a step length was traveled
-		if (trackedDistance < initialStepLength){
-			return;
-		}
-		
-		
 		Log.i("FOOTPATH", "MultFit working...");
 		long ms = System.currentTimeMillis();
 		currentStep++;
-		ppt.onStepUpdate((float) bearing, steplength, timestamp, estimatedStepLengthError, estimatedBearingError);
+		ppt.onStepUpdate(bearing, steplength, timestamp, estimatedStepLengthError, estimatedBearingError);
 		returnedPositions.add(ppt.getCurrentBestLocation());
 		currentLocation = ppt.getCurrentBestLocation();
 		Log.i("FOOTPATH", "MultiFit done. (" + (System.currentTimeMillis() - ms) + "ms)");
-		
-		// and now remove the walked step
-		trackedDistance-=initialStepLength;
-		
-		if (trackedDistance >= initialStepLength) {
-			Log.i("FOOTPATH", "RETRACKING");
-			// if we have detected a "longer" step than we have walked with the algorithm then repaeat with a further
-			// step but do not add anything to the length -> 0.0f
-			onStepUpdate(bearing, 0.0f, timestamp, estimatedStepLengthError, estimatedBearingError);
-		}
 	}
 
 	@Override
@@ -90,5 +72,4 @@ public class MultiFit extends MatchingAlgorithm implements DrawToCanvas {
 		ppt.drawToCanvas(canvas, center, ox, oy, pixelsPerMeterOrMaxValue);
 
 	}
-
 }

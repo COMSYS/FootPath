@@ -9,6 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
+import de.uvwxy.footpath2.FootPath;
 import de.uvwxy.footpath2.log.ExportManager;
 
 /**
@@ -244,7 +245,11 @@ public class SensorEventDistributor implements SensorEventListener {
 			}
 			break;
 		case Sensor.TYPE_ORIENTATION:
-			orientationHistory.add(new SensorTriple(event.values, now, event.sensor.getType()));
+			SensorTriple tempTriple = new  SensorTriple(event.values, now, event.sensor.getType());
+			if (FootPath.INVERTED_SRC_COMPASS){
+				tempTriple.getValues()[0] = tempTriple.getValues()[0]*-1f;
+			}
+			orientationHistory.add(tempTriple);
 			if (orientationEventListenerList != null) {
 				for (SensorEventListener sel : orientationEventListenerList) {
 					if (sel != null) {

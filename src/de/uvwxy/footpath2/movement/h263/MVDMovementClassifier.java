@@ -59,7 +59,7 @@ public class MVDMovementClassifier extends MovementDetection implements MVDTrigg
 		if (onStepListenerList != null && onStepListenerList.size() > 0) {
 			for (StepEventListener l : onStepListenerList) {
 				// TODO: Documentation 0.0 = not defined similar to accuracy in Location
-				l.onStepUpdate(sde.getAzimuth(), stepLength, now_ms, 0.0, 0.0);
+				l.onStepUpdate(sde.getAzimuth(), stepLength, now_ms, 0.0f, 0.0f);
 			}
 		}
 

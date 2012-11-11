@@ -1,6 +1,8 @@
 package de.uvwxy.footpath2.matching;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import android.util.Log;
 import de.uvwxy.footpath2.map.GraphEdge;
@@ -44,16 +46,98 @@ public abstract class MatchingAlgorithm implements StepEventListener {
 
 	public abstract void init() throws FootPathException;
 
-	@Override
-	public abstract void onStepUpdate(double bearing, double steplength, long timestamp,
-			double estimatedStepLengthError, double estimatedBearingError);
+	private float trackedDistance = 0.0f;
+
+	private Object threadRunningLock = new Object();
+	private boolean threadRunning = false;
+
+	private class StepWorker implements Runnable {
+		private boolean queue_is_empty = true;
+
+		@Override
+		public void run() {
+			setThreadRunningSemaphore(true);
+			checkXIsEmptySemaphore();
+
+			int i = 0;
+			while (!queue_is_empty) {
+				Step s = stepQueue.pop();
+				onStepUpdateOnThread(s.bearing, s.steplength, s.timestamp, 0.0f, 0.0f);
+				Log.i("FOOTPATH", "Thread consumed step " + ++i);
+				checkXIsEmptySemaphore();
+			}
+
+			setThreadRunningSemaphore(false);
+		}
+
+		private void setThreadRunningSemaphore(boolean b) {
+			synchronized (threadRunningLock) {
+				threadRunning = b;
+			}
+
+		}
+
+		private void checkXIsEmptySemaphore() {
+			synchronized (stepQueue) {
+				queue_is_empty = stepQueue.isEmpty();
+			}
+		}
+
+	}
+
+	private LinkedList<Step> stepQueue = new LinkedList<Step>();
+
+	private class Step {
+		float bearing, steplength; // TODO: estimatedStepLengthError, estimatedBearingError;
+		long timestamp;
+
+		public Step(float bearing, float steplength, long timestamp) {
+			this.bearing = bearing;
+			this.steplength = steplength;
+			this.timestamp = timestamp;
+		}
+	}
+
+	public void onStepUpdate(float bearing, float steplength, long timestamp, float estimatedStepLengthError,
+			float estimatedBearingError) {
+
+		trackedDistance += steplength;
+		if (trackedDistance < initialStepLength) {
+			// virtual step length not reached, return; nothing to add to queue
+			Log.i("FOOTPATH", "Steps not long enough yet trackedDistance = " + trackedDistance + " ; steplength = " + steplength);
+			return;
+		}
+
+		// add virtual steps to queue:
+		while (trackedDistance >= initialStepLength) {
+			// we use the bearing of latest detected step here.
+			// as we currently do not use initial/virtual step lengths which differ largely from the detected step
+			// length we do not change too much of the value, but still:
+			// TODO: !
+			stepQueue.addLast(new Step(bearing, initialStepLength, timestamp));
+			Log.i("FOOTPATH", "Added step to queue " + bearing + ", " + initialStepLength + "m");
+			trackedDistance -= initialStepLength;
+		}
+
+		// trigger thread to start consuming virtual steps, if there is none running
+		synchronized (threadRunningLock) {
+			if (!threadRunning) {
+				Thread t = new Thread(new StepWorker());
+				t.start();
+			}
+		}
+
+	}
+
+	public abstract void onStepUpdateOnThread(float bearing, float steplength, long timestamp,
+			float estimatedStepLengthError, float estimatedBearingError);
 
 	protected IndoorLocation getPositionFromProgress() {
 		IndoorLocation ret = new IndoorLocation("" + currentStep, "FootPath");
-		if (edges == null){
+		if (edges == null) {
 			return null;
 		}
-		
+
 		double tempProgress = progress;
 		Log.i("FOOTPATH", "BestFit: tempProgress=" + tempProgress);
 		for (int i = 0; i < edges.size() - 1; i++) {
@@ -67,10 +151,10 @@ public abstract class MatchingAlgorithm implements StepEventListener {
 				ret.setLatitude(x.getLatitude());
 				ret.setLongitude(x.getLongitude());
 				Log.i("FOOTPATH", "BestFit: !! dist = " + x.distanceTo(path.get(i + 1)));
-				Log.i("FOOTPATH", "BestFit: !! mv factor = " + tempProgress + " / " +  x.distanceTo(path.get(i + 1))
-						+ " = " + tempProgress /  x.distanceTo(path.get(i + 1)));
+				Log.i("FOOTPATH", "BestFit: !! mv factor = " + tempProgress + " / " + x.distanceTo(path.get(i + 1))
+						+ " = " + tempProgress / x.distanceTo(path.get(i + 1)));
 
-				ret.moveIntoDirection(path.get(i + 1),tempProgress / x.distanceTo(path.get(i + 1)) );
+				ret.moveIntoDirection(path.get(i + 1), tempProgress / x.distanceTo(path.get(i + 1)));
 				ret.setLevel(x.getLevel());
 				// ret=path.get(i);
 				break;
@@ -79,8 +163,6 @@ public abstract class MatchingAlgorithm implements StepEventListener {
 		Log.i("FOOTPATH", "BestFit: " + ret.getLatitude() + "/ " + ret.getLongitude());
 		return ret;
 	}
-	
-	
 
 	@Deprecated
 	public IndoorLocationList _debug_getLocHist() {

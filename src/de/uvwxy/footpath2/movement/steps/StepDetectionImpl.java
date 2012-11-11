@@ -499,7 +499,7 @@ public class StepDetectionImpl extends MovementDetection implements SensorEventL
 								// l.onStepUpdate(bearing, steplength, timestamp, estimatedStepLengthError,
 								// estimatedBearingError)
 								// TODO: Documentation 0.0 = not defined similar to accuracy in Location
-								l.onStepUpdate(bearing[0], initialStepLength, t, 0.0, 0.0);
+								l.onStepUpdate(bearing[0], initialStepLength, t, 0.0f, 0.0f);
 							}
 						}
 					}

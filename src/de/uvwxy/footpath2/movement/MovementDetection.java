@@ -34,7 +34,7 @@ public abstract class MovementDetection {
 
 	public void setInitialStepLength(float f) {
 		// TODO Auto-generated method stub
-		
+		initialStepLength = f;
 	}
 
 }
