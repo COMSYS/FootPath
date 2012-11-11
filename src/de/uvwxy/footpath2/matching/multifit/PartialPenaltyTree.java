@@ -28,7 +28,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 	// repeat expansion check every EXPANSION_FREQUENZY number of steps (and on first step!)
 	public static final int EXPANSION_FREQUENZY = 5; // we'll keep the typo for now. FEEEEEEELIX
 	// maximum number of leafs to keep in the tree
-	public static final int MAX_LEAFS = 16;
+	public static final int MAX_LEAFS = 32;
 
 	private float virtualStepLength;
 	private PPTNode root;

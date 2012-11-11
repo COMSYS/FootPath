@@ -234,9 +234,9 @@ public class PPTNode {
 					double a = getPenaltyValue(iVirtStep - 1, jStep - 1)
 							+ score.score(getBearing(iVirtStep), ppt.getS(jStep), 0);
 					double b = getPenaltyValue(iVirtStep - 1, jStep)
-							+ score.score(getBearing(iVirtStep), ppt.getS(jStep - 1), 1);
+							+ score.score(getBearing(iVirtStep), ppt.getS(jStep - 1), -1);
 					double c = getPenaltyValue(iVirtStep, jStep - 1)
-							+ score.score(getBearing(iVirtStep - 1), ppt.getS(jStep), -1);
+							+ score.score(getBearing(iVirtStep - 1), ppt.getS(jStep), 1);
 
 					double d = Math.min(a, Math.min(b, c));
 
@@ -308,7 +308,7 @@ public class PPTNode {
 					PPTNode meP = this.parent;
 					PPTNode mePP = meP != null ? meP.parent : null;
 					// inhibit bouncing in graph but permit going back
-					if (meP != null && mePP != null & !me.equals(mePP))
+					if (meP != null && mePP != null && !me.equals(mePP))
 						children.add(newNode);
 				} else {
 					// root always expands!

@@ -33,7 +33,7 @@ public class ScoreMultiFit extends Score {
 		}
 		switch (diagonal) {
 		case -1:
-			ret = ret + PENALTY_NOT_DIAGONAL * 4;
+			ret = ret + PENALTY_NOT_DIAGONAL;
 			break;
 		case 1:
 			ret = ret + PENALTY_NOT_DIAGONAL;
@@ -41,7 +41,8 @@ public class ScoreMultiFit extends Score {
 		default:
 
 		}
-
+		
+		Log.i("SCORE", "x: " + x + " y: " + y + " --> " + ret + ", t = " + t);
 		return ret;
 	}
 }
