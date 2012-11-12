@@ -7,7 +7,7 @@ public class ScoreMultiFit extends Score {
 	public final static int VIRTUAL_STEPS_LOOKAHEAD = 20;
 
 	public final static double BASE = 1.03;
-	public final static double DEGREE = 43;
+	public final static double DEGREE = 90;
 	// How high is the penalty when skipping a step or discarding a step?
 	public final static double PENALTY_NOT_DIAGONAL = Math.pow(BASE, DEGREE);
 

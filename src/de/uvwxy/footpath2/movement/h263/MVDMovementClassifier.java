@@ -41,7 +41,7 @@ public class MVDMovementClassifier extends MovementDetection implements MVDTrigg
 	public void processMVData(long now_ms, float[][][] mvds) {
 
 		curEvalLength = mvdclassifier.classify(now_ms, mvds);
-		stepLength = curEvalLength / FlowPathConfig.PIC_FPS;
+		stepLength = curEvalLength / (FlowPathConfig.PIC_FPS /2);
 		fpsF = 1000f / (System.currentTimeMillis() - s);
 //		Log.i("FLOWPATH", "@ " + ((System.currentTimeMillis() - s)));
 		s = System.currentTimeMillis();
