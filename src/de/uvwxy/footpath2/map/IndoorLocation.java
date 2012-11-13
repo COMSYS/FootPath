@@ -260,4 +260,9 @@ public class IndoorLocation extends Location implements DrawToCanvas {
 		apix = GeoUtils.convertToPixelLocation(this, center, pixelsPerMeterOrMaxValue);
 		canvas.drawCircle(ox + apix[0], oy + apix[1], pixelsPerMeterOrMaxValue * 0.5f, pLocation);
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return super.equals(o);
+	}
 }

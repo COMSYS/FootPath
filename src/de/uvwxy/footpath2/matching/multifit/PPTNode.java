@@ -1,12 +1,8 @@
 package de.uvwxy.footpath2.matching.multifit;
 
-import java.lang.reflect.Array;
 import java.util.LinkedList;
 
-import android.util.Log;
-
 import de.uvwxy.footpath2.map.IndoorLocation;
-import de.uvwxy.footpath2.matching.Score;
 import de.uvwxy.footpath2.matching.ScoreMultiFit;
 
 public class PPTNode {
@@ -311,9 +307,9 @@ public class PPTNode {
 					if (meP != null && mePP != null && !me.equals(mePP))
 						children.add(newNode);
 				} else {
-				// root always expands!
-				children.add(newNode);
-				 }
+					// root always expands!
+					children.add(newNode);
+				}
 			}
 		}
 	}
@@ -417,8 +413,32 @@ public class PPTNode {
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof PPTNode) {
+			PPTNode on = (PPTNode) o;
 			if (targetOnEdge != null) {
-				return targetOnEdge.equals(((PPTNode) o).getTargetLocation());
+				boolean targetEquals = targetOnEdge.equals(on.getTargetLocation());
+				if (!targetEquals) {
+					// just checking if they point to the same node
+					return false;
+				} else {
+					// also check if their starting point is the same
+					// the old code equaled the following case:
+					// xp ---> me ---> a <--- o <--- yp as they both point to a
+					// we have to check xp and yp aswell!
+					IndoorLocation xp = null;
+					IndoorLocation yp = null;
+					if (on.parent != null)
+						xp = on.parent.targetOnEdge;
+					if (parent != null)
+						yp = parent.targetOnEdge;
+					// both parents are root, as we did not initialize the variables
+					if (xp == null && yp == null)
+						return true;
+					if (xp != null)
+						return xp.equals(yp);
+					else if (yp != null)
+						return yp.equals(xp);
+					return false;
+				}
 			} else {
 				return false;
 			}
@@ -426,5 +446,4 @@ public class PPTNode {
 			return false;
 		}
 	}
-
 }
