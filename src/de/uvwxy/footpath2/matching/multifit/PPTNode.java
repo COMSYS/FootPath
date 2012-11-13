@@ -276,7 +276,7 @@ public class PPTNode {
 	private void expandThisNode(int virtualStepsToGo) {
 		if (virtualStepsToGo <= 0)
 			return;
-//		Log.i("FOOTPATH", "Stepping into " + targetOnEdge.getId() + " " + getVirtualLength());
+		// Log.i("FOOTPATH", "Stepping into " + targetOnEdge.getId() + " " + getVirtualLength());
 		LinkedList<IndoorLocation> adjNodes = (LinkedList<IndoorLocation>) targetOnEdge
 				.getAdjacentIndoorLocationsWithoutElevators();
 		for (IndoorLocation adjacentNode : adjNodes) {
@@ -311,9 +311,9 @@ public class PPTNode {
 					if (meP != null && mePP != null && !me.equals(mePP))
 						children.add(newNode);
 				} else {
-					// root always expands!
-					children.add(newNode);
-				}
+				// root always expands!
+				children.add(newNode);
+				 }
 			}
 		}
 	}
@@ -387,6 +387,9 @@ public class PPTNode {
 
 	public String printMatrix() {
 		String buf = isRoot ? "Root:\n" : "Node:\n";
+		if (parent != null && parent.targetOnEdge != null) {
+			buf += "direction: " + parent.targetOnEdge.bearingTo(targetOnEdge) + "\n";
+		}
 		for (int y = 0; y < virtualLength; y++) {
 			for (int x = 0; x < matrix.size(); x++) {
 				buf += matrix.get(x)[y] + " ";

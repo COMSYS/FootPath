@@ -26,9 +26,9 @@ public class PartialPenaltyTree implements DrawToCanvas {
 	// if a leaf is in range of MIN_STEP_EXPANSION: expand it
 	public static final int MIN_STEP_EXPANSION = 10; // originally 8
 	// repeat expansion check every EXPANSION_FREQUENZY number of steps (and on first step!)
-	public static final int EXPANSION_FREQUENZY = 5; // we'll keep the typo for now. FEEEEEEELIX
+	public static final int EXPANSION_FREQUENZY = 6; // we'll keep the typo for now. FEEEEEEELIX
 	// maximum number of leafs to keep in the tree
-	public static final int MAX_LEAFS = 32;
+	public static final int MAX_LEAFS = 16;
 
 	private float virtualStepLength;
 	private PPTNode root;
@@ -93,19 +93,20 @@ public class PartialPenaltyTree implements DrawToCanvas {
 		PPTNode bestNode = root.getBetterChild(Float.POSITIVE_INFINITY);
 		// Log.i("FOOTPATH", "bestNode: " + bestNode.getTargetLocation() + "\n" + bestNode.printMatrix());
 
-		Log.i("FOOTPATH", "lastNode: lastPenalty: " + bestNode.getLeafPathPenalty(bestNode.getPathLength()));
+		// Log.i("FOOTPATH", "lastNode: lastPenalty: " + bestNode.getLeafPathPenalty(bestNode.getPathLength()));
 
 		double minIndex = bestNode.getMinIndexFromLastColumn();
 		double lastIndex = bestNode.getVirtualLength();
 		double factor = minIndex / lastIndex;
 		// Log.i("FOOTPATH", "factor = " + minIndex + "/" + lastIndex);
-		// LinkedList<PPTNode> path = new LinkedList<PPTNode>();
-		// bestNode.getPath(path);
-		//
-		// for (PPTNode n : path) {
-		// Log.i("FOOTPATH", "Path: " + n.printMatrix());
-		// }
+		if (false) {
+			LinkedList<PPTNode> path = new LinkedList<PPTNode>();
+			bestNode.getPath(path);
 
+			for (PPTNode n : path) {
+				Log.i("FOOTPATH", "Path: " + n.printMatrix());
+			}
+		}
 		// Log.i("FOOTPATH", "bestNode = " + bestNode);
 		// Log.i("FOOTPATH", "bestNode.getTargetLocation() = " + bestNode.getTargetLocation());
 		// Log.i("FOOTPATH", "factor = " + factor);
@@ -244,9 +245,8 @@ public class PartialPenaltyTree implements DrawToCanvas {
 			}
 		}
 	}
-	
+
 	private Paint pTree = new Paint();
-	
 
 	@Override
 	public void drawToCanvas(Canvas canvas, IndoorLocation center, int ox, int oy, float pixelsPerMeterOrMaxValue) {
@@ -257,7 +257,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 
 		for (int i = 0; i < nodesInTree.size() - 1; i++) {
 			// TODO: draw branches of tree!
-			
+
 			// draw line between nodes
 			IndoorLocation a = nodesInTree.get(i);
 			int[] apix = GeoUtils.convertToPixelLocation(a, center, pixelsPerMeterOrMaxValue);

@@ -136,6 +136,13 @@ public class IndoorLocation extends Location implements DrawToCanvas {
 	public int getDegree() {
 		return loc_edges.size();
 	}
+	
+	@Override
+	public float bearingTo(Location dest) {
+		float r =  super.bearingTo(dest);
+		r = r < 0 ? r + 360 : r;
+		return r;
+	}
 
 	public List<IndoorLocation> getAdjacentIndoorLocations() {
 		LinkedList<IndoorLocation> buf = new LinkedList<IndoorLocation>();
