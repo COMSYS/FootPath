@@ -147,7 +147,9 @@ public abstract class MatchingAlgorithm implements StepEventListener {
 
 		double tempProgress = progress;
 		Log.i("FOOTPATH", "BestFit: tempProgress=" + tempProgress);
-		for (int i = 0; i < edges.size() - 1; i++) {
+		
+		// 20.02 19:11: not edge.size()-1 as we have n edges but n+1 nodes. thus path.get(i+1) is ok
+		for (int i = 0; i < edges.size(); i++) {
 			Log.i("FOOTPATH", "BestFit: -> tempProgress was " + tempProgress);
 			
 			if (tempProgress - edges.get(i).getLen() > 0) {
