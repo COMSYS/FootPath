@@ -101,6 +101,12 @@ public abstract class MatchingAlgorithm implements StepEventListener {
 	public void onStepUpdate(float bearing, float steplength, long timestamp, float estimatedStepLengthError,
 			float estimatedBearingError) {
 
+		
+		while (bearing < 0f){
+			Log.i("FOOTPATH", "Fixing negative input: " + bearing);
+			bearing +=360f;
+		}
+		
 		trackedDistance += steplength;
 		if (trackedDistance < initialStepLength) {
 			// virtual step length not reached, return; nothing to add to queue
@@ -142,6 +148,8 @@ public abstract class MatchingAlgorithm implements StepEventListener {
 		double tempProgress = progress;
 		Log.i("FOOTPATH", "BestFit: tempProgress=" + tempProgress);
 		for (int i = 0; i < edges.size() - 1; i++) {
+			Log.i("FOOTPATH", "BestFit: -> tempProgress was " + tempProgress);
+			
 			if (tempProgress - edges.get(i).getLen() > 0) {
 				tempProgress -= edges.get(i).getLen();
 				Log.i("FOOTPATH", "BestFit: -> tempProgress=" + tempProgress);
@@ -160,6 +168,7 @@ public abstract class MatchingAlgorithm implements StepEventListener {
 				// ret=path.get(i);
 				break;
 			}
+			
 		}
 		Log.i("FOOTPATH", "BestFit: " + ret.getLatitude() + "/ " + ret.getLongitude());
 		return ret;

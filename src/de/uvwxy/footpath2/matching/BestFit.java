@@ -189,8 +189,18 @@ public class BestFit extends MatchingAlgorithm {
 	private double getFromS(int i) {
 		if (i < 0)
 			return 0.0;
-		else
-			return s.get(i).doubleValue();
+		else {
+			try {
+				return s.get(i).doubleValue();
+			} catch (Exception e) {
+				Log.i("BESTFIT", "Error: element not in list " + i);
+				Log.i("BESTFIT", "Error: List size is " + s.size());
+				// 20.02 18:20: paul: nasty way of producing the same error again, as we can not throw anything without propagating
+				// "throws yada" all the way to the top as java forces us then to implement a catch clause...argh
+				return s.get(i).doubleValue();
+			}
+
+		}
 	}
 
 }
