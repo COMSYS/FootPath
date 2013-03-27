@@ -1,6 +1,6 @@
 package de.uvwxy.footpath2.map;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 /**
  * A class to maintain a way with given parameters found in OSM/XML data.
@@ -10,7 +10,7 @@ import java.util.LinkedList;
  */
 public class GraphWay {
 	// all nodes on this path ( ref0 -> ref1 -> ref2 -> ...)
-	private LinkedList<Integer> refs = new LinkedList<Integer>();
+	private ArrayList<Integer> refs = new ArrayList<Integer>();
 	private int id;
 	private int step_count = 0;
 	private float level;
@@ -40,18 +40,18 @@ public class GraphWay {
 	 * @param level
 	 *            the level of this way
 	 */
-	public GraphWay(LinkedList<Integer> refs, int id, String wheelchair, float level) {
+	public GraphWay(ArrayList<Integer> refs, int id, String wheelchair, float level) {
 		this.refs = refs;
 		this.id = id;
 		this.wheelchair = wheelchair;
 		this.level = level;
 	}
 
-	public LinkedList<Integer> getRefs() {
+	public ArrayList<Integer> getRefs() {
 		return refs;
 	}
 
-	public void setRefs(LinkedList<Integer> refs) {
+	public void setRefs(ArrayList<Integer> refs) {
 		this.refs = refs;
 	}
 

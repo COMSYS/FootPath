@@ -42,7 +42,7 @@ public class ScoreMultiFit extends Score {
 
 		}
 		
-		Log.i("SCORE", "x: " + x + " y: " + y + " --> " + ret + ", t = " + t);
+		//Log.i("SCORE", "x: " + x + " y: " + y + " --> " + ret + ", t = " + t);
 		return ret;
 	}
 }

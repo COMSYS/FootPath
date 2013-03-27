@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -62,9 +63,9 @@ public class BuildingLoaderAndPainter {
 		Log.i("FOOTPATH", "Loading building data from " + filePath);
 
 		// store all nodes found in file
-		LinkedList<IndoorLocation> allNodes = new LinkedList<IndoorLocation>();
+		ArrayList<IndoorLocation> allNodes = new ArrayList<IndoorLocation>();
 		// store all ways found in file
-		LinkedList<GraphWay> allWays = new LinkedList<GraphWay>();
+		ArrayList<GraphWay> allWays = new ArrayList<GraphWay>();
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setIgnoringElementContentWhitespace(true);
@@ -173,7 +174,7 @@ public class BuildingLoaderAndPainter {
 			boolean isArea = false;
 			String buildingpart = null;
 			
-			LinkedList<Integer> refs = new LinkedList<Integer>();
+			ArrayList<Integer> refs = new ArrayList<Integer>();
 
 
 			NodeList way_children = way.getChildNodes();
@@ -324,8 +325,8 @@ public class BuildingLoaderAndPainter {
 
 	}
 
-	// This is the slower version which is used during parsing
-	private synchronized IndoorLocation getNode(LinkedList<IndoorLocation> list, int id) {
+	// This is the slower version which is used during parsing (how about a has map?)
+	private synchronized IndoorLocation getNode(ArrayList<IndoorLocation> list, int id) {
 		for (IndoorLocation node : list) {
 			if (node.getId() == id)
 				return node;

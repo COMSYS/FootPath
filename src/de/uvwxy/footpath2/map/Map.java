@@ -256,7 +256,7 @@ public class Map {
 			Node way = domWays.item(i);
 			NamedNodeMap way_attributes = way.getAttributes();
 			GraphWay tempWay = new GraphWay(Integer.parseInt(way_attributes.getNamedItem("id").getNodeValue()));
-			LinkedList<Integer> refs = new LinkedList<Integer>();
+			ArrayList<Integer> refs = new ArrayList<Integer>();
 			NodeList way_children = way.getChildNodes();
 			for (int j = 0; j < way_children.getLength(); j++) {
 				Node tagOrNDNode = way_children.item(j);
@@ -323,7 +323,7 @@ public class Map {
 			if (way.getBuildingpart() != null && way.getBuildingpart().equals("wall")) {
 				if (way.getIndoor() != null && way.getIndoor().equals("yes")) {
 					if (way.getArea() != null && way.getArea().equals("yes")) {
-						LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
+						ArrayList<GraphEdge> temp = new ArrayList<GraphEdge>();
 						addWayAsEdgesToList(temp, way, allNodes);
 						// areas are lists of lists
 						osm2Dbuilding.walls_inner_area.add(temp);
@@ -333,7 +333,7 @@ public class Map {
 					}
 				} else if (way.getIndoor() != null && way.getIndoor().equals("no")) {
 					if (way.getArea() != null && way.getArea().equals("yes")) {
-						LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
+						ArrayList<GraphEdge> temp = new ArrayList<GraphEdge>();
 						addWayAsEdgesToList(temp, way, allNodes);
 						// areas are lists of lists
 						osm2Dbuilding.walls_outer_area.add(temp);
@@ -344,7 +344,7 @@ public class Map {
 				}
 			} else if (way.getBuildingpart() != null && way.getBuildingpart().equals("elevator")) {
 				if (way.getArea() != null && way.getArea().equals("yes")) {
-					LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
+					ArrayList<GraphEdge> temp = new ArrayList<GraphEdge>();
 					addWayAsEdgesToList(temp, way, allNodes);
 					// areas are lists of lists
 					osm2Dbuilding.elevators_area.add(temp);
@@ -354,7 +354,7 @@ public class Map {
 				}
 			} else if (way.getBuildingpart() != null && way.getBuildingpart().equals("steps")) {
 				if (way.getArea() != null && way.getArea().equals("yes")) {
-					LinkedList<GraphEdge> temp = new LinkedList<GraphEdge>();
+					ArrayList<GraphEdge> temp = new ArrayList<GraphEdge>();
 					addWayAsEdgesToList(temp, way, allNodes);
 					// areas are lists of lists
 					osm2Dbuilding.stairs_area.add(temp);
@@ -426,7 +426,7 @@ public class Map {
 		return true;
 	} // -> addToGraphFromXMLFile(String filePath) { ... }
 
-	private void addWayAsEdgesToList(LinkedList<GraphEdge> insertInto, GraphWay way, List<IndoorLocation> allNodes) {
+	private void addWayAsEdgesToList(ArrayList<GraphEdge> insertInto, GraphWay way, List<IndoorLocation> allNodes) {
 
 		IndoorLocation firstNode = getNode(allNodes, way.getRefs().get(0).intValue());
 

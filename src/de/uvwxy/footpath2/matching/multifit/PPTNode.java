@@ -1,5 +1,6 @@
 package de.uvwxy.footpath2.matching.multifit;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import de.uvwxy.footpath2.map.IndoorLocation;
@@ -14,8 +15,8 @@ public class PPTNode {
 
 	private boolean isRoot = false;
 	private PPTNode parent;
-	private LinkedList<PPTNode> children = new LinkedList<PPTNode>();
-	private LinkedList<float[]> matrix = new LinkedList<float[]>();
+	private ArrayList<PPTNode> children = new ArrayList<PPTNode>();
+	private ArrayList<float[]> matrix = new ArrayList<float[]>();
 
 	private IndoorLocation targetOnEdge;
 
@@ -101,7 +102,7 @@ public class PPTNode {
 			return Float.POSITIVE_INFINITY;
 		}
 
-		float[] column = matrix.getLast();
+		float[] column = matrix.get(matrix.size() - 1);
 
 		float min = Float.POSITIVE_INFINITY;
 		if (column == null)
@@ -117,7 +118,7 @@ public class PPTNode {
 		if (isRoot)
 			return 0;
 
-		float[] column = matrix.getLast();
+		float[] column = matrix.get(matrix.size() - 1);
 
 		float min = Float.POSITIVE_INFINITY;
 		int index = -1;
@@ -177,7 +178,7 @@ public class PPTNode {
 		return parent;
 	}
 
-	public LinkedList<PPTNode> getChildren() {
+	public ArrayList<PPTNode> getChildren() {
 		return children;
 	}
 
@@ -273,7 +274,7 @@ public class PPTNode {
 		if (virtualStepsToGo <= 0)
 			return;
 		// Log.i("FOOTPATH", "Stepping into " + targetOnEdge.getId() + " " + getVirtualLength());
-		LinkedList<IndoorLocation> adjNodes = (LinkedList<IndoorLocation>) targetOnEdge
+		ArrayList<IndoorLocation> adjNodes = (ArrayList<IndoorLocation>) targetOnEdge
 				.getAdjacentIndoorLocationsWithoutElevators();
 		for (IndoorLocation adjacentNode : adjNodes) {
 			// we need our location here to estimate if this node expanded at all
@@ -323,7 +324,7 @@ public class PPTNode {
 
 		// if requested position is further than our path length return last penalty
 		if (index < 0) {
-			return matrix.getLast()[virtualLength - 1];
+			return matrix.get(matrix.size() - 1)[virtualLength - 1];
 		}
 
 		// if the penalty we want is above us:
@@ -339,7 +340,7 @@ public class PPTNode {
 		if (matrix.size() == 0)
 			return Float.MAX_VALUE;
 		else
-			return matrix.getLast()[index];
+			return matrix.get(matrix.size() - 1)[index];
 	}
 
 	public int getPathLength() {
@@ -395,7 +396,7 @@ public class PPTNode {
 		return buf;
 	}
 
-	public void getAllNodes(LinkedList<IndoorLocation> nodesInTree) {
+	public void getAllNodes(ArrayList<IndoorLocation> nodesInTree) {
 		nodesInTree.add(this.getTargetLocation());
 		for (PPTNode n : children)
 			n.getAllNodes(nodesInTree);

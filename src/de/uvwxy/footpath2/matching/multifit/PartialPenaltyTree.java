@@ -1,15 +1,13 @@
 package de.uvwxy.footpath2.matching.multifit;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.util.Log;
-
 import de.uvwxy.footpath2.drawing.DrawToCanvas;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.tools.GeoUtils;
@@ -35,15 +33,15 @@ public class PartialPenaltyTree implements DrawToCanvas {
 
 	private int currentStep;
 
-	private LinkedList<Float> bearings = new LinkedList<Float>();
+	private ArrayList<Float> bearings = new ArrayList<Float>();
 
 	private IndoorLocation currentBestLocation = null;
 
-	private LinkedList<PPTNode> leafList = null;
+	private ArrayList<PPTNode> leafList = null;
 
 	private IndoorLocation destination = null;
 
-	private LinkedList<IndoorLocation> nodesInTree = new LinkedList<IndoorLocation>();
+	private ArrayList<IndoorLocation> nodesInTree = new ArrayList<IndoorLocation>();
 
 	public PartialPenaltyTree() {
 		root = new PPTNode(this);
@@ -133,7 +131,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 
 		Log.i("FOOTPATH", "Prune start " + (System.currentTimeMillis() - ms));
 		// setup new empty leaf list:
-		leafList = leafList == null ? new LinkedList<PPTNode>() : leafList;
+		leafList = leafList == null ? new ArrayList<PPTNode>() : leafList;
 		leafList.clear();
 
 		Log.i("FOOTPATH", "Prune adding leafs to list " + (System.currentTimeMillis() - ms));
@@ -154,8 +152,8 @@ public class PartialPenaltyTree implements DrawToCanvas {
 
 		int del = 0;
 		while (leafList.size() > maxLeafs) {
-			deleteList.add(leafList.getLast());
-			leafList.removeLast();
+			deleteList.add(leafList.get(leafList.size() - 1));
+			leafList.remove(leafList.size() - 1);
 			del++;
 		}
 
@@ -182,7 +180,7 @@ public class PartialPenaltyTree implements DrawToCanvas {
 		return this.currentBestLocation;
 	}
 
-	public LinkedList<IndoorLocation> getAllNodesInTree() {
+	public ArrayList<IndoorLocation> getAllNodesInTree() {
 		return nodesInTree;
 	}
 

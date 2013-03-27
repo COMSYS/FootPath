@@ -1,6 +1,6 @@
 package de.uvwxy.footpath2.map;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Canvas;
@@ -24,7 +24,7 @@ public class IndoorLocation extends Location implements DrawToCanvas {
 	private int id;
 	private String mergeid;
 	private int numSteps = 0;
-	private List<GraphEdge> loc_edges = new LinkedList<GraphEdge>();
+	private ArrayList<GraphEdge> loc_edges = new ArrayList<GraphEdge>();
 
 	public IndoorLocation(Location l) {
 		super(l);
@@ -129,7 +129,7 @@ public class IndoorLocation extends Location implements DrawToCanvas {
 			return false;
 	}
 
-	public List<GraphEdge> getEdges() {
+	public ArrayList<GraphEdge> getEdges() {
 		return loc_edges;
 	}
 
@@ -145,7 +145,7 @@ public class IndoorLocation extends Location implements DrawToCanvas {
 	}
 
 	public List<IndoorLocation> getAdjacentIndoorLocations() {
-		LinkedList<IndoorLocation> buf = new LinkedList<IndoorLocation>();
+		ArrayList<IndoorLocation> buf = new ArrayList<IndoorLocation>();
 
 		if (loc_edges != null && loc_edges.size() > 0) {
 			for (GraphEdge e : loc_edges) {
@@ -163,7 +163,7 @@ public class IndoorLocation extends Location implements DrawToCanvas {
 	}
 
 	public List<IndoorLocation> getAdjacentIndoorLocationsWithoutElevators() {
-		LinkedList<IndoorLocation> buf = new LinkedList<IndoorLocation>();
+		ArrayList<IndoorLocation> buf = new ArrayList<IndoorLocation>();
 
 		if (loc_edges != null && loc_edges.size() > 0) {
 			for (GraphEdge e : loc_edges) {

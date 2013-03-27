@@ -1,5 +1,6 @@
 package de.uvwxy.footpath2.drawing;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import android.graphics.Canvas;
@@ -7,22 +8,20 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
-import android.graphics.Rect;
-import android.util.Log;
 import de.uvwxy.footpath2.map.GraphEdge;
 import de.uvwxy.footpath2.map.IndoorLocation;
 import de.uvwxy.footpath2.tools.GeoUtils;
 
 public class OSM2DBuilding implements DrawToCanvas {
-	public LinkedList<GraphEdge> walls_outer = new LinkedList<GraphEdge>();
-	public LinkedList<GraphEdge> walls_inner = new LinkedList<GraphEdge>();
-	public LinkedList<LinkedList<GraphEdge>> walls_outer_area = new LinkedList<LinkedList<GraphEdge>>();
-	public LinkedList<LinkedList<GraphEdge>> walls_inner_area = new LinkedList<LinkedList<GraphEdge>>();
+	public ArrayList<GraphEdge> walls_outer = new ArrayList<GraphEdge>();
+	public ArrayList<GraphEdge> walls_inner = new ArrayList<GraphEdge>();
+	public ArrayList<ArrayList<GraphEdge>> walls_outer_area = new ArrayList<ArrayList<GraphEdge>>();
+	public ArrayList<ArrayList<GraphEdge>> walls_inner_area = new ArrayList<ArrayList<GraphEdge>>();
 
-	public LinkedList<GraphEdge> stairs = new LinkedList<GraphEdge>();
-	public LinkedList<GraphEdge> elevators = new LinkedList<GraphEdge>();
-	public LinkedList<LinkedList<GraphEdge>> stairs_area = new LinkedList<LinkedList<GraphEdge>>();
-	public LinkedList<LinkedList<GraphEdge>> elevators_area = new LinkedList<LinkedList<GraphEdge>>();
+	public ArrayList<GraphEdge> stairs = new ArrayList<GraphEdge>();
+	public ArrayList<GraphEdge> elevators = new ArrayList<GraphEdge>();
+	public ArrayList<ArrayList<GraphEdge>> stairs_area = new ArrayList<ArrayList<GraphEdge>>();
+	public ArrayList<ArrayList<GraphEdge>> elevators_area = new ArrayList<ArrayList<GraphEdge>>();
 
 	private float current_level = 2.0f;
 
@@ -146,7 +145,7 @@ public class OSM2DBuilding implements DrawToCanvas {
 	}
 
 	Paint wallpaint = new Paint();
-	LinkedList<GraphEdge> es;
+	ArrayList<GraphEdge> es;
 	int[] apix;
 	
 	/**
@@ -159,7 +158,7 @@ public class OSM2DBuilding implements DrawToCanvas {
 	 * @param wallpath
 	 */
 	private void paintWallPathArea(Canvas canvas, IndoorLocation center, float pixelsPerMeterOrMaxValue, int w, int h,
-			int color, LinkedList<LinkedList<GraphEdge>> walls_area, float level) {
+			int color, ArrayList<ArrayList<GraphEdge>> walls_area, float level) {
 
 
 		wallpaint.setColor(color);
@@ -167,8 +166,8 @@ public class OSM2DBuilding implements DrawToCanvas {
 
 		Path wallpath = new Path();
 		for (int i = 0; i < walls_area.size(); i++) {
-			if (walls_area.get(i) != null && walls_area.get(i).getFirst() != null
-					&& walls_area.get(i).getFirst().getLevel() == level) {
+			if (walls_area.get(i) != null && walls_area.get(i).get(0) != null
+					&& walls_area.get(i).get(0).getLevel() == level) {
 
 				es = walls_area.get(i);
 				wallpath.reset(); // only needed when reusing this path for a new build
