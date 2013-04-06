@@ -95,7 +95,7 @@ public class SensorHistory implements Serializable, Exporter {
 			diff = max - tempLeft.getTs();
 		}
 
-		canvas.drawText("Size: " + size() * 25 + " byte", 16, 16, pGreen);
+		//canvas.drawText("Size: " + size() * 25 + " byte", 16, 16, pGreen);
 
 		// Log.i("LOCMOV", "Added type: " + t.values[0] + "/" + t.values[1] +
 		// "/" + t.values[2]);
