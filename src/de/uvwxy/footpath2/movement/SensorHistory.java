@@ -1,22 +1,21 @@
 package de.uvwxy.footpath2.movement;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.location.Location;
 import de.uvwxy.footpath2.log.AppendWriter;
 import de.uvwxy.footpath2.log.Exporter;
 
 public class SensorHistory implements Serializable, Exporter {
-	private final List<SensorTriple> list = new LinkedList<SensorTriple>();
+	private final List<SensorTriple> list = new ArrayList<SensorTriple>();
 
 	private static final long serialVersionUID = 5777397679052032803L;
 	private final float backLogMillis = 3000; // show three seconds of data
